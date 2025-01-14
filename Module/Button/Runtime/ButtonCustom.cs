@@ -13,7 +13,7 @@ using Button = UnityEngine.UI.Button;
 namespace VirtueSky.UIButton
 {
     [EditorIcon("icon_button")]
-    public class ButtonCustom : Button
+    public abstract class ButtonCustom : Button
     {
         [HeaderLine("Motion", false, CustomColor.Aquamarine, CustomColor.Bright)] [SerializeField]
         private bool invokeClickButton = true;
