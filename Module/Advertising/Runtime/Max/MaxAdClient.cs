@@ -13,7 +13,6 @@ namespace VirtueSky.Ads
             AdSettings.MaxInterstitialAdUnit.Init();
             AdSettings.MaxRewardAdUnit.Init();
             AdSettings.MaxAppOpenAdUnit.Init();
-            AdSettings.MaxRewardedInterstitialAdUnit.Init();
             App.AddPauseCallback(OnAppStateChange);
             LoadInterstitial();
             LoadRewarded();
@@ -37,11 +36,10 @@ namespace VirtueSky.Ads
             if (!AdSettings.MaxRewardAdUnit.IsReady()) AdSettings.MaxRewardAdUnit.Load();
         }
 
-        public override AdUnit RewardedInterstitialAdUnit() => AdSettings.MaxRewardedInterstitialAdUnit;
+        public override AdUnit RewardedInterstitialAdUnit() => null;
 
         public override void LoadRewardedInterstitial()
         {
-            if (!AdSettings.MaxRewardedInterstitialAdUnit.IsReady()) AdSettings.MaxRewardedInterstitialAdUnit.Load();
         }
 
         public override AdUnit AppOpenAdUnit() => AdSettings.MaxAppOpenAdUnit;
