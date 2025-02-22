@@ -51,6 +51,7 @@ namespace VirtueSky.ControlPanel.Editor
 #endif
             GUILayout.EndVertical();
         }
+#if UNITY_ANDROID
 
         static void OpenSdkPath()
         {
@@ -120,5 +121,7 @@ namespace VirtueSky.ControlPanel.Editor
                 process.Start();
             }
         }
+
+#endif
     }
 }

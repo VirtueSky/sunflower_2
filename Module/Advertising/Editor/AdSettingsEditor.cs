@@ -17,7 +17,6 @@ namespace VirtueSky.Ads
         private SerializedProperty _maxBannerAdUnit;
         private SerializedProperty _maxInterstitialAdUnit;
         private SerializedProperty _maxRewardAdUnit;
-        private SerializedProperty _maxRewardedInterstitialAdUnit;
         private SerializedProperty _maxAppOpenAdUnit;
 
         private SerializedProperty _admobBannerAdUnit;
@@ -51,7 +50,6 @@ namespace VirtueSky.Ads
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
             _maxInterstitialAdUnit = serializedObject.FindProperty("maxInterstitialAdUnit");
             _maxRewardAdUnit = serializedObject.FindProperty("maxRewardAdUnit");
-            _maxRewardedInterstitialAdUnit = serializedObject.FindProperty("maxRewardedInterstitialAdUnit");
             _maxAppOpenAdUnit = serializedObject.FindProperty("maxAppOpenAdUnit");
             _admobBannerAdUnit = serializedObject.FindProperty("admobBannerAdUnit");
             _admobInterstitialAdUnit = serializedObject.FindProperty("admobInterstitialAdUnit");
@@ -127,7 +125,6 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_maxBannerAdUnit);
             EditorGUILayout.PropertyField(_maxInterstitialAdUnit);
             EditorGUILayout.PropertyField(_maxRewardAdUnit);
-            EditorGUILayout.PropertyField(_maxRewardedInterstitialAdUnit);
             EditorGUILayout.PropertyField(_maxAppOpenAdUnit);
         }
 

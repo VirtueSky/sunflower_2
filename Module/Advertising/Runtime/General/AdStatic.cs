@@ -106,9 +106,6 @@ namespace VirtueSky.Ads
                 case MaxRewardAdUnit maxReward:
                     maxReward.completedCallback = onCompleted;
                     return unit;
-                case MaxRewardedInterstitialAdUnit maxRewardInter:
-                    maxRewardInter.completedCallback = onCompleted;
-                    return unit;
                 case IronSourceInterstitialAdUnit ironSourceInterstitialAdUnit:
                     ironSourceInterstitialAdUnit.completedCallback = onCompleted;
                     return unit;
@@ -132,9 +129,6 @@ namespace VirtueSky.Ads
                     return unit;
                 case MaxRewardAdUnit maxReward:
                     maxReward.skippedCallback = onSkipped;
-                    return unit;
-                case MaxRewardedInterstitialAdUnit maxRewardInter:
-                    maxRewardInter.skippedCallback = onSkipped;
                     return unit;
                 case IronSourceRewardAdUnit ironSourceRewardAdUnit:
                     ironSourceRewardAdUnit.skippedCallback = onSkipped;

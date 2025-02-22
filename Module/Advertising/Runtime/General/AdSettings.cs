@@ -27,7 +27,6 @@ namespace VirtueSky.Ads
         [SerializeField] private MaxBannerAdUnit maxBannerAdUnit;
         [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnit;
         [SerializeField] private MaxRewardAdUnit maxRewardAdUnit;
-        [SerializeField] private MaxRewardedInterstitialAdUnit maxRewardedInterstitialAdUnit;
         [SerializeField] private MaxAppOpenAdUnit maxAppOpenAdUnit;
 
         public static string SdkKey => Instance.sdkKey;
@@ -35,10 +34,6 @@ namespace VirtueSky.Ads
         public static MaxBannerAdUnit MaxBannerAdUnit => Instance.maxBannerAdUnit;
         public static MaxInterstitialAdUnit MaxInterstitialAdUnit => Instance.maxInterstitialAdUnit;
         public static MaxRewardAdUnit MaxRewardAdUnit => Instance.maxRewardAdUnit;
-
-        public static MaxRewardedInterstitialAdUnit MaxRewardedInterstitialAdUnit =>
-            Instance.maxRewardedInterstitialAdUnit;
-
         public static MaxAppOpenAdUnit MaxAppOpenAdUnit => Instance.maxAppOpenAdUnit;
 
         #endregion
@@ -58,7 +53,10 @@ namespace VirtueSky.Ads
         public static AdmobBannerAdUnit AdmobBannerAdUnit => Instance.admobBannerAdUnit;
         public static AdmobInterstitialAdUnit AdmobInterstitialAdUnit => Instance.admobInterstitialAdUnit;
         public static AdmobRewardAdUnit AdmobRewardAdUnit => Instance.admobRewardAdUnit;
-        public static AdmobRewardedInterstitialAdUnit AdmobRewardedInterstitialAdUnit => Instance.admobRewardedInterstitialAdUnit;
+
+        public static AdmobRewardedInterstitialAdUnit AdmobRewardedInterstitialAdUnit =>
+            Instance.admobRewardedInterstitialAdUnit;
+
         public static AdmobAppOpenAdUnit AdmobAppOpenAdUnit => Instance.admobAppOpenAdUnit;
         public static AdmobNativeOverlayAdUnit AdmobNativeOverlayAdUnit => Instance.admobNativeOverlayAdUnit;
         public static bool AdmobEnableTestMode => Instance.admobEnableTestMode;
@@ -111,7 +109,10 @@ namespace VirtueSky.Ads
 
         public static bool UseTestAppKey => Instance.useTestAppKey;
         public static IronSourceBannerAdUnit IronSourceBannerAdUnit => Instance.ironSourceBannerAdUnit;
-        public static IronSourceInterstitialAdUnit IronSourceInterstitialAdUnit => Instance.ironSourceInterstitialAdUnit;
+
+        public static IronSourceInterstitialAdUnit IronSourceInterstitialAdUnit =>
+            Instance.ironSourceInterstitialAdUnit;
+
         public static IronSourceRewardAdUnit IronSourceRewardAdUnit => Instance.ironSourceRewardAdUnit;
 
         #endregion
