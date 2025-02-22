@@ -31,7 +31,7 @@
             "com.google.external-dependency-manager";
 
         public const string MaxVersionGGExternalDependencyManager =
-            "https://github.com/googlesamples/unity-jar-resolver.git?path=upm#v1.2.183";
+            "https://github.com/googlesamples/unity-jar-resolver.git?path=upm#v1.2.185";
 
         public const string PackageNameGGPlayReview = "com.google.play.review";
 
@@ -44,40 +44,40 @@
         public const string PackageNameFirebaseApp = "com.google.firebase.app";
 
         public const string MaxVersionFirebaseApp =
-            "https://github.com/firebase-unity/firebase-app.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-app.git#12.6.0";
 
         public const string PackageNameFirebaseRemoteConfig = "com.google.firebase.remote-config";
 
         public const string MaxVersionFirebaseRemoteConfig =
-            "https://github.com/firebase-unity/firebase-remote-config.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-remote-config.git#12.6.0";
 
         public const string PackageNameFirebaseAnalytics = "com.google.firebase.analytics";
 
         public const string MaxVersionFirebaseAnalytics =
-            "https://github.com/firebase-unity/firebase-analytics.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-analytics.git#12.6.0";
 
         public const string PackageNameFirebaseDatabase = "com.google.firebase.database";
 
         public const string MaxVersionFirebaseDatabase =
-            "https://github.com/firebase-unity/firebase-database.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-database.git#12.6.0";
 
         public const string PackageNameFirebaseAuth = "com.google.firebase.auth";
-        public const string MaxVersionFirebaseAuth = "https://github.com/firebase-unity/firebase-auth.git#12.5.0";
+        public const string MaxVersionFirebaseAuth = "https://github.com/firebase-unity/firebase-auth.git#12.6.0";
 
         public const string PackageNameFirebaseCrashlytics = "com.google.firebase.crashlytics";
 
         public const string MaxVersionFirebaseCrashlytics =
-            "https://github.com/firebase-unity/firebase-crashlytics.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-crashlytics.git#12.6.0";
 
         public const string PackageNameFirebaseSupportIos = "com.google.firebase.support-ios";
 
         public const string MaxVersionFirebaseSupportIos =
-            "https://github.com/firebase-unity/firebase-support-ios.git#12.5.0";
+            "https://github.com/firebase-unity/firebase-support-ios.git#12.6.0";
 
         #endregion
 
         public const string PackageNameAdjust = "com.adjust.sdk";
-        public const string MaxVersionAdjust = "https://github.com/adjust/unity_sdk.git?path=Assets/Adjust#v5.0.6";
+        public const string MaxVersionAdjust = "https://github.com/adjust/unity_sdk.git?path=Assets/Adjust#v5.0.7";
         public const string PackageNamePlayFab = "com.pancake.playfab";
 
         public const string MaxVersionPlayFab =
@@ -97,7 +97,7 @@
         public const string PackageNameCoffeeUIEffect = "com.coffee.ui-effect";
 
         public const string MaxVersionCoffeeUIEffect =
-            "https://github.com/mob-sakai/UIEffect.git?path=Packages/src#5.2.2";
+            "https://github.com/mob-sakai/UIEffect.git?path=Packages/src#5.5.1";
 
         public const string PackageNameCoffeeUIParticle = "com.coffee.ui-particle";
 
