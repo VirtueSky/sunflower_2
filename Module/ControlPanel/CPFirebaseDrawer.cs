@@ -69,37 +69,44 @@ namespace VirtueSky.ControlPanel.Editor
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase No Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseNoParam>(pathScriptableTracking, "tracking_firebase_no_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseNoParam>(pathScriptableTracking,
+                    "tracking_firebase_no_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 1 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseOneParam>(pathScriptableTracking, "tracking_firebase_1_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseOneParam>(pathScriptableTracking,
+                    "tracking_firebase_1_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 2 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseTwoParam>(pathScriptableTracking, "tracking_firebase_2_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseTwoParam>(pathScriptableTracking,
+                    "tracking_firebase_2_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 3 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseThreeParam>(pathScriptableTracking, "tracking_firebase_3_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseThreeParam>(pathScriptableTracking,
+                    "tracking_firebase_3_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 4 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseFourParam>(pathScriptableTracking, "tracking_firebase_4_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseFourParam>(pathScriptableTracking,
+                    "tracking_firebase_4_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 5 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseFiveParam>(pathScriptableTracking, "tracking_firebase_5_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseFiveParam>(pathScriptableTracking,
+                    "tracking_firebase_5_param");
             }
 
             if (GUILayout.Button("Create Scriptable Tracking Firebase 6 Param"))
             {
-                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseSixParam>(pathScriptableTracking, "tracking_firebase_6_param");
+                CreateAsset.CreateScriptableAssetsOnlyName<ScriptableTrackingFirebaseSixParam>(pathScriptableTracking,
+                    "tracking_firebase_6_param");
             }
 
             GUILayout.Space(10);
@@ -140,6 +147,7 @@ namespace VirtueSky.ControlPanel.Editor
                 GUILayout.Space(10);
             }
         }
+#if UNITY_ANDROID
 
         static void DrawDebugView()
         {
@@ -189,5 +197,7 @@ namespace VirtueSky.ControlPanel.Editor
             process!.WaitForExit();
             UnityEngine.Debug.Log($"{fileName} {arguments}");
         }
+
+#endif
     }
 }
