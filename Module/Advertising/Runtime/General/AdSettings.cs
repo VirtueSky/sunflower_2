@@ -46,6 +46,12 @@ namespace VirtueSky.Ads
         [SerializeField] private AdmobRewardedInterstitialAdUnit admobRewardedInterstitialAdUnit;
         [SerializeField] private AdmobAppOpenAdUnit admobAppOpenAdUnit;
         [SerializeField] private AdmobNativeOverlayAdUnit admobNativeOverlayAdUnit;
+
+        [Tooltip(
+             "If you enable and connect admob with firebase, ad_impression will be automatically tracked. If you disable and disconnect admob with firebase, ad_impression will be tracked manually."),
+         SerializeField]
+        private bool autoTrackingAdImpressionAdmob = true;
+
         [SerializeField] private bool admobEnableTestMode;
         [SerializeField] private List<string> admobDevicesTest;
 
@@ -59,6 +65,7 @@ namespace VirtueSky.Ads
 
         public static AdmobAppOpenAdUnit AdmobAppOpenAdUnit => Instance.admobAppOpenAdUnit;
         public static AdmobNativeOverlayAdUnit AdmobNativeOverlayAdUnit => Instance.admobNativeOverlayAdUnit;
+        public static bool AutoTrackingAdImpressionAdmob => Instance.autoTrackingAdImpressionAdmob;
         public static bool AdmobEnableTestMode => Instance.admobEnableTestMode;
         public static List<string> AdmobDevicesTest => Instance.admobDevicesTest;
 

@@ -25,6 +25,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _admobRewardedInterstitialAdUnit;
         private SerializedProperty _admobNativeOverlayAdUnit;
         private SerializedProperty _admobAppOpenAdUnit;
+        private SerializedProperty _autoTrackingAdImpressionAdmob;
         private SerializedProperty _admobEnableTestMode;
         private SerializedProperty _enableGDPR;
         private SerializedProperty _enableGDPRTestMode;
@@ -57,6 +58,7 @@ namespace VirtueSky.Ads
             _admobRewardedInterstitialAdUnit = serializedObject.FindProperty("admobRewardedInterstitialAdUnit");
             _admobAppOpenAdUnit = serializedObject.FindProperty("admobAppOpenAdUnit");
             _admobNativeOverlayAdUnit = serializedObject.FindProperty("admobNativeOverlayAdUnit");
+            _autoTrackingAdImpressionAdmob = serializedObject.FindProperty("autoTrackingAdImpressionAdmob");
             _admobEnableTestMode = serializedObject.FindProperty("admobEnableTestMode");
             _enableGDPR = serializedObject.FindProperty("enableGDPR");
             _enableGDPRTestMode = serializedObject.FindProperty("enableGDPRTestMode");
@@ -140,6 +142,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_admobRewardedInterstitialAdUnit);
             EditorGUILayout.PropertyField(_admobAppOpenAdUnit);
             EditorGUILayout.PropertyField(_admobNativeOverlayAdUnit);
+            EditorGUILayout.PropertyField(_autoTrackingAdImpressionAdmob);
             EditorGUILayout.PropertyField(_admobEnableTestMode);
             EditorGUILayout.PropertyField(_admobDevicesTest);
             GUILayout.Space(10);
