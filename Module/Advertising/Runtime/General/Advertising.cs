@@ -13,6 +13,7 @@ using GoogleMobileAds.Ump.Api;
 using UnityEngine;
 using VirtueSky.Inspector;
 using VirtueSky.Misc;
+using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
 {
@@ -114,6 +115,7 @@ namespace VirtueSky.Ads
                     break;
             }
 
+            FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
             currentAdClient.Initialize();
             Debug.Log($"currentAdClient: {currentAdClient}".SetColor(Color.cyan));
             isInitAdClient = true;
