@@ -6,11 +6,8 @@ namespace VirtueSky.Tracking
     [CreateAssetMenu(menuName = "Sunflower2/Tracking Event/Firebase Analytic/Tracking 3 Param",
         fileName = "tracking_firebase_3_param")]
     [EditorIcon("scriptable_firebase")]
-    public class ScriptableTrackingFirebaseThreeParam : ScriptableObject
+    public class ScriptableTrackingFirebaseThreeParam : TrackingFirebase
     {
-        [Space] [HeaderLine("Event Name")] [SerializeField]
-        private string eventName;
-
         [Space] [HeaderLine("Parameter Name")] [SerializeField]
         private string parameterName1;
 
@@ -27,6 +24,7 @@ namespace VirtueSky.Tracking
                 new(parameterName3, parameterValue3)
             };
             Firebase.Analytics.FirebaseAnalytics.LogEvent(eventName, parameters);
+            onTracked?.Invoke();
 #endif
         }
     }
