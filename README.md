@@ -6,16 +6,16 @@
     <img alt="Made With Unity" src="https://img.shields.io/badge/made%20with-Unity-57b9d3.svg?logo=Unity">
   </a>
   <a>
-    <img alt="License" src="https://img.shields.io/github/license/unity-package/sunflower_2?logo=github">
+    <img alt="License" src="https://img.shields.io/github/license/VirtueSky/sunflower_2?logo=github">
   </a>
   <a>
-    <img alt="Last Commit" src="https://img.shields.io/github/last-commit/unity-package/sunflower_2?logo=Mapbox&color=orange">
+    <img alt="Last Commit" src="https://img.shields.io/github/last-commit/VirtueSky/sunflower_2?logo=Mapbox&color=orange">
   </a>
   <a>
-    <img alt="Repo Size" src="https://img.shields.io/github/repo-size/unity-package/sunflower_2?logo=VirtualBox">
+    <img alt="Repo Size" src="https://img.shields.io/github/repo-size/VirtueSky/sunflower_2?logo=VirtualBox">
   </a>
   <a>
-    <img alt="Last Release" src="https://img.shields.io/github/v/release/unity-package/sunflower_2?include_prereleases&logo=Dropbox&color=yellow">
+    <img alt="Last Release" src="https://img.shields.io/github/v/release/VirtueSky/sunflower_2?include_prereleases&logo=Dropbox&color=yellow">
   </a>
 </p>
   
@@ -25,7 +25,7 @@
 
 for version `1.5.3`
 ```csharp
-"com.wolf-org.sunflower2":"https://github.com/unity-package/sunflower_2.git#1.5.3",
+"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.5.3",
 ```
 
 ## Includes modules
