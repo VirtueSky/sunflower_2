@@ -29,7 +29,7 @@ namespace VirtueSky.ControlPanel.Editor
             _editor = UnityEditor.Editor.CreateEditor(_adSetting);
         }
 
-        public static void OnDrawAdvertising(Rect position)
+        public static void OnDrawAdvertising()
         {
             GUILayout.Space(10);
             GUILayout.BeginVertical();
@@ -57,19 +57,8 @@ namespace VirtueSky.ControlPanel.Editor
                     _editor.OnInspectorGUI();
                 }
 
-
-                switch (AdSettings.CurrentAdNetwork)
-                {
-                    case AdNetwork.Max:
-                        DrawMaxField(position);
-                        break;
-                    case AdNetwork.Admob:
-                        DrawAdmobField(position);
-                        break;
-                    case AdNetwork.IronSource:
-                        DrawIronSource(position);
-                        break;
-                }
+                DrawDefineSymbols();
+                DrawInstallSdk();
             }
 
             GUILayout.Space(10);
@@ -95,93 +84,81 @@ namespace VirtueSky.ControlPanel.Editor
             GUILayout.EndVertical();
         }
 
-
-        static void DrawMaxField(Rect position)
+        static void DrawDefineSymbols()
         {
-            GUILayout.Space(10);
-            CPUtility.GuiLine(2);
-            GUILayout.Space(10);
-            CPUtility.DrawHeader("Install Max Sdk");
-            GUILayout.Space(10);
-            if (GUILayout.Button("Install Max Sdk Plugin"))
-            {
-                AssetDatabase.ImportPackage(
-                    FileExtension.GetPathFileInCurrentEnvironment(
-                        "Module/Utils/Editor/UnityPackage/max-sdk.unitypackage"), false);
-            }
-
             GUILayout.Space(10);
             CPUtility.GuiLine(2);
             GUILayout.Space(10);
             CPUtility.DrawHeader("Define symbols");
             GUILayout.Space(10);
+            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADS);
+            if (AdSettings.UseMax)
+            {
 #if !VIRTUESKY_ADS || !VIRTUESKY_APPLOVIN
             EditorGUILayout.HelpBox(
                 $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_APPLOVIN}\" to use Max Ads",
                 MessageType.Info);
 #endif
-
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADS);
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_APPLOVIN);
-        }
-
-        static void DrawAdmobField(Rect position)
-        {
-            GUILayout.Space(10);
-            CPUtility.GuiLine(2);
-            GUILayout.Space(10);
-            CPUtility.DrawHeader("Install Admob Sdk");
-            GUILayout.Space(10);
-            if (GUILayout.Button("Install Admob Sdk Plugin"))
-            {
-                AssetDatabase.ImportPackage(
-                    FileExtension.GetPathFileInCurrentEnvironment(
-                        "Module/Utils/Editor/UnityPackage/google-mobile-ads.unitypackage"), false);
+                CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_APPLOVIN);
             }
 
-            GUILayout.Space(10);
-            CPUtility.GuiLine(2);
-            GUILayout.Space(10);
-            CPUtility.DrawHeader("Define symbols");
-            GUILayout.Space(10);
+            if (AdSettings.UseAdmob)
+            {
 #if !VIRTUESKY_ADS || !VIRTUESKY_ADMOB
             EditorGUILayout.HelpBox(
                 $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_ADMOB}\" to use Admob Ads",
                 MessageType.Info);
 #endif
-
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADS);
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADMOB);
-        }
-
-        private static void DrawIronSource(Rect position)
-        {
-            GUILayout.Space(10);
-            CPUtility.GuiLine(2);
-            GUILayout.Space(10);
-            CPUtility.DrawHeader("Install IronSource Sdk");
-            GUILayout.Space(10);
-            if (GUILayout.Button("Install IronSource Sdk Plugin"))
-            {
-                AssetDatabase.ImportPackage(
-                    FileExtension.GetPathFileInCurrentEnvironment(
-                        "Module/Utils/Editor/UnityPackage/is-sdk.unitypackage"), false);
+                CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADMOB);
             }
 
-            GUILayout.Space(10);
-            CPUtility.GuiLine(2);
-            GUILayout.Space(10);
-            CPUtility.DrawHeader("Define symbols");
-            GUILayout.Space(10);
+            if (AdSettings.UseIronSource)
+            {
 #if !VIRTUESKY_ADS || !VIRTUESKY_IRONSOURCE
             EditorGUILayout.HelpBox(
                 $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_IRONSOURCE}\" to use IronSource Ads",
                 MessageType.Info);
 #endif
 
+                CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_IRONSOURCE);
+            }
+        }
 
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADS);
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_IRONSOURCE);
+        static void DrawInstallSdk()
+        {
+            GUILayout.Space(10);
+            CPUtility.GuiLine(2);
+            GUILayout.Space(10);
+            CPUtility.DrawHeader("Install Sdk");
+            GUILayout.Space(10);
+            if (AdSettings.UseMax)
+            {
+                GUILayout.Space(10);
+                if (GUILayout.Button("Install Max Sdk Plugin"))
+                {
+                    AssetDatabase.ImportPackage(
+                        FileExtension.GetPathFileInCurrentEnvironment(
+                            "Module/Utils/Editor/UnityPackage/max-sdk.unitypackage"), false);
+                }
+            }
+
+            if (AdSettings.UseAdmob)
+            {
+                GUILayout.Space(10);
+                CPUtility.DrawButtonInstallPackage("Install Admob Sdk Plugin", "Remove Admob Sdk Plugin",
+                    ConstantPackage.PackageNameAdmob, ConstantPackage.VersionAdmob);
+            }
+
+            if (AdSettings.UseIronSource)
+            {
+                GUILayout.Space(10);
+                if (GUILayout.Button("Install IronSource Sdk Plugin"))
+                {
+                    AssetDatabase.ImportPackage(
+                        FileExtension.GetPathFileInCurrentEnvironment(
+                            "Module/Utils/Editor/UnityPackage/is-sdk.unitypackage"), false);
+                }
+            }
         }
     }
 }

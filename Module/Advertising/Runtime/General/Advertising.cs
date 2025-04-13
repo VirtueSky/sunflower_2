@@ -27,15 +27,18 @@ namespace VirtueSky.Ads
         private float _lastTimeLoadAppOpenTimestamp = DEFAULT_TIMESTAMP;
         private const float DEFAULT_TIMESTAMP = -1000;
 
-        private AdClient currentAdClient;
+        private AdClient maxAdClient;
+        private AdClient admobAdClient;
+        private AdClient ironSourceAdClient;
+
         private bool isInitAdClient = false;
 
-        private static event Func<AdUnit> OnGetBannerAdEvent;
-        private static event Func<AdUnit> OnGetInterAdEvent;
-        private static event Func<AdUnit> OnGetRewardAdEvent;
-        private static event Func<AdUnit> OnGetRewardInterEvent;
-        private static event Func<AdUnit> OnGetAppOpenAdEvent;
-        private static event Func<AdUnit> OnGetNativeOverlayEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetBannerAdEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetInterAdEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetRewardAdEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetRewardInterEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetAppOpenAdEvent;
+        private static event Func<AdNetwork, AdUnit> OnGetNativeOverlayEvent;
         private static event Func<bool> OnInitAdClientEvent;
         private static event Action OnLoadAndShowGdprEvent;
         private static event Action OnShowGdprAgainEvent;
@@ -102,22 +105,29 @@ namespace VirtueSky.Ads
 
         void InitAdClient()
         {
-            switch (AdSettings.CurrentAdNetwork)
+            var adSettings = AdSettings.Instance;
+
+            if (AdSettings.UseMax)
             {
-                case AdNetwork.Max:
-                    currentAdClient = new MaxAdClient();
-                    break;
-                case AdNetwork.Admob:
-                    currentAdClient = new AdmobClient();
-                    break;
-                case AdNetwork.IronSource:
-                    currentAdClient = new IronSourceClient();
-                    break;
+                maxAdClient = new MaxAdClient();
+                maxAdClient.Initialize();
+                Debug.Log($"Use AdClient: {maxAdClient}".SetColor(Color.cyan));
             }
 
-            FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
-            currentAdClient.Initialize();
-            Debug.Log($"currentAdClient: {currentAdClient}".SetColor(Color.cyan));
+            if (AdSettings.UseAdmob)
+            {
+                admobAdClient = new AdmobClient();
+                admobAdClient.Initialize();
+                Debug.Log($"Use AdClient: {admobAdClient}".SetColor(Color.cyan));
+            }
+
+            if (AdSettings.UseIronSource)
+            {
+                ironSourceAdClient = new IronSourceClient();
+                ironSourceAdClient.Initialize();
+                Debug.Log($"Use AdClient: {ironSourceAdClient}".SetColor(Color.cyan));
+            }
+
             isInitAdClient = true;
             InitAutoLoadAds();
         }
@@ -153,7 +163,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadInterstitialAdTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            currentAdClient.LoadInterstitial();
+            if (AdSettings.UseMax) maxAdClient.LoadInterstitial();
+            if (AdSettings.UseAdmob) admobAdClient.LoadInterstitial();
+            if (AdSettings.UseIronSource) ironSourceAdClient.LoadInterstitial();
             _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -161,7 +173,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            currentAdClient.LoadRewarded();
+            if (AdSettings.UseMax) maxAdClient.LoadRewarded();
+            if (AdSettings.UseAdmob) admobAdClient.LoadRewarded();
+            if (AdSettings.UseIronSource) ironSourceAdClient.LoadRewarded();
             _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -169,7 +183,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedInterstitialTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            currentAdClient.LoadRewardedInterstitial();
+            if (AdSettings.UseMax) maxAdClient.LoadRewardedInterstitial();
+            if (AdSettings.UseAdmob) admobAdClient.LoadRewardedInterstitial();
+            if (AdSettings.UseIronSource) ironSourceAdClient.LoadRewardedInterstitial();
             _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -177,7 +193,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadAppOpenTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            currentAdClient.LoadAppOpen();
+            if (AdSettings.UseMax) maxAdClient.LoadAppOpen();
+            if (AdSettings.UseAdmob) admobAdClient.LoadAppOpen();
+            if (AdSettings.UseIronSource) ironSourceAdClient.LoadAppOpen();
             _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -283,24 +301,78 @@ namespace VirtueSky.Ads
 
         #region Internal API
 
-        private AdUnit GetBannerAdUnit() => currentAdClient.BannerAdUnit();
-        private AdUnit GetInterAdUnit() => currentAdClient.InterstitialAdUnit();
-        private AdUnit GetRewardAdUnit() => currentAdClient.RewardAdUnit();
-        private AdUnit GetRewardInterAdUnit() => currentAdClient.RewardedInterstitialAdUnit();
-        private AdUnit GetAppOpenAdUnit() => currentAdClient.AppOpenAdUnit();
-        private AdUnit GetNativeOverlayAdUnit() => currentAdClient.NativeOverlayAdUnit();
+        private AdUnit GetBannerAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.BannerAdUnit(),
+                AdNetwork.Admob => admobAdClient.BannerAdUnit(),
+                _ => ironSourceAdClient.BannerAdUnit()
+            };
+        }
+
+        private AdUnit GetInterAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.InterstitialAdUnit(),
+                AdNetwork.Admob => admobAdClient.InterstitialAdUnit(),
+                _ => ironSourceAdClient.InterstitialAdUnit()
+            };
+        }
+
+        private AdUnit GetRewardAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.RewardAdUnit(),
+                AdNetwork.Admob => admobAdClient.RewardAdUnit(),
+                _ => ironSourceAdClient.RewardAdUnit()
+            };
+        }
+
+        private AdUnit GetRewardInterAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.RewardedInterstitialAdUnit(),
+                AdNetwork.Admob => admobAdClient.RewardedInterstitialAdUnit(),
+                _ => ironSourceAdClient.RewardedInterstitialAdUnit()
+            };
+        }
+
+        private AdUnit GetAppOpenAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.AppOpenAdUnit(),
+                AdNetwork.Admob => admobAdClient.AppOpenAdUnit(),
+                _ => ironSourceAdClient.AppOpenAdUnit()
+            };
+        }
+
+        private AdUnit GetNativeOverlayAdUnit(AdNetwork adNetwork)
+        {
+            return adNetwork switch
+            {
+                AdNetwork.Max => maxAdClient.NativeOverlayAdUnit(),
+                AdNetwork.Admob => admobAdClient.NativeOverlayAdUnit(),
+                _ => ironSourceAdClient.NativeOverlayAdUnit()
+            };
+        }
+
         private bool InternalIsInitAdClient() => isInitAdClient;
 
         #endregion
 
         #region Public API
 
-        public static AdUnit BannerAd => OnGetBannerAdEvent?.Invoke();
-        public static AdUnit InterstitialAd => OnGetInterAdEvent?.Invoke();
-        public static AdUnit RewardAd => OnGetRewardAdEvent?.Invoke();
-        public static AdUnit RewardedInterstitialAd => OnGetRewardInterEvent?.Invoke();
-        public static AdUnit AppOpenAd => OnGetAppOpenAdEvent?.Invoke();
-        public static AdUnit NativeOverlayAd => OnGetNativeOverlayEvent?.Invoke();
+        public static AdUnit BannerAd(AdNetwork adNetwork) => OnGetBannerAdEvent?.Invoke(adNetwork);
+        public static AdUnit InterstitialAd(AdNetwork adNetwork) => OnGetInterAdEvent?.Invoke(adNetwork);
+        public static AdUnit RewardAd(AdNetwork adNetwork) => OnGetRewardAdEvent?.Invoke(adNetwork);
+        public static AdUnit RewardedInterstitialAd(AdNetwork adNetwork) => OnGetRewardInterEvent?.Invoke(adNetwork);
+        public static AdUnit AppOpenAd(AdNetwork adNetwork) => OnGetAppOpenAdEvent?.Invoke(adNetwork);
+        public static AdUnit NativeOverlayAd(AdNetwork adNetwork) => OnGetNativeOverlayEvent?.Invoke(adNetwork);
         public static bool IsInitAdClient => (bool)OnInitAdClientEvent?.Invoke();
 
 #if VIRTUESKY_ADMOB

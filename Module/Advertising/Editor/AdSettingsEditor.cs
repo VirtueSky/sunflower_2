@@ -11,7 +11,10 @@ namespace VirtueSky.Ads
         private SerializedProperty _runtimeAutoInitType;
         private SerializedProperty _adCheckingInterval;
         private SerializedProperty _adLoadingInterval;
-        private SerializedProperty _adNetwork;
+
+        private SerializedProperty _useMax;
+        private SerializedProperty _useAdmob;
+        private SerializedProperty _useIronSource;
 
         private SerializedProperty _sdkKey;
         private SerializedProperty _maxBannerAdUnit;
@@ -46,7 +49,11 @@ namespace VirtueSky.Ads
             _runtimeAutoInitType = serializedObject.FindProperty("runtimeAutoInitType");
             _adCheckingInterval = serializedObject.FindProperty("adCheckingInterval");
             _adLoadingInterval = serializedObject.FindProperty("adLoadingInterval");
-            _adNetwork = serializedObject.FindProperty("adNetwork");
+
+            _useMax = serializedObject.FindProperty("useMax");
+            _useAdmob = serializedObject.FindProperty("useAdmob");
+            _useIronSource = serializedObject.FindProperty("useIronSource");
+
             _sdkKey = serializedObject.FindProperty("sdkKey");
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
             _maxInterstitialAdUnit = serializedObject.FindProperty("maxInterstitialAdUnit");
@@ -87,7 +94,11 @@ namespace VirtueSky.Ads
             GUILayout.Space(10);
             EditorGUILayout.PropertyField(_adCheckingInterval);
             EditorGUILayout.PropertyField(_adLoadingInterval);
-            EditorGUILayout.PropertyField(_adNetwork);
+
+            EditorGUILayout.PropertyField(_useMax);
+            EditorGUILayout.PropertyField(_useAdmob);
+            EditorGUILayout.PropertyField(_useIronSource);
+
             GUILayout.Space(10);
             EditorGUILayout.PropertyField(_enableGDPR);
             if (_enableGDPR.boolValue)
@@ -97,18 +108,9 @@ namespace VirtueSky.Ads
 
             GUILayout.Space(10);
 
-            switch (_adNetwork.enumValueIndex)
-            {
-                case (int)AdNetwork.Max:
-                    DrawMax();
-                    break;
-                case (int)AdNetwork.Admob:
-                    DrawAdmob();
-                    break;
-                case (int)AdNetwork.IronSource:
-                    DrawIronSource();
-                    break;
-            }
+            if (_useMax.boolValue) DrawMax();
+            if (_useAdmob.boolValue) DrawAdmob();
+            if (_useIronSource.boolValue) DrawIronSource();
 
 
             EditorUtility.SetDirty(target);
@@ -119,7 +121,7 @@ namespace VirtueSky.Ads
         void DrawMax()
         {
             GUILayout.Space(10);
-            EditorGUILayout.LabelField("AppLovin-Max", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Applovin - Max", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_sdkKey);
@@ -128,12 +130,14 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_maxInterstitialAdUnit);
             EditorGUILayout.PropertyField(_maxRewardAdUnit);
             EditorGUILayout.PropertyField(_maxAppOpenAdUnit);
+
+            GUILayout.Space(10);
         }
 
         void DrawAdmob()
         {
             GUILayout.Space(10);
-            EditorGUILayout.LabelField("Google-Admob", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Google - Admob", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_admobBannerAdUnit);
@@ -154,12 +158,14 @@ namespace VirtueSky.Ads
             {
                 EditorApplication.ExecuteMenuItem("Assets/Google Mobile Ads/Settings...");
             }
+
+            GUILayout.Space(10);
         }
 
         void DrawIronSource()
         {
             GUILayout.Space(10);
-            EditorGUILayout.LabelField("LevelPlay-IronSource", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("LevelPlay - IronSource", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_androidAppKey);
@@ -168,6 +174,16 @@ namespace VirtueSky.Ads
             // EditorGUILayout.PropertyField(_ironSourceBannerAdUnit);
             // EditorGUILayout.PropertyField(_ironSourceInterstitialAdUnit);
             // EditorGUILayout.PropertyField(_ironSourceRewardAdUnit);
+
+            GUILayout.Space(10);
+        }
+
+        GUIStyle StyleLabel()
+        {
+            var style = new GUIStyle();
+            style.fontSize = 14;
+            style.normal.textColor = Color.white;
+            return style;
         }
 
         void GuiLine(int i_height = 1)
