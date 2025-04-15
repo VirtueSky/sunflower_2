@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 #if VIRTUESKY_SKELETON
 using Spine;
 using Spine.Unity;
 using UnityEngine;
 using VirtueSky.Core;
-
+using Animation = Spine.Animation;
 
 namespace VirtueSky.Misc
 {
@@ -14,9 +13,16 @@ namespace VirtueSky.Misc
     {
         public static float Duration(this SkeletonAnimation skeletonAnimation, string animationName)
         {
-            var animation =
-                skeletonAnimation.AnimationState.Data.SkeletonData.Animations.Items.FirstOrDefault(animation =>
-                    animation.Name.Equals(animationName));
+            Animation animation = null;
+            foreach (var animationsItem in skeletonAnimation.AnimationState.Data.SkeletonData.Animations.Items)
+            {
+                if (animationsItem.Name.Equals(animationName))
+                {
+                    animation = animationsItem;
+                    break;
+                }
+            }
+
             if (animation == null) return 0;
             return animation.Duration;
         }
