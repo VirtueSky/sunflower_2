@@ -152,12 +152,8 @@ namespace VirtueSky.ControlPanel.Editor
             if (AdSettings.UseIronSource)
             {
                 GUILayout.Space(10);
-                if (GUILayout.Button("Install IronSource Sdk Plugin"))
-                {
-                    AssetDatabase.ImportPackage(
-                        FileExtension.GetPathFileInCurrentEnvironment(
-                            "Module/Utils/Editor/UnityPackage/is-sdk.unitypackage"), false);
-                }
+                CPUtility.DrawButtonInstallPackage("Install IronSource Sdk Plugin", "Remove IronSource Sdk Plugin",
+                    ConstantPackage.PackageNameLevelPlay, ConstantPackage.MaxVersionLevelPlay);
             }
         }
     }
