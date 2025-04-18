@@ -4,7 +4,6 @@ namespace VirtueSky.Ads
     {
         protected bool statusAppOpenFirstIgnore;
 
-
         public abstract void Initialize();
         public abstract AdUnit InterstitialAdUnit();
         public abstract void LoadInterstitial();

@@ -166,14 +166,14 @@ namespace VirtueSky.UtilsEditor
         public static string GetPathFileInCurrentEnvironment(string fullRelativePath)
         {
             var upmPath = $"Packages/com.wolf-org.sunflower2/{fullRelativePath}";
-            var normalPath = $"Assets/sunflower2/{fullRelativePath}";
+            var normalPath = $"Assets/sunflower_2/{fullRelativePath}";
             return !File.Exists(Path.GetFullPath(upmPath)) ? normalPath : upmPath;
         }
 
         public static string GetPathFolderInCurrentEnvironment(string fullRelativePath)
         {
             var upmPath = $"Packages/com.wolf-org.sunflower2/{fullRelativePath}";
-            var normalPath = $"Assets/sunflower2/{fullRelativePath}";
+            var normalPath = $"Assets/sunflower_2/{fullRelativePath}";
             return Directory.Exists(upmPath) ? upmPath : normalPath;
         }
 

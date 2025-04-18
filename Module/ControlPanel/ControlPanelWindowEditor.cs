@@ -92,7 +92,7 @@ namespace VirtueSky.ControlPanel.Editor
             switch (statePanelControl)
             {
                 case StatePanelControl.Advertising:
-                    CPAdvertisingDrawer.OnDrawAdvertising(position);
+                    CPAdvertisingDrawer.OnDrawAdvertising();
                     break;
                 case StatePanelControl.InAppPurchase:
                     CPIapDrawer.OnDrawIap(position);

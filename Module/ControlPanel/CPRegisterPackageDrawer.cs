@@ -66,8 +66,6 @@ namespace VirtueSky.ControlPanel.Editor
                 ConstantPackage.PackageNameInAppPurchase, ConstantPackage.MaxVersionInAppPurchase);
             CPUtility.DrawButtonInstallPackage("Install AppsFlyer", "Remove AppsFlyer",
                 ConstantPackage.PackageNameAppFlyer, ConstantPackage.MaxVersionAppFlyer);
-            CPUtility.DrawButtonInstallPackage("Install AppsFlyer Revenue Generic", "Remove AppsFlyer Revenue Generic",
-                ConstantPackage.PackageNameAppFlyerRevenueGeneric, ConstantPackage.MaxVersionAppFlyerRevenueGeneric);
             CPUtility.DrawButtonInstallPackage("Install Google Play Review", "Remove Google Play Review",
                 ConstantPackage.PackageNameGGPlayReview, ConstantPackage.MaxVersionGGPlayReview);
             CPUtility.DrawButtonInstallPackage("Install Google Play Core", "Remove Google Play Core",
@@ -101,6 +99,11 @@ namespace VirtueSky.ControlPanel.Editor
                 ConstantPackage.PackageNameAddressables, ConstantPackage.MaxVersionAddressables);
             CPUtility.DrawButtonInstallPackage("Install Baking Sheet", "Remove Baking Sheet",
                 ConstantPackage.PackageNameBakingSheet, ConstantPackage.MaxVersionBakingSheet);
+            CPUtility.DrawButtonInstallPackage("Install Admob Sdk Plugin", "Remove Admob Sdk Plugin",
+                ConstantPackage.PackageNameAdmob, ConstantPackage.VersionAdmob);
+            CPUtility.DrawButtonInstallPackage("Install LevelPlay Sdk Plugin", "Remove LevelPlay Sdk Plugin",
+                ConstantPackage.PackageNameLevelPlay, ConstantPackage.MaxVersionLevelPlay);
+            
             if (GUILayout.Button("Install Google Play Game Service", GUILayout.Width(400)))
             {
                 AssetDatabase.ImportPackage(

@@ -14,7 +14,10 @@ namespace VirtueSky.Ads
         [SerializeField] private CoreEnum.RuntimeAutoInitType runtimeAutoInitType;
         [Range(5, 100), SerializeField] private float adCheckingInterval = 8f;
         [Range(5, 100), SerializeField] private float adLoadingInterval = 15f;
-        [SerializeField] private AdNetwork adNetwork = AdNetwork.Max;
+
+        [SerializeField] private bool useMax = true;
+        [SerializeField] private bool useAdmob;
+        [SerializeField] private bool useIronSource;
 
         [Tooltip("Install google-mobile-ads sdk to use GDPR"), SerializeField]
         private bool enableGDPR;
@@ -129,11 +132,9 @@ namespace VirtueSky.Ads
         public static float AdCheckingInterval => Instance.adCheckingInterval;
         public static float AdLoadingInterval => Instance.adLoadingInterval;
 
-        public static AdNetwork CurrentAdNetwork
-        {
-            get => Instance.adNetwork;
-            set => Instance.adNetwork = value;
-        }
+        public static bool UseMax => Instance.useMax;
+        public static bool UseAdmob => Instance.useAdmob;
+        public static bool UseIronSource => Instance.useIronSource;
 
         public static bool EnableGDPR => Instance.enableGDPR;
         public static bool EnableGDPRTestMode => Instance.enableGDPRTestMode;

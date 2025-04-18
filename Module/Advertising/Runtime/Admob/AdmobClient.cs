@@ -1,5 +1,6 @@
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
+using VirtueSky.Tracking;
 #endif
 using VirtueSky.Core;
 
@@ -30,6 +31,9 @@ namespace VirtueSky.Ads
                     MobileAds.SetRequestConfiguration(configuration);
                 });
             });
+
+            FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
+
             AdSettings.AdmobBannerAdUnit.Init();
             AdSettings.AdmobInterstitialAdUnit.Init();
             AdSettings.AdmobRewardAdUnit.Init();
@@ -109,7 +113,7 @@ namespace VirtueSky.Ads
             if (state == GoogleMobileAds.Common.AppState.Foreground && AdSettings.AdmobAppOpenAdUnit.autoShow &&
                 !AdStatic.isShowingAd)
             {
-                if (AdSettings.CurrentAdNetwork == AdNetwork.Admob) ShowAppOpen();
+                if (AdSettings.UseAdmob) ShowAppOpen();
             }
         }
 #endif
