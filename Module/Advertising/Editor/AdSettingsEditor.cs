@@ -15,6 +15,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _useMax;
         private SerializedProperty _useAdmob;
         private SerializedProperty _useIronSource;
+        private SerializedProperty _enableTrackAdRevenue;
 
         private SerializedProperty _sdkKey;
         private SerializedProperty _maxBannerAdUnit;
@@ -53,6 +54,7 @@ namespace VirtueSky.Ads
             _useMax = serializedObject.FindProperty("useMax");
             _useAdmob = serializedObject.FindProperty("useAdmob");
             _useIronSource = serializedObject.FindProperty("useIronSource");
+            _enableTrackAdRevenue = serializedObject.FindProperty("enableTrackAdRevenue");
 
             _sdkKey = serializedObject.FindProperty("sdkKey");
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
@@ -98,8 +100,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_useMax);
             EditorGUILayout.PropertyField(_useAdmob);
             EditorGUILayout.PropertyField(_useIronSource);
-
-            GUILayout.Space(10);
+            EditorGUILayout.PropertyField(_enableTrackAdRevenue);
             EditorGUILayout.PropertyField(_enableGDPR);
             if (_enableGDPR.boolValue)
             {

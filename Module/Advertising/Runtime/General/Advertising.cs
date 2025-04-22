@@ -106,7 +106,7 @@ namespace VirtueSky.Ads
         void InitAdClient()
         {
             var adSettings = AdSettings.Instance;
-
+            AppTracking.Init(AdSettings.EnableTrackAdRevenue);
             if (AdSettings.UseMax)
             {
                 maxAdClient = new MaxAdClient();
@@ -237,8 +237,7 @@ namespace VirtueSky.Ads
                 return;
             }
 
-            ConsentForm.LoadAndShowConsentFormIfRequired(
-                (FormError formError) =>
+            ConsentForm.LoadAndShowConsentFormIfRequired((FormError formError) =>
                 {
                     if (formError != null)
                     {

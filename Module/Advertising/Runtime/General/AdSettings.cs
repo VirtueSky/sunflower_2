@@ -18,6 +18,7 @@ namespace VirtueSky.Ads
         [SerializeField] private bool useMax = true;
         [SerializeField] private bool useAdmob;
         [SerializeField] private bool useIronSource;
+        [SerializeField] private bool enableTrackAdRevenue = true;
 
         [Tooltip("Install google-mobile-ads sdk to use GDPR"), SerializeField]
         private bool enableGDPR;
@@ -135,7 +136,7 @@ namespace VirtueSky.Ads
         public static bool UseMax => Instance.useMax;
         public static bool UseAdmob => Instance.useAdmob;
         public static bool UseIronSource => Instance.useIronSource;
-
+        public static bool EnableTrackAdRevenue => Instance.enableTrackAdRevenue;
         public static bool EnableGDPR => Instance.enableGDPR;
         public static bool EnableGDPRTestMode => Instance.enableGDPRTestMode;
     }
