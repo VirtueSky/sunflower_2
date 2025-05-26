@@ -24,7 +24,7 @@
 ### 2: Add the line below to `Packages/manifest.json`
 
 for version `1.5.4`
-```csharp
+```json
 "com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.5.4",
 ```
 
