@@ -13,7 +13,11 @@ namespace VirtueSky.Component
         private Transform currentTrans;
 
         [Space, SerializeField] private Transform targetTrans;
-        [ReadOnly, SerializeField] private Vector3 offsetTrans;
+        [SerializeField] private bool useOffsetTrans = true;
+
+        [ShowIf(nameof(useOffsetTrans), true), ReadOnly, SerializeField]
+        private Vector3 offsetTrans;
+
         [Space, SerializeField] private DirectionFollowTarget directionFollowTarget;
         [Space, SerializeField] private TypeFollowTarget typeFollowTarget;
 
@@ -90,9 +94,9 @@ namespace VirtueSky.Component
                 currentTrans = gameObject.transform;
             }
 
-            offsetTrans = currentTrans.position - targetTrans.position;
+            offsetTrans = useOffsetTrans ? currentTrans.position - targetTrans.position : Vector3.zero;
         }
-        
+
 
         public override void LateTick()
         {
