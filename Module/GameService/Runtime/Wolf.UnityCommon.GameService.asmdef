@@ -1,19 +1,20 @@
 {
-  "name": "Wolf.UnityCommon.GameService",
-  "rootNamespace": "",
-  "references": [
-    "GUID:ba00a69c89ab3a94d84d27e0051afcfd",
-    "GUID:1ed07ff861e5f468287b0baef844706d",
-    "GUID:e2146bdc04d424169b039613a1b62bdf",
-    "GUID:324caed91501a9c47a04ebfd87b68794"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "Wolf.UnityCommon.GameService",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ba00a69c89ab3a94d84d27e0051afcfd",
+        "GUID:1ed07ff861e5f468287b0baef844706d",
+        "GUID:e2146bdc04d424169b039613a1b62bdf",
+        "GUID:324caed91501a9c47a04ebfd87b68794",
+        "GUID:32dbaa332e571bf429b7de517f75f074"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

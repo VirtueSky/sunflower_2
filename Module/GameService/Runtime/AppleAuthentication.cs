@@ -9,6 +9,7 @@ using AppleAuth.Interfaces;
 using AppleAuth.Native;
 #endif
 using UnityEngine;
+using VirtueSky.DataStorage;
 using VirtueSky.Inspector;
 
 namespace VirtueSky.GameService
@@ -17,27 +18,35 @@ namespace VirtueSky.GameService
     public class AppleAuthentication : ServiceAuthentication
     {
         private static event Func<string> GetAuthorCodeEvent;
-        private static event Func<string> GetUserIdEvent;
+        private static event Action TryLoginEvent;
 
         private string _authorizationCode;
-        private string _userId;
-
-
         private string InternalGetAuthorCode() => _authorizationCode;
-        private string InternalGetUserId() => _userId;
+
+        public static string Email
+        {
+            get => GameData.Get("AppleAuthentication_Email", "");
+            private set => GameData.Set("AppleAuthentication_Email", value);
+        }
+
+        public static string UserId
+        {
+            get => GameData.Get("AppleAuthentication_UserId", "");
+            private set => GameData.Set("AppleAuthentication_UserId", value);
+        }
 
         protected override void OnEnable()
         {
             base.OnEnable();
             GetAuthorCodeEvent += InternalGetAuthorCode;
-            GetUserIdEvent += InternalGetUserId;
+            TryLoginEvent += InternalTryLogin;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
             GetAuthorCodeEvent -= InternalGetAuthorCode;
-            GetUserIdEvent -= InternalGetUserId;
+            TryLoginEvent -= InternalTryLogin;
         }
 
 #if UNITY_IOS && VIRTUESKY_APPLE_AUTH
@@ -108,14 +117,15 @@ namespace VirtueSky.GameService
                         // And now you have all the information to create/login a user in your system
                         serverCode = identityToken;
                         _authorizationCode = authorizationCode;
-                        _userId = userId;
-                        nameAuth = $"{fullName.GivenName} {fullName.FamilyName}";
+                        if (!string.IsNullOrEmpty(userId)) UserId = userId;
+                        if (!string.IsNullOrEmpty(email)) Email = email;
+                        if (fullName != null) UserName = $"{fullName.GivenName} {fullName.FamilyName}";
                         statusLogin = StatusLogin.Successful;
                     }
                     else
                     {
                         serverCode = "";
-                        _userId = "";
+                        UserId = "";
                         statusLogin = StatusLogin.Failed;
                     }
                 },
@@ -124,16 +134,44 @@ namespace VirtueSky.GameService
                     // Something went wrong
                     var authorizationErrorCode = error.GetAuthorizationErrorCode();
                     serverCode = "";
-                    _userId = "";
+                    UserId = "";
                     statusLogin = StatusLogin.Failed;
                 });
+#endif
+        }
+
+        /// <summary>
+        /// Login when Apple credential still valid.
+        /// </summary>
+        private void InternalTryLogin()
+        {
+#if UNITY_IOS && VIRTUESKY_APPLE_AUTH
+            if (string.IsNullOrEmpty(UserId)) return;
+            this._iAppleAuthManager.GetCredentialState(UserId, state =>
+            {
+                switch (state)
+                {
+                    case CredentialState.Revoked:
+                        break;
+                    case CredentialState.Authorized:
+                        Debug.Log($"Apple credential still valid. Auto-login with userId: {UserId}");
+                        Login();
+                        break;
+                    case CredentialState.NotFound:
+                        Debug.LogWarning("Apple credential invalid or revoked.");
+                        UserId = "";
+                        break;
+                    case CredentialState.Transferred:
+                        break;
+                }
+            }, error => { Debug.LogError("CredentialState check failed: " + error.ToString()); });
 #endif
         }
 
         #region Api
 
         public static string GetAuthorizationCode() => GetAuthorCodeEvent?.Invoke();
-        public static string GetUserId() => GetUserIdEvent?.Invoke();
+        public static void TryLogin() => TryLoginEvent?.Invoke();
 
         #endregion
     }
