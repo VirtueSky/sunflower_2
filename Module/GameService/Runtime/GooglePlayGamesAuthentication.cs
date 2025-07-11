@@ -62,7 +62,11 @@ namespace VirtueSky.GameService
                         {
                             Debug.Log("Authorization code: " + code);
                             serverCode = code;
-                            nameAuth = PlayGamesPlatform.Instance.GetUserDisplayName();
+                            if (!string.IsNullOrEmpty(PlayGamesPlatform.Instance.GetUserDisplayName()))
+                            {
+                                UserName = PlayGamesPlatform.Instance.GetUserDisplayName();
+                            }
+
                             statusLogin = StatusLogin.Successful;
                         });
                 }
@@ -77,7 +81,11 @@ namespace VirtueSky.GameService
                                 {
                                     Debug.Log("Authorization code: " + code);
                                     serverCode = code;
-                                    nameAuth = PlayGamesPlatform.Instance.GetUserDisplayName();
+                                    if (!string.IsNullOrEmpty(PlayGamesPlatform.Instance.GetUserDisplayName()))
+                                    {
+                                        UserName = PlayGamesPlatform.Instance.GetUserDisplayName();
+                                    }
+
                                     statusLogin = StatusLogin.Successful;
                                 });
                         }

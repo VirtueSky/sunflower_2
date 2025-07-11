@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VirtueSky.DataStorage;
 
 namespace VirtueSky.GameService
 {
@@ -9,14 +10,18 @@ namespace VirtueSky.GameService
 
         private static event Action OnLoginEvent;
         private static event Func<string> OnGetServerCodeEvent;
-        private static event Func<string> OnGetNameEvent;
         private static event Func<StatusLogin> OnGetStatusLoginEvent;
         private static event Action<StatusLogin> OnSetStatusLoginEvent;
 
 
         protected string serverCode;
-        protected string nameAuth;
         protected StatusLogin statusLogin;
+
+        public static string UserName
+        {
+            get => GameData.Get("ServiceAuthentication_Name", "");
+            internal set => GameData.Set("ServiceAuthentication_Name", value);
+        }
 
         private void Awake()
         {
@@ -27,7 +32,6 @@ namespace VirtueSky.GameService
         {
             OnLoginEvent += InternalLogin;
             OnGetServerCodeEvent += InternalGetServerCode;
-            OnGetNameEvent += InternalGetNameAuth;
             OnGetStatusLoginEvent += InternalGetStatusLogin;
             OnSetStatusLoginEvent += InternalSetStatusLogin;
         }
@@ -36,7 +40,6 @@ namespace VirtueSky.GameService
         {
             OnLoginEvent -= InternalLogin;
             OnGetServerCodeEvent -= InternalGetServerCode;
-            OnGetNameEvent -= InternalGetNameAuth;
             OnGetStatusLoginEvent -= InternalGetStatusLogin;
             OnSetStatusLoginEvent -= InternalSetStatusLogin;
         }
@@ -46,7 +49,6 @@ namespace VirtueSky.GameService
             InternalInit();
         }
 
-        private string InternalGetNameAuth() => nameAuth;
         private string InternalGetServerCode() => serverCode;
         private StatusLogin InternalGetStatusLogin() => statusLogin;
         private void InternalSetStatusLogin(StatusLogin status) => statusLogin = status;
@@ -57,7 +59,6 @@ namespace VirtueSky.GameService
 
         public static void Login() => OnLoginEvent?.Invoke();
         public static string GetServerCode() => OnGetServerCodeEvent?.Invoke();
-        public static string GetNameAuthentication() => OnGetNameEvent?.Invoke();
         public static StatusLogin GetStatusLogin() => (StatusLogin)OnGetStatusLoginEvent?.Invoke();
         public static void SetStatusLogin(StatusLogin statusLogin) => OnSetStatusLoginEvent?.Invoke(statusLogin);
 

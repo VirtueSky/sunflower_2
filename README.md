@@ -23,9 +23,9 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-for version `1.5.8`
+for version `1.5.9`
 ```json
-"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.5.8",
+"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.5.9",
 ```
 
 ## Includes modules
