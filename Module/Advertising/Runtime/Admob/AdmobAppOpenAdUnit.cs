@@ -16,6 +16,9 @@ namespace VirtueSky.Ads
         [Tooltip("Automatically show AppOpenAd when app status is changed")]
         public bool autoShow = false;
 
+        [Tooltip("Time between closing the previous full-screen ad and starting to show the app open ad - in seconds")]
+        public float timeBetweenFullScreenAd = 2f;
+
         public bool useTestId;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private AppOpenAd _appOpenAd;
@@ -47,19 +50,11 @@ namespace VirtueSky.Ads
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            return _appOpenAd != null && _appOpenAd.CanShowAd() && DateTime.Now < _expireTime;
+            return _appOpenAd != null && _appOpenAd.CanShowAd() && DateTime.Now < _expireTime &&
+                   (DateTime.Now - AdStatic.AdClosingTime).TotalSeconds > timeBetweenFullScreenAd;
 #else
             return false;
 #endif
-        }
-
-        public override AdUnit Show()
-        {
-            ResetChainCallback();
-            if (!Application.isMobilePlatform || string.IsNullOrEmpty(Id) || AdStatic.IsRemoveAd ||
-                !IsReady()) return this;
-            ShowImpl();
-            return this;
         }
 
         protected override void ShowImpl()
@@ -111,7 +106,7 @@ namespace VirtueSky.Ads
         private void OnAdOpening()
         {
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
-            AdStatic.isShowingAd = true;
+            AdStatic.IsShowingAd = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -125,7 +120,7 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.waitAppOpenClosedAction?.Invoke();
-            AdStatic.isShowingAd = false;
+            AdStatic.IsShowingAd = false;
             Common.CallActionAndClean(ref closedCallback);
             OnClosedAdEvent?.Invoke();
             Destroy();

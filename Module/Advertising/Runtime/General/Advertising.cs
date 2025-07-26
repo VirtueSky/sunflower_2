@@ -154,7 +154,7 @@ namespace VirtueSky.Ads
 
         private void OnChangePreventDisplayOpenAd(bool state)
         {
-            AdStatic.isShowingAd = state;
+            AdStatic.IsShowingAd = state;
         }
 
         #region Method Load Ads

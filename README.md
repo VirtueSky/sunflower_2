@@ -23,16 +23,15 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-for version `1.6.1`
+for version `1.6.2`
 ```json
-"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.6.1",
+"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.6.2",
 ```
 
 ## Includes modules
 
 ```bash
 ├── Core (Update only called once in Monobehaviour, Delay...)
-├── ATT_IOS
 ├── Advertising (Support for Max, Admob and IronSource)
 ├── In App Purchase (IAP)
 ├── Asset Finder

@@ -110,8 +110,7 @@ namespace VirtueSky.Ads
 
         void OnAppStateChanged(GoogleMobileAds.Common.AppState state)
         {
-            if (state == GoogleMobileAds.Common.AppState.Foreground && AdSettings.AdmobAppOpenAdUnit.autoShow &&
-                !AdStatic.isShowingAd)
+            if (state == GoogleMobileAds.Common.AppState.Foreground && AdSettings.AdmobAppOpenAdUnit.autoShow)
             {
                 if (AdSettings.UseAdmob) ShowAppOpen();
             }
