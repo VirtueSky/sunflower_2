@@ -74,7 +74,10 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
         private void OnAppStateChange(bool pauseStatus)
         {
-            if (!pauseStatus && AdSettings.MaxAppOpenAdUnit.autoShow && !AdStatic.isShowingAd) ShowAppOpen();
+            if (!pauseStatus && AdSettings.MaxAppOpenAdUnit.autoShow)
+            {
+                if (AdSettings.UseMax) ShowAppOpen();
+            }
         }
 #endif
     }

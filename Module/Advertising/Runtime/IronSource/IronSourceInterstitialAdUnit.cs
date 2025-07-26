@@ -82,7 +82,7 @@ namespace VirtueSky.Ads
 
         void InterstitialOnAdOpenedEvent(IronSourceAdInfo adInfo)
         {
-            AdStatic.isShowingAd = true;
+            AdStatic.IsShowingAd = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -105,7 +105,7 @@ namespace VirtueSky.Ads
 
         void InterstitialOnAdClosedEvent(IronSourceAdInfo adInfo)
         {
-            AdStatic.isShowingAd = false;
+            AdStatic.IsShowingAd = false;
             Common.CallActionAndClean(ref completedCallback);
             OnClosedAdEvent?.Invoke();
             Load();

@@ -59,7 +59,7 @@ namespace VirtueSky.Ads
         public virtual AdUnit Show()
         {
             ResetChainCallback();
-            if (!Application.isMobilePlatform || string.IsNullOrEmpty(Id) || AdStatic.IsRemoveAd)
+            if (!Application.isMobilePlatform || string.IsNullOrEmpty(Id) || AdStatic.IsRemoveAd || !IsReady())
                 return this;
             ShowImpl();
             return this;

@@ -11,6 +11,8 @@ namespace VirtueSky.Ads
         [Tooltip("Automatically show AppOpenAd when app status is changed")]
         public bool autoShow = false;
 
+        [Tooltip("Time between closing the previous full-screen ad and starting to show the app open ad - in seconds")]
+        public float timeBetweenFullScreenAd = 2f;
 
         public override void Init()
         {
@@ -38,7 +40,8 @@ namespace VirtueSky.Ads
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-            return !string.IsNullOrEmpty(Id) && MaxSdk.IsAppOpenAdReady(Id);
+            return !string.IsNullOrEmpty(Id) && MaxSdk.IsAppOpenAdReady(Id) &&
+                   (DateTime.Now - AdStatic.AdClosingTime).TotalSeconds > timeBetweenFullScreenAd;
 #else
             return false;
 #endif
@@ -94,7 +97,7 @@ namespace VirtueSky.Ads
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.waitAppOpenClosedAction?.Invoke();
-            AdStatic.isShowingAd = false;
+            AdStatic.IsShowingAd = false;
             Common.CallActionAndClean(ref closedCallback);
             OnClosedAdEvent?.Invoke();
 
@@ -104,7 +107,7 @@ namespace VirtueSky.Ads
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
-            AdStatic.isShowingAd = true;
+            AdStatic.IsShowingAd = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
