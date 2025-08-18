@@ -23,9 +23,17 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-for version `1.6.2`
+- for version `1.6.3`
 ```json
-"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.6.2",
+"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.6.3",
+```
+- depencies:
+```json
+"com.unity.nuget.newtonsoft-json": "3.2.1",
+"com.unity.serialization": "3.1.1",
+"com.unity.collections": "2.1.4",
+"com.unity.textmeshpro": "3.0.8",
+"com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10",
 ```
 
 ## Includes modules
