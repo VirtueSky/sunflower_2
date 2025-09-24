@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VirtueSky.Inspector;
+using VirtueSky.Misc;
 
 
 namespace VirtueSky.DataType
@@ -10,7 +11,7 @@ namespace VirtueSky.DataType
     [Serializable]
     public class DictionaryCustom<TKey, TValue> : ISerializationCallbackReceiver, IDictionary, IDictionary<TKey, TValue>
     {
-        [TableList, SerializeField] private List<DictionaryCustomData<TKey, TValue>> dictionaryData;
+        [TableList, SerializeField] private List<DictionaryCustomData<TKey, TValue>> dictionaryData = new List<DictionaryCustomData<TKey, TValue>>();
 
         [NonSerialized] private Dictionary<TKey, TValue> m_dict = new Dictionary<TKey, TValue>();
         public Dictionary<TKey, TValue> GetDict => m_dict;
@@ -47,7 +48,9 @@ namespace VirtueSky.DataType
 
         private void UpdateList()
         {
-            dictionaryData.Clear();
+            if (!dictionaryData.IsNullOrEmpty()) {
+                dictionaryData.Clear();
+            }
             if (m_dict is { Count: > 0 })
             {
                 foreach (var kvp in m_dict)
