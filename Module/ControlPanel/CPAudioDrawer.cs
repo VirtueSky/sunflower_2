@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using VirtueSky.Audio;
+using VirtueSky.AudioEditor;
 
 
 namespace VirtueSky.ControlPanel.Editor

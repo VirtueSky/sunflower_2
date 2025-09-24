@@ -121,9 +121,9 @@ namespace VirtueSky.Ads
                 Debug.Log($"Use AdClient: {admobAdClient}".SetColor(Color.cyan));
             }
 
-            if (AdSettings.UseIronSource)
+            if (AdSettings.UseLevelPlay)
             {
-                ironSourceAdClient = new IronSourceClient();
+                ironSourceAdClient = new LevelPlayClient();
                 ironSourceAdClient.Initialize();
                 Debug.Log($"Use AdClient: {ironSourceAdClient}".SetColor(Color.cyan));
             }
@@ -165,7 +165,7 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.UseMax) maxAdClient.LoadInterstitial();
             if (AdSettings.UseAdmob) admobAdClient.LoadInterstitial();
-            if (AdSettings.UseIronSource) ironSourceAdClient.LoadInterstitial();
+            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadInterstitial();
             _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -175,7 +175,7 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.UseMax) maxAdClient.LoadRewarded();
             if (AdSettings.UseAdmob) admobAdClient.LoadRewarded();
-            if (AdSettings.UseIronSource) ironSourceAdClient.LoadRewarded();
+            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadRewarded();
             _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -185,7 +185,7 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.UseMax) maxAdClient.LoadRewardedInterstitial();
             if (AdSettings.UseAdmob) admobAdClient.LoadRewardedInterstitial();
-            if (AdSettings.UseIronSource) ironSourceAdClient.LoadRewardedInterstitial();
+            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadRewardedInterstitial();
             _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -195,7 +195,7 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.UseMax) maxAdClient.LoadAppOpen();
             if (AdSettings.UseAdmob) admobAdClient.LoadAppOpen();
-            if (AdSettings.UseIronSource) ironSourceAdClient.LoadAppOpen();
+            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadAppOpen();
             _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
         }
 
