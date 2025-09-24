@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VirtueSky.Core;
 using VirtueSky.Inspector;
 using VirtueSky.Utils;
@@ -17,7 +18,7 @@ namespace VirtueSky.Ads
 
         [SerializeField] private bool useMax = true;
         [SerializeField] private bool useAdmob;
-        [SerializeField] private bool useIronSource;
+        [SerializeField] private bool useLevelPlay;
         [SerializeField] private bool enableTrackAdRevenue = true;
 
         [Tooltip("Install google-mobile-ads sdk to use GDPR"), SerializeField]
@@ -75,14 +76,15 @@ namespace VirtueSky.Ads
 
         #endregion
 
-        #region IronSource
+        #region LevelPlay
 
         [SerializeField] private string androidAppKey;
         [SerializeField] private string iOSAppKey;
+        
         [SerializeField] private bool useTestAppKey;
-        [SerializeField] private IronSourceBannerAdUnit ironSourceBannerAdUnit;
-        [SerializeField] private IronSourceInterstitialAdUnit ironSourceInterstitialAdUnit;
-        [SerializeField] private IronSourceRewardAdUnit ironSourceRewardAdUnit;
+        [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
+        [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
+        [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnit;
 
         public static string AndroidAppKey
         {
@@ -119,12 +121,12 @@ namespace VirtueSky.Ads
         }
 
         public static bool UseTestAppKey => Instance.useTestAppKey;
-        public static IronSourceBannerAdUnit IronSourceBannerAdUnit => Instance.ironSourceBannerAdUnit;
+        public static LevelPlayBannerAdUnit LevelPlayBannerAdUnit => Instance.levelPlayBannerAdUnit;
 
-        public static IronSourceInterstitialAdUnit IronSourceInterstitialAdUnit =>
-            Instance.ironSourceInterstitialAdUnit;
+        public static LevelPlayInterstitialAdUnit LevelPlayInterstitialAdUnit =>
+            Instance.levelPlayInterstitialAdUnit;
 
-        public static IronSourceRewardAdUnit IronSourceRewardAdUnit => Instance.ironSourceRewardAdUnit;
+        public static LevelPlayRewardAdUnit LevelPlayRewardAdUnit => Instance.levelPlayRewardAdUnit;
 
         #endregion
 
@@ -135,7 +137,7 @@ namespace VirtueSky.Ads
 
         public static bool UseMax => Instance.useMax;
         public static bool UseAdmob => Instance.useAdmob;
-        public static bool UseIronSource => Instance.useIronSource;
+        public static bool UseLevelPlay => Instance.useLevelPlay;
         public static bool EnableTrackAdRevenue => Instance.enableTrackAdRevenue;
         public static bool EnableGDPR => Instance.enableGDPR;
         public static bool EnableGDPRTestMode => Instance.enableGDPRTestMode;
@@ -145,7 +147,7 @@ namespace VirtueSky.Ads
     {
         Max,
         Admob,
-        IronSource
+        LevelPlay
     }
 
     public enum AdsPosition

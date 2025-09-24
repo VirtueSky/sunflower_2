@@ -1,40 +1,49 @@
 using System;
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+using Unity.Services.LevelPlay;
+#endif
 using UnityEngine;
 using VirtueSky.Misc;
 
 namespace VirtueSky.Ads
 {
     [Serializable]
-    public class IronSourceBannerAdUnit : AdUnit
+    public class LevelPlayBannerAdUnit : AdUnit
     {
         public AdsSize size;
         public AdsPosition position;
         private bool _isBannerDestroyed = true;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+        private LevelPlayBannerAd bannerAd;  
+#endif
 
         public override void Init()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            IronSourceBannerEvents.onAdLoadedEvent += BannerOnAdLoadedEvent;
-            IronSourceBannerEvents.onAdLoadFailedEvent += BannerOnAdLoadFailedEvent;
-            IronSourceBannerEvents.onAdClickedEvent += BannerOnAdClickedEvent;
-            IronSourceBannerEvents.onAdScreenPresentedEvent += BannerOnAdScreenPresentedEvent;
-            IronSourceBannerEvents.onAdScreenDismissedEvent += BannerOnAdScreenDismissedEvent;
-            IronSourceBannerEvents.onAdLeftApplicationEvent += BannerOnAdLeftApplicationEvent;
+            bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
+            bannerAd.OnAdLoadFailed += BannerOnAdLoadFailedEvent;
+            bannerAd.OnAdClicked += BannerOnAdClickedEvent;
+            bannerAd.OnAdDisplayed += BannerOnAdDisplayedEvent;
+            bannerAd.OnAdDisplayFailed += BannerOnAdDisplayFailedEvent;
+            bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
 #endif
         }
 
         public override void Load()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            var bannerSize = ConvertBannerSize();
-            if (size == AdsSize.Adaptive) bannerSize.SetAdaptive(true);
-            if (_isBannerDestroyed)
+            if (_isBannerDestroyed) 
             {
-                IronSource.Agent.loadBanner(bannerSize, ConvertBannerPosition());
+                LevelPlayBannerAd.Config.Builder builder = new LevelPlayBannerAd.Config.Builder();
+                builder.SetPosition(ConvertBannerPosition());
+                builder.SetSize(ConvertBannerSize());
+                var config = builder.Build();
+                bannerAd = new LevelPlayBannerAd(Id, config);
+                bannerAd.LoadAd();
                 _isBannerDestroyed = false;
             }
 #endif
@@ -66,12 +75,12 @@ namespace VirtueSky.Ads
 
         protected override void ShowImpl()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = true;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
-            IronSource.Agent.displayBanner();
+            bannerAd.ShowAd();
 #endif
         }
 
@@ -85,83 +94,83 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = false;
             _isBannerDestroyed = true;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
-            IronSource.Agent.destroyBanner();
+            bannerAd.DestroyAd();
 #endif
         }
 
         public override void HideBanner()
         {
             base.HideBanner();
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = false;
-            IronSource.Agent.hideBanner();
+            bannerAd.HideAd();
 #endif
         }
 
 
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
-        private IronSourceBannerSize ConvertBannerSize()
+        private LevelPlayAdSize ConvertBannerSize()
         {
             switch (size)
             {
-                case AdsSize.Banner: return IronSourceBannerSize.BANNER;
-                case AdsSize.Adaptive: return IronSourceBannerSize.BANNER;
-                case AdsSize.MediumRectangle: return IronSourceBannerSize.RECTANGLE;
-                case AdsSize.Leaderboard: return IronSourceBannerSize.LARGE;
-                default: return IronSourceBannerSize.BANNER;
+                case AdsSize.Banner: return LevelPlayAdSize.BANNER;
+                case AdsSize.Adaptive: return LevelPlayAdSize.LARGE;
+                case AdsSize.MediumRectangle: return LevelPlayAdSize.MEDIUM_RECTANGLE;
+                case AdsSize.Leaderboard: return LevelPlayAdSize.LEADERBOARD;
+                default: return LevelPlayAdSize.BANNER;
             }
         }
 
-        private IronSourceBannerPosition ConvertBannerPosition()
+        private LevelPlayBannerPosition ConvertBannerPosition()
         {
             switch (position)
             {
-                case AdsPosition.Bottom: return IronSourceBannerPosition.BOTTOM;
-                case AdsPosition.Top: return IronSourceBannerPosition.TOP;
-                default: return IronSourceBannerPosition.BOTTOM;
+                case AdsPosition.Bottom: return LevelPlayBannerPosition.BottomCenter;
+                case AdsPosition.Top: return LevelPlayBannerPosition.TopCenter;
+                default: return LevelPlayBannerPosition.BottomCenter;
             }
         }
 
         #region Fun Callback
 
-        void BannerOnAdLoadedEvent(IronSourceAdInfo adInfo)
+        void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
             Common.CallActionAndClean(ref loadedCallback);
             OnLoadAdEvent?.Invoke();
         }
 
-        void BannerOnAdLoadFailedEvent(IronSourceError ironSourceError)
+        void BannerOnAdLoadFailedEvent(LevelPlayAdError ironSourceError)
         {
             Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ToString());
+            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ErrorMessage);
             Destroy();
         }
 
-        void BannerOnAdClickedEvent(IronSourceAdInfo adInfo)
+        void BannerOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
             Common.CallActionAndClean(ref clickedCallback);
             OnClickedAdEvent?.Invoke();
         }
 
-        void BannerOnAdScreenPresentedEvent(IronSourceAdInfo adInfo)
+        void BannerOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
         {
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
 
-        void BannerOnAdScreenDismissedEvent(IronSourceAdInfo adInfo)
+        void BannerOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
-            Common.CallActionAndClean(ref closedCallback);
-            OnClosedAdEvent?.Invoke();
+            Common.CallActionAndClean(ref failedToDisplayCallback);
+            OnFailedToDisplayAdEvent?.Invoke(adError.ErrorMessage);
         }
 
-        void BannerOnAdLeftApplicationEvent(IronSourceAdInfo adInfo)
+        void BannerOnAdLeftApplicationEvent(LevelPlayAdInfo adInfo)
         {
         }
 

@@ -112,15 +112,15 @@ namespace VirtueSky.ControlPanel.Editor
                 CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADMOB);
             }
 
-            if (AdSettings.UseIronSource)
+            if (AdSettings.UseLevelPlay)
             {
 #if !VIRTUESKY_ADS || !VIRTUESKY_IRONSOURCE
             EditorGUILayout.HelpBox(
-                $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_IRONSOURCE}\" to use IronSource Ads",
+                $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_LEVELPLAY}\" to use IronSource Ads",
                 MessageType.Info);
 #endif
 
-                CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_IRONSOURCE);
+                CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_LEVELPLAY);
             }
         }
 
@@ -149,7 +149,7 @@ namespace VirtueSky.ControlPanel.Editor
                     ConstantPackage.PackageNameAdmob, ConstantPackage.VersionAdmob);
             }
 
-            if (AdSettings.UseIronSource)
+            if (AdSettings.UseLevelPlay)
             {
                 GUILayout.Space(10);
                 CPUtility.DrawButtonInstallPackage("Install LevelPlay Sdk Plugin", "Remove LevelPlay Sdk Plugin",

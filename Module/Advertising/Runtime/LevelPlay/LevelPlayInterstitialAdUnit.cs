@@ -1,41 +1,48 @@
 using System;
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+using Unity.Services.LevelPlay;
+#endif
 using UnityEngine;
 using VirtueSky.Misc;
 
 namespace VirtueSky.Ads
 {
     [Serializable]
-    public class IronSourceInterstitialAdUnit : AdUnit
+    public class LevelPlayInterstitialAdUnit : AdUnit
     {
         [NonSerialized] internal Action completedCallback;
-
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+        private LevelPlayInterstitialAd interstitialAd;
+#endif
         public override void Init()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            IronSourceInterstitialEvents.onAdReadyEvent += InterstitialOnAdReadyEvent;
-            IronSourceInterstitialEvents.onAdLoadFailedEvent += InterstitialOnAdLoadFailed;
-            IronSourceInterstitialEvents.onAdOpenedEvent += InterstitialOnAdOpenedEvent;
-            IronSourceInterstitialEvents.onAdClickedEvent += InterstitialOnAdClickedEvent;
-            IronSourceInterstitialEvents.onAdShowSucceededEvent += InterstitialOnAdShowSucceededEvent;
-            IronSourceInterstitialEvents.onAdShowFailedEvent += InterstitialOnAdShowFailedEvent;
-            IronSourceInterstitialEvents.onAdClosedEvent += InterstitialOnAdClosedEvent;
+            interstitialAd.OnAdLoaded += InterstitialOnAdLoadedEvent;
+            interstitialAd.OnAdLoadFailed += InterstitialOnAdLoadFailed;
+            interstitialAd.OnAdDisplayed += InterstitialOnAdDisplayEvent;
+            interstitialAd.OnAdClicked += InterstitialOnAdClickedEvent;
+            interstitialAd.OnAdDisplayFailed += InterstitialOnAdDisplayFailedEvent;
+            interstitialAd.OnAdClosed += InterstitialOnAdClosedEvent;
 #endif
         }
 
         public override void Load()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            IronSource.Agent.loadInterstitial();
+            var configBuilder = new LevelPlayInterstitialAd.Config.Builder();
+            var config = configBuilder.Build();
+            interstitialAd = new LevelPlayInterstitialAd(Id, config);
+           interstitialAd.LoadAd();
             OnAdLoaded();
 #endif
         }
 
         public override bool IsReady()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
-            return IronSource.Agent.isInterstitialReady();
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            return interstitialAd.IsAdReady();
 #else
             return false;
 #endif
@@ -43,8 +50,8 @@ namespace VirtueSky.Ads
 
         protected override void ShowImpl()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
-            IronSource.Agent.showInterstitial();
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            interstitialAd.ShowAd();
 #endif
         }
 
@@ -66,44 +73,40 @@ namespace VirtueSky.Ads
             completedCallback = null;
         }
 
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
         #region Fun Callback
 
-        void InterstitialOnAdReadyEvent(IronSourceAdInfo adInfo)
+        void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
         }
 
-        void InterstitialOnAdLoadFailed(IronSourceError ironSourceError)
+        void InterstitialOnAdLoadFailed(LevelPlayAdError ironSourceError)
         {
             Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ToString());
+            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ErrorMessage);
         }
 
-        void InterstitialOnAdOpenedEvent(IronSourceAdInfo adInfo)
+        void InterstitialOnAdDisplayEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
 
-        void InterstitialOnAdClickedEvent(IronSourceAdInfo adInfo)
+        void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
             Common.CallActionAndClean(ref clickedCallback);
             OnClickedAdEvent?.Invoke();
         }
-
-        void InterstitialOnAdShowSucceededEvent(IronSourceAdInfo adInfo)
-        {
-        }
-
-        void InterstitialOnAdShowFailedEvent(IronSourceError ironSourceError, IronSourceAdInfo adInfo)
+        
+        void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
             Common.CallActionAndClean(ref failedToDisplayCallback);
-            OnFailedToDisplayAdEvent?.Invoke(ironSourceError.ToString());
+            OnFailedToDisplayAdEvent?.Invoke(adError.ErrorMessage);
         }
 
-        void InterstitialOnAdClosedEvent(IronSourceAdInfo adInfo)
+        void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = false;
             Common.CallActionAndClean(ref completedCallback);
