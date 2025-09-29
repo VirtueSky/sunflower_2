@@ -2,7 +2,7 @@
   "name": "com.wolf-org.sunflower2",
   "displayName": "Sunflower2",
   "description": "Core singleton for building Unity games ",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "unity": "2022.3",
   "category": "virtuesky",
   "license": "MIT",
