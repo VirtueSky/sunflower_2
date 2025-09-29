@@ -8,7 +8,13 @@ namespace VirtueSky.ControlPanel.Editor
     {
         private StatePanelControl statePanelControl;
         private Vector2 scrollButton = Vector2.zero;
-
+        private const string keySaveStatePanelControl = "Window_StatePanelControl";
+        private static StatePanelControl StatePanelControl
+        {
+            get => (StatePanelControl)EditorPrefs.GetInt(keySaveStatePanelControl, (int)StatePanelControl.About);
+            set => EditorPrefs.SetInt(keySaveStatePanelControl, (int)value);
+        }
+        
         [MenuItem("Sunflower2/Magic Panel &1", false, priority = 1)]
         public static void ShowPanelControlWindow()
         {
@@ -26,7 +32,7 @@ namespace VirtueSky.ControlPanel.Editor
 
         private void OnEnable()
         {
-            statePanelControl = StatePanelControl.About;
+            statePanelControl = StatePanelControl;
             CPAdvertisingDrawer.OnEnable();
             CPIapDrawer.OnEnable();
             CPFolderIconDrawer.OnEnable();
@@ -159,6 +165,7 @@ namespace VirtueSky.ControlPanel.Editor
             if (clicked && statePanelControl != _statePanelControlTab)
             {
                 statePanelControl = _statePanelControlTab;
+                StatePanelControl = statePanelControl;
             }
 
             GUILayout.EndHorizontal();
@@ -168,23 +175,23 @@ namespace VirtueSky.ControlPanel.Editor
 
     public enum StatePanelControl
     {
-        Advertising,
-        InAppPurchase,
-        AssetsFinder,
-        Audio,
-        Firebase,
-        Adjust,
-        AppsFlyer,
-        LevelEditor,
-        ScriptDefineSymbols,
-        RegisterPackage,
-        Hierarchy,
-        FolderIcon,
-        GameService,
-        Notification,
-        Extensions,
-        Localization,
-        InAppReview,
-        About,
+        Advertising = 0,
+        InAppPurchase = 1,
+        AssetsFinder = 2,
+        Audio = 3,
+        Firebase = 4,
+        Adjust = 5,
+        AppsFlyer = 6,
+        LevelEditor = 7,
+        ScriptDefineSymbols = 8,
+        RegisterPackage = 9,
+        Hierarchy = 10,
+        FolderIcon = 11,
+        GameService = 12,
+        Notification = 13,
+        Extensions = 14,
+        Localization = 15,
+        InAppReview = 16,
+        About = 17,
     }
 }
