@@ -34,8 +34,7 @@ namespace VirtueSky.Ads
             var configBuilder = new LevelPlayInterstitialAd.Config.Builder();
             var config = configBuilder.Build();
             interstitialAd = new LevelPlayInterstitialAd(Id, config);
-           interstitialAd.LoadAd();
-            OnAdLoaded();
+            interstitialAd.LoadAd();
 #endif
         }
 
@@ -79,6 +78,8 @@ namespace VirtueSky.Ads
 
         void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
+            Common.CallActionAndClean(ref loadedCallback);
+            OnLoadAdEvent?.Invoke();
         }
 
         void InterstitialOnAdLoadFailed(LevelPlayAdError ironSourceError)
@@ -113,12 +114,7 @@ namespace VirtueSky.Ads
             OnClosedAdEvent?.Invoke();
             Load();
         }
-
-        private void OnAdLoaded()
-        {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
-        }
+       
 
         #endregion
 
