@@ -77,24 +77,63 @@ namespace VirtueSky.Iap
             var iapDataProducts = IapSettings.IapDataProducts;
             for (int i = 0; i < iapDataProducts.Length; i++)
             {
-                var itemName = iapDataProducts[i].Id.Split('.').Last();
-                str += $"// {itemName.ToUpper()}";
-                str += $"\n\t\tpublic const string ID_{itemName.ToUpper()} = \"{iapDataProducts[i].Id}\";";
+                var androidItemName = !string.IsNullOrEmpty(iapDataProducts[i].androidId) 
+                    ? iapDataProducts[i].androidId.Split('.').Last() 
+                    : "";
+                var iosItemName = !string.IsNullOrEmpty(iapDataProducts[i].iOSId) 
+                    ? iapDataProducts[i].iOSId.Split('.').Last() 
+                    : "";
 
-                str +=
-                    $"\n\t\tpublic static IapDataProduct Purchase{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName)}() => IapManager.PurchaseProduct(IapSettings.IapDataProducts[{i}]);";
-
-                str +=
-                    $"\n\t\tpublic static bool IsPurchased{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName)}() => IapManager.IsPurchasedProduct(IapSettings.IapDataProducts[{i}]);";
-
-                str +=
-                    $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
-
-                str += $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName)}() => IapSettings.IapDataProducts[{i}].price;";
-                if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
+                // Android Section
+                if (!string.IsNullOrEmpty(iapDataProducts[i].androidId))
                 {
+                    str += "#if UNITY_ANDROID\n";
+                    str += $"\t\t// {androidItemName.ToUpper()} - ANDROID";
+                    str += $"\n\t\tpublic const string ID_{androidItemName.ToUpper()} = \"{iapDataProducts[i].androidId}\";";
+
                     str +=
-                        $"\n\t\tpublic static UnityEngine.Purchasing.SubscriptionInfo GetSubscriptionInfo{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName)}() => IapManager.GetSubscriptionInfo(IapSettings.IapDataProducts[{i}]);";
+                        $"\n\t\tpublic static IapDataProduct Purchase{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.PurchaseProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str +=
+                        $"\n\t\tpublic static bool IsPurchased{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.IsPurchasedProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str +=
+                        $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str += $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapSettings.IapDataProducts[{i}].price;";
+                    if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
+                    {
+                        str +=
+                            $"\n\t\tpublic static UnityEngine.Purchasing.SubscriptionInfo GetSubscriptionInfo{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.GetSubscriptionInfo(IapSettings.IapDataProducts[{i}]);";
+                    }
+
+                    str += "\n#endif\n";
+                }
+
+                // iOS Section
+                if (!string.IsNullOrEmpty(iapDataProducts[i].iOSId))
+                {
+                    str += "#if UNITY_IOS\n";
+                    str += $"\t\t// {iosItemName.ToUpper()} - iOS";
+                    str += $"\n\t\tpublic const string ID_{iosItemName.ToUpper()} = \"{iapDataProducts[i].iOSId}\";";
+
+                    str +=
+                        $"\n\t\tpublic static IapDataProduct Purchase{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.PurchaseProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str +=
+                        $"\n\t\tpublic static bool IsPurchased{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.IsPurchasedProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str +=
+                        $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
+
+                    str += $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapSettings.IapDataProducts[{i}].price;";
+                    if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
+                    {
+                        str +=
+                            $"\n\t\tpublic static UnityEngine.Purchasing.SubscriptionInfo GetSubscriptionInfo{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.GetSubscriptionInfo(IapSettings.IapDataProducts[{i}]);";
+                    }
+
+                    str += "\n#endif\n";
                 }
 
                 str += "\n";

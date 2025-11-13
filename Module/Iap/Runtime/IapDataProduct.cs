@@ -6,11 +6,13 @@ namespace VirtueSky.Iap
     [Serializable]
     public class IapDataProduct
     {
-#if UNITY_ANDROID
+//#if UNITY_ANDROID
         public string androidId;
-#elif UNITY_IOS
+
+//#elif UNITY_IOS
         public string iOSId;
-#endif
+
+//#endif
         public IapProductType iapProductType;
 
         [Tooltip("Config price for UI setup or tracking")]

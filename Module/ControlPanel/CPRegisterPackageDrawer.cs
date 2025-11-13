@@ -72,8 +72,8 @@ namespace VirtueSky.ControlPanel.Editor
                 ConstantPackage.PackageNameGGPlayCommon, ConstantPackage.MaxVersionGGPlayCommon);
             CPUtility.DrawButtonInstallPackage("Install Newtonsoft.Json", "Remove Newtonsoft.Json",
                 ConstantPackage.PackageNameNewtonsoftJson, ConstantPackage.MaxVersionNewtonsoftJson);
-            CPUtility.DrawButtonInstallPackage("Install PlayFab", "Remove PlayFab", ConstantPackage.PackageNamePlayFab,
-                ConstantPackage.MaxVersionPlayFab);
+            // CPUtility.DrawButtonInstallPackage("Install PlayFab", "Remove PlayFab", ConstantPackage.PackageNamePlayFab,
+            //     ConstantPackage.MaxVersionPlayFab);
             CPUtility.DrawButtonInstallPackage("Install Coffee UI Effect", "Remove Coffee UI Effect",
                 ConstantPackage.PackageNameCoffeeUIEffect, ConstantPackage.MaxVersionCoffeeUIEffect);
             CPUtility.DrawButtonInstallPackage("Install Coffee UI Particle", "Remove Coffee UI Particle",
