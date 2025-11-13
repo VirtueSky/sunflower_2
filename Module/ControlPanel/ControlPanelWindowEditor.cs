@@ -9,12 +9,13 @@ namespace VirtueSky.ControlPanel.Editor
         private StatePanelControl statePanelControl;
         private Vector2 scrollButton = Vector2.zero;
         private const string keySaveStatePanelControl = "Window_StatePanelControl";
+
         private static StatePanelControl StatePanelControl
         {
             get => (StatePanelControl)EditorPrefs.GetInt(keySaveStatePanelControl, (int)StatePanelControl.About);
             set => EditorPrefs.SetInt(keySaveStatePanelControl, (int)value);
         }
-        
+
         [MenuItem("Sunflower2/Magic Panel &1", false, priority = 1)]
         public static void ShowPanelControlWindow()
         {
@@ -107,7 +108,7 @@ namespace VirtueSky.ControlPanel.Editor
                     CPAssetFinderDrawer.OnDrawAssetUsageDetector();
                     break;
                 case StatePanelControl.Audio:
-                    CPAudioDrawer.OnDrawAudio(position);
+                    CPAudioDrawer.OnDrawAudio(position, this);
                     break;
                 case StatePanelControl.LevelEditor:
                     CPLevelEditorDrawer.OnDrawLevelEditor(position);
