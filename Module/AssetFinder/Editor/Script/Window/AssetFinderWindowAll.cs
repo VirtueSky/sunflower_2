@@ -12,7 +12,7 @@ namespace VirtueSky.AssetFinder.Editor
     {
         [SerializeField] internal PanelSettings settings = new PanelSettings();
 
-        [MenuItem("Sunflower/Asset Finder/Show Window %#K")]
+        [MenuItem("Sunflower2/Asset Finder/Show Window %#K")]
         internal static void ShowWindow()
         {
             var _window = CreateInstance<AssetFinderWindowAll>();
