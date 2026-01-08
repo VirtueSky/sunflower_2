@@ -2,7 +2,7 @@
 {
     public class ConstantPackage
     {
-        public const string VersionUnityCommon = "1.6.7";
+        public const string VersionUnityCommon = "1.6.8";
         public const string PackageNameInAppPurchase = "com.unity.purchasing";
         public const string MaxVersionInAppPurchase = "5.0.2";
         public const string PackageNameNewtonsoftJson = "com.unity.nuget.newtonsoft-json";
@@ -88,18 +88,18 @@
         public const string PackageNameAppFlyer = "appsflyer-unity-plugin";
 
         public const string MaxVersionAppFlyer =
-            "https://github.com/AppsFlyerSDK/appsflyer-unity-plugin.git?path=Assets/AppsFlyer#6.17.72";
+            "https://github.com/AppsFlyerSDK/appsflyer-unity-plugin.git?path=Assets/AppsFlyer#6.17.81";
 
 
         public const string PackageNameCoffeeUIEffect = "com.coffee.ui-effect";
 
         public const string MaxVersionCoffeeUIEffect =
-            "https://github.com/mob-sakai/UIEffect.git?path=Packages/src#5.10.5";
+            "https://github.com/mob-sakai/UIEffect.git?path=Packages/src#5.10.7";
 
         public const string PackageNameCoffeeUIParticle = "com.coffee.ui-particle";
 
         public const string MaxVersionCoffeeUIParticle =
-            "https://github.com/mob-sakai/ParticleEffectForUGUI.git#4.11.3";
+            "https://github.com/mob-sakai/ParticleEffectForUGUI.git#4.11.4";
 
         public const string PackageNameAppleSignIn = "com.lupidan.apple-signin-unity";
 
