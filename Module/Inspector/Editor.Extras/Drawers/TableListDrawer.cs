@@ -10,6 +10,12 @@ using UnityEditor.IMGUI.Controls;
 using UnityEditorInternal;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using TreeView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+#endif
+
 [assembly: RegisterTriAttributeDrawer(typeof(TableListDrawer), TriDrawerOrder.Drawer)]
 
 namespace VirtueSky.Inspector.Drawers
@@ -183,6 +189,7 @@ namespace VirtueSky.Inspector.Drawers
             private readonly TriElement _cellElementContainer;
             private readonly ReorderableList _listGui;
             private readonly TableListPropertyOverrideContext _propertyOverrideContext;
+            private readonly bool _showAlternatingBackground;
 
             private bool _wasRendered;
 
@@ -191,9 +198,12 @@ namespace VirtueSky.Inspector.Drawers
             public TableMultiColumnTreeView(TriProperty property, TriElement container, ReorderableList listGui)
                 : base(new TreeViewState(), new TableColumnHeader())
             {
+                property.TryGetAttribute(out ListDrawerSettingsAttribute listSettings);
+
                 _property = property;
                 _cellElementContainer = container;
                 _listGui = listGui;
+                _showAlternatingBackground = listSettings?.ShowAlternatingBackground ?? true;
                 _propertyOverrideContext = new TableListPropertyOverrideContext(property);
 
                 showAlternatingRowBackgrounds = true;
@@ -301,6 +311,11 @@ namespace VirtueSky.Inspector.Drawers
                 {
                     base.RowGUI(args);
                     return;
+                }
+
+                if (_showAlternatingBackground && args.row % 2 != 0)
+                {
+                    EditorGUI.DrawRect(args.rowRect, new Color(0.1f, 0.1f, 0.1f, 0.15f));
                 }
 
                 var rowElement = (TableRowElement) _cellElementContainer.GetChild(args.row);

@@ -106,7 +106,7 @@ namespace PrimeTween {
         [NotNull]
         internal static string Get(long id) {
             Assert.IsTrue(id < idToHash.Count);
-            // todo limit the max number of stack traces or wrap them around max value
+            // p1 todo limit the max number of stack traces or wrap them around max value
             bool isSuccess = hashToTraces.TryGetValue(idToHash[(int)id], out var traces);
             Assert.IsTrue(isSuccess);
             Assert.IsNotNull(traces);
@@ -127,10 +127,6 @@ namespace PrimeTween {
                     }
                 }
             }));
-        }
-
-        internal static void logDebugInfo() {
-            Debug.Log($"idToHash.Count: {idToHash.Count}, hashToTraces.Count: {hashToTraces.Count}");
         }
     }
 }

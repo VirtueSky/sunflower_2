@@ -3,16 +3,17 @@ using UnityEngine;
 
 namespace PrimeTween {
     internal static class Assert {
-        internal static void LogError(string msg, long id, [CanBeNull] Object context = null) {
-            Debug.LogError(TryAddStackTrace(msg, id), context);
+        internal static void LogErrorWithStackTrace(string msg, long id, [CanBeNull] object context) {
+            Debug.LogError(TryAddStackTrace(msg, id), context as Object);
         }
 
-        internal static void LogWarning(string msg, long id, [CanBeNull] Object context = null) {
-            Debug.LogWarning(TryAddStackTrace(msg, id), context);
+        internal static void LogWarningWithStackTrace(string msg, long id, [CanBeNull] object context) {
+            Debug.LogWarning(TryAddStackTrace(msg, id), context as Object);
         }
 
         [CanBeNull, PublicAPI]
         static string TryAddStackTrace([CanBeNull] string msg, long tweenId) {
+            // msg = $"[{Time.frameCount}] {msg}";
             #if UNITY_ASSERTIONS
                 #if PRIME_TWEEN_SAFETY_CHECKS
                 if (tweenId == 0) {
@@ -29,9 +30,10 @@ namespace PrimeTween {
 
         #if UNITY_ASSERTIONS && !PRIME_TWEEN_DISABLE_ASSERTIONS
         [ContractAnnotation("condition:false => halt")]
-        internal static void IsTrue(bool condition, long? tweenId = null, string msg = null) => UnityEngine.Assertions.Assert.IsTrue(condition, AddStackTrace(!condition, msg, tweenId));
+        internal static void IsTrue(bool condition) => UnityEngine.Assertions.Assert.IsTrue(condition);
+        internal static void IsTrue(bool condition, long? tweenId, string msg = null) => UnityEngine.Assertions.Assert.IsTrue(condition, AddStackTrace(!condition, msg, tweenId));
         internal static void AreEqual<T>(T expected, T actual, string msg = null) => UnityEngine.Assertions.Assert.AreEqual(expected, actual, msg);
-        internal static void AreNotEqual<T>(T expected, T actual, string msg = null) => UnityEngine.Assertions.Assert.AreNotEqual(expected, actual, msg);
+        internal static void AreNotEqual<T>(T expected, T actual) => UnityEngine.Assertions.Assert.AreNotEqual(expected, actual);
         internal static void IsFalse(bool condition, string msg = null) => UnityEngine.Assertions.Assert.IsFalse(condition, msg);
         [ContractAnnotation("value:null => halt")]
         internal static void IsNotNull<T>(T value, string msg = null) where T : class => UnityEngine.Assertions.Assert.IsNotNull(value, msg);

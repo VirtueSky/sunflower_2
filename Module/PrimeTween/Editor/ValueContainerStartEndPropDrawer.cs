@@ -1,11 +1,15 @@
 using System;
+using System.Runtime.CompilerServices;
 using PrimeTween;
 using UnityEditor;
 using UnityEngine;
 using Mathf = UnityEngine.Mathf;
+using TweenType = PrimeTween.TweenAnimation.TweenType;
 
 [CustomPropertyDrawer(typeof(ValueContainerStartEnd))]
 public class ValueContainerStartEndPropDrawer : PropertyDrawer {
+    static readonly GUIContent _startFromCurrentToggleGuiContent = new GUIContent();
+
     public override float GetPropertyHeight(SerializedProperty prop, GUIContent label) {
         prop.Next(true);
         var tweenType = (TweenType)prop.enumValueIndex;
@@ -28,6 +32,7 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
         return EditorGUI.GetPropertyHeight(ToSerializedPropType(), label);
         SerializedPropertyType ToSerializedPropType() {
             switch (propType) {
+                case PropType.Double:
                 case PropType.Float:
                     return SerializedPropertyType.Float;
                 case PropType.Color:
@@ -43,7 +48,6 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
                     return SerializedPropertyType.Rect;
                 case PropType.Int:
                     return SerializedPropertyType.Integer;
-                case PropType.Double: // todo support double
                 case PropType.None:
                 default:
                     throw new Exception();
@@ -58,29 +62,35 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
         Draw(ref pos, prop, tweenType);
     }
 
-    internal static void Draw(ref Rect pos, SerializedProperty prop, TweenType tweenType) {
+    internal static void Draw(ref Rect pos, SerializedProperty prop, TweenType tweenType, bool drawStartFromCurrentToggle = true, bool invert = true) {
         var propType = Utils.TweenTypeToTweenData(tweenType).Item1;
         Assert.AreNotEqual(PropType.None, propType);
         const float toggleWidth = 18f;
         EditorGUIUtility.labelWidth -= toggleWidth;
-        var togglePos = new Rect(pos.x + 2, pos.y, toggleWidth - 2, EditorGUIUtility.singleLineHeight);
-        var guiContent = EditorGUI.BeginProperty(togglePos, new GUIContent(), prop); // todo is it possible to display tooltip? tooltip is only displayed over the label, but I need to display it over the ToggleLeft
-        EditorGUI.BeginChangeCheck();
-        bool newStartFromCurrent = !EditorGUI.ToggleLeft(togglePos, guiContent, !prop.boolValue);
-        if (EditorGUI.EndChangeCheck()) {
-            prop.boolValue = newStartFromCurrent;
+
+        // startFromCurrent toggle
+        bool newStartFromCurrent = false;
+        if (drawStartFromCurrentToggle)
+        {
+            var togglePos = new Rect(pos.x + 2, pos.y, toggleWidth - 2, EditorGUIUtility.singleLineHeight);
+            var guiContent = EditorGUI.BeginProperty(togglePos, _startFromCurrentToggleGuiContent, prop); // p2 todo is it possible to display tooltip? tooltip is only displayed over the label, but I need to display it over the ToggleLeft
+            EditorGUI.BeginChangeCheck();
+            if (invert) {
+                newStartFromCurrent = !EditorGUI.ToggleLeft(togglePos, guiContent, !prop.boolValue);
+            } else {
+                newStartFromCurrent = EditorGUI.ToggleLeft(togglePos, guiContent, prop.boolValue);
+            }
+            if (EditorGUI.EndChangeCheck()) {
+                prop.boolValue = newStartFromCurrent;
+            }
+            EditorGUI.EndProperty();
         }
-        EditorGUI.EndProperty();
 
         pos.x += toggleWidth;
         pos.width -= toggleWidth;
 
-        prop.Next(false);
-        if (newStartFromCurrent) {
-            pos.height = EditorGUIUtility.singleLineHeight;
-            EditorGUI.LabelField(pos, new GUIContent(prop.displayName, prop.tooltip));
-            prop.Next(false);
-        } else {
+        prop.NextVisible(nameof(ValueContainerStartEnd.startValue));
+        using (new EditorGUI.DisabledScope(newStartFromCurrent ^ !invert)) {
             DrawValueContainer(ref pos, prop, propType);
         }
 
@@ -95,7 +105,7 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
     static void DrawValueContainer(ref Rect pos, SerializedProperty prop, PropType propType) {
         var root = prop.Copy();
         prop.Next(true);
-        ValueContainer valueContainer = default;
+        TweenAnimation.ValueWrapper valueContainer = default;
         for (int i = 0; i < 4; i++) {
             valueContainer[i] = prop.floatValue;
             prop.Next(false);
@@ -104,26 +114,27 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
         pos.height = GetSingleItemHeight(propType, guiContent);
         guiContent = EditorGUI.BeginProperty(pos, guiContent, root);
         EditorGUI.BeginChangeCheck();
-        ValueContainer newVal = DrawField(pos);
-        ValueContainer DrawField(Rect position) {
+        TweenAnimation.ValueWrapper newVal = DrawField(pos);
+        TweenAnimation.ValueWrapper DrawField(Rect position) {
             switch (propType) {
                 case PropType.Float:
-                    return EditorGUI.FloatField(position, guiContent, valueContainer.FloatVal).ToContainer();
+                    return EditorGUI.FloatField(position, guiContent, valueContainer.single).ToContainer();
                 case PropType.Color:
-                    return EditorGUI.ColorField(position, guiContent, valueContainer.ColorVal).ToContainer();
+                    return EditorGUI.ColorField(position, guiContent, valueContainer.color).ToContainer();
                 case PropType.Vector2:
-                    return EditorGUI.Vector2Field(position, guiContent, valueContainer.Vector2Val).ToContainer();
+                    return EditorGUI.Vector2Field(position, guiContent, valueContainer.vector2).ToContainer();
                 case PropType.Vector3:
-                    return EditorGUI.Vector3Field(position, guiContent, valueContainer.Vector3Val).ToContainer();
+                    return EditorGUI.Vector3Field(position, guiContent, valueContainer.vector3).ToContainer();
                 case PropType.Vector4:
-                case PropType.Quaternion: // todo don't draw quaternion
-                    return EditorGUI.Vector4Field(position, guiContent, valueContainer.Vector4Val).ToContainer();
+                case PropType.Quaternion: // p2 todo don't draw quaternion. Or draw it as Vector3 euler angles?
+                    return EditorGUI.Vector4Field(position, guiContent, valueContainer.vector4).ToContainer();
                 case PropType.Rect:
-                    return EditorGUI.RectField(position, guiContent, valueContainer.RectVal).ToContainer();
+                    return EditorGUI.RectField(position, guiContent, valueContainer.rect).ToContainer();
                 case PropType.Int:
-                    var newIntVal = EditorGUI.IntField(position, guiContent, Mathf.RoundToInt(valueContainer.FloatVal));
+                    var newIntVal = EditorGUI.IntField(position, guiContent, Mathf.RoundToInt(valueContainer.single));
                     return ((float)newIntVal).ToContainer();
-                case PropType.Double: // todo support double with EditorGUI.DoubleField()?
+                case PropType.Double: // should be used for display only. Unity serializes floats to text, not binary,so it's not possible to serialze two floats as one double
+                    return EditorGUI.DoubleField(position, guiContent, valueContainer.DoubleVal).ToContainer();
                 case PropType.None:
                 default:
                     throw new Exception();
@@ -140,5 +151,15 @@ public class ValueContainerStartEndPropDrawer : PropertyDrawer {
             }
         }
         EditorGUI.EndProperty();
+    }
+}
+
+internal static class SerializedPropertyExtensions {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void NextVisible(this SerializedProperty prop, string expectedName, bool enterChildren = false) {
+        prop.NextVisible(enterChildren);
+        #if PRIME_TWEEN_SAFETY_CHECKS
+        Assert.AreEqual(expectedName, prop.name);
+        #endif
     }
 }

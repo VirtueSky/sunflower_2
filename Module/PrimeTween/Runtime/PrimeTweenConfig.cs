@@ -24,7 +24,7 @@ namespace PrimeTween {
         /// </example>
         public static void SetTweensCapacity(int capacity) {
             Assert.IsTrue(capacity >= 0);
-            if (PrimeTweenManager.HasInstance) {
+            if (PrimeTweenManager.HasInstance && !PrimeTweenManager.Instance.isDestroyed) {
                 PrimeTweenManager.Instance.SetTweensCapacity(capacity);
             } else {
                 PrimeTweenManager.customInitialCapacity = capacity;
@@ -54,6 +54,7 @@ namespace PrimeTween {
         }
         
         public static bool warnTweenOnDisabledTarget {
+            internal get => Instance.warnTweenOnDisabledTarget;
             set => Instance.warnTweenOnDisabledTarget = value;
         }
         

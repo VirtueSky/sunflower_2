@@ -6,14 +6,14 @@ namespace PrimeTween {
         internal static float CalcDistance(Vector3 v1, Vector3 v2) => Vector3.Distance(v1, v2);
         internal static float CalcDistance(Quaternion q1, Quaternion q2) => Quaternion.Angle(q1, q2);
 
-        internal static float calcDelta(this float val, ValueContainer prevVal) => val - prevVal.FloatVal;
-        internal static double calcDelta(this double val, ValueContainer prevVal) => val - prevVal.DoubleVal;
-        internal static Color calcDelta(this Color val, ValueContainer prevVal) => val - prevVal.ColorVal;
-        internal static Vector2 calcDelta(this Vector2 val, ValueContainer prevVal) => val - prevVal.Vector2Val;
-        internal static Vector3 calcDelta(this Vector3 val, ValueContainer prevVal) => val - prevVal.Vector3Val;
-        internal static Vector4 calcDelta(this Vector4 val, ValueContainer prevVal) => val - prevVal.Vector4Val;
-        internal static Quaternion calcDelta(this Quaternion val, ValueContainer prevVal) => Quaternion.Inverse(prevVal.QuaternionVal) * val;
-        internal static Rect calcDelta(this Rect val, ValueContainer prevVal) => new Rect(
+        internal static float calcDelta(this float val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.single;
+        internal static double calcDelta(this double val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.DoubleVal;
+        internal static Color calcDelta(this Color val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.color;
+        internal static Vector2 calcDelta(this Vector2 val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.vector2;
+        internal static Vector3 calcDelta(this Vector3 val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.vector3;
+        internal static Vector4 calcDelta(this Vector4 val, TweenAnimation.ValueWrapper prevVal) => val - prevVal.vector4;
+        internal static Quaternion calcDelta(this Quaternion val, TweenAnimation.ValueWrapper prevVal) => Quaternion.Inverse(prevVal.quaternion) * val;
+        internal static Rect calcDelta(this Rect val, TweenAnimation.ValueWrapper prevVal) => new Rect(
             val.x - prevVal.x,
             val.y - prevVal.y,
             val.width - prevVal.z,
@@ -24,14 +24,14 @@ namespace PrimeTween {
             return c;
         }
 
-        internal static ValueContainer ToContainer(this float f) => new ValueContainer { FloatVal = f };
-        internal static ValueContainer ToContainer(this Vector2 v) => new ValueContainer { Vector2Val = v };
-        internal static ValueContainer ToContainer(this Vector3 v) => new ValueContainer { Vector3Val = v };
-        internal static ValueContainer ToContainer(this Vector4 v) => new ValueContainer { Vector4Val = v };
-        internal static ValueContainer ToContainer(this Color c) => new ValueContainer { ColorVal = c };
-        internal static ValueContainer ToContainer(this Quaternion q) => new ValueContainer { QuaternionVal = q };
-        internal static ValueContainer ToContainer(this Rect r) => new ValueContainer { RectVal = r };
-        internal static ValueContainer ToContainer(this double d) => new ValueContainer { DoubleVal = d };
+        internal static TweenAnimation.ValueWrapper ToContainer(this float f) => new TweenAnimation.ValueWrapper { single = f };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Vector2 v) => new TweenAnimation.ValueWrapper { vector2 = v };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Vector3 v) => new TweenAnimation.ValueWrapper { vector3 = v };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Vector4 v) => new TweenAnimation.ValueWrapper { vector4 = v };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Color c) => new TweenAnimation.ValueWrapper { color = c };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Quaternion q) => new TweenAnimation.ValueWrapper { quaternion = q };
+        internal static TweenAnimation.ValueWrapper ToContainer(this Rect r) => new TweenAnimation.ValueWrapper { rect = r };
+        internal static TweenAnimation.ValueWrapper ToContainer(this double d) => new TweenAnimation.ValueWrapper { DoubleVal = d };
 
         internal static Vector2 WithComponent(this Vector2 v, int index, float val) {
             v[index] = val;

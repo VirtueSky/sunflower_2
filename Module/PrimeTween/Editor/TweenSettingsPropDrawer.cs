@@ -3,15 +3,14 @@ using PrimeTween;
 using UnityEditor;
 using UnityEngine;
 using Mathf = UnityEngine.Mathf;
-using static UnityEditor.EditorGUI;
-using static UnityEditor.EditorGUIUtility;
 
-/// todo clear the custom ease curve when ease != Ease.Custom
 [CustomPropertyDrawer(typeof(TweenSettings))]
 internal class TweenSettingsPropDrawer : PropertyDrawer {
+    static GUIContent updateTypeGuiContent;
+
     public override float GetPropertyHeight([NotNull] SerializedProperty property, GUIContent label) {
         if (!property.isExpanded) {
-            return singleLineHeight;
+            return EditorGUIUtility.singleLineHeight;
         }
         return getPropHeight(property);
     }
@@ -33,33 +32,33 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
         count++; // endDelay
         count++; // useUnscaledTime
         count++; // useFixedUpdate
-        var result = singleLineHeight * count + standardVerticalSpacing * (count - 1);
-        result += standardVerticalSpacing * 2; // extra spacing
+        var result = EditorGUIUtility.singleLineHeight * count + EditorGUIUtility.standardVerticalSpacing * (count - 1);
+        result += EditorGUIUtility.standardVerticalSpacing * 4; // extra spacing
         return result;
     }
 
     public override void OnGUI(Rect position, [NotNull] SerializedProperty property, GUIContent label) {
-        var rect = new Rect(position) { height = singleLineHeight };
-        PropertyField(rect, property, label);
+        var rect = new Rect(position) { height = EditorGUIUtility.singleLineHeight };
+        EditorGUI.PropertyField(rect, property, label);
         if (!property.isExpanded) {
             return;
         }
         moveToNextLine(ref rect);
-        indentLevel++;
+        EditorGUI.indentLevel++;
         { // duration
             property.NextVisible(true);
             DrawDuration(rect, property);
             moveToNextLine(ref rect);
         }
         drawEaseTillEnd(property, ref rect);
-        indentLevel--;
+        EditorGUI.indentLevel--;
     }
 
-    internal static void DrawDuration(Rect rect, [NotNull] SerializedProperty property) {
+    internal static void DrawDuration(Rect rect, [NotNull] SerializedProperty property) { // p2 todo allow duration to be 0f in Inspector? need to change how defaultValue behaves below
         if (GUI.enabled) {
             ClampProperty(property, 1f);
         }
-        PropertyField(rect, property);
+        EditorGUI.PropertyField(rect, property);
     }
 
     internal static void ClampProperty(SerializedProperty prop, float defaultValue, float min = 0.01f, float max = float.MaxValue) {
@@ -74,27 +73,34 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
     internal static void DrawEaseAndCycles(SerializedProperty property, ref Rect rect, bool addSpace = true, bool draw = true, bool allowInfiniteCycles = true) {
         { // ease
             property.NextVisible(true);
-            if (draw) PropertyField(rect, property);
+            if (draw)
+                EditorGUI.PropertyField(rect, property);
             moveToNextLine(ref rect);
             // customEase
             bool isCustom = property.intValue == (int) Ease.Custom;
             property.NextVisible(true);
             if (isCustom) {
-                if (draw) PropertyField(rect, property);
+                if (draw)
+                    EditorGUI.PropertyField(rect, property);
                 moveToNextLine(ref rect);
+            } else {
+                property.animationCurveValue = new AnimationCurve();
             }
         }
         if (addSpace) {
-            rect.y += standardVerticalSpacing * 2;
+            rect.y += EditorGUIUtility.standardVerticalSpacing * 4;
         }
         { // cycles
-            var cycles = drawCycles(rect, property, draw, allowInfiniteCycles);
+            property.NextVisible(false);
+            Assert.AreEqual(nameof(TweenSettings.cycles), property.name);
+            var cycles = DrawCycles(rect, property, draw, allowInfiniteCycles);
             moveToNextLine(ref rect);
             {
                 // cycleMode
                 property.NextVisible(true);
                 if (cycles != 0 && cycles != 1) {
-                    if (draw) PropertyField(rect, property);
+                    if (draw)
+                        EditorGUI.PropertyField(rect, property);
                     moveToNextLine(ref rect);
                 }
             }
@@ -108,13 +114,13 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
                 if (property.floatValue < 0f) {
                     property.floatValue = 0f;
                 }
-                PropertyField(rect, property);
+                EditorGUI.PropertyField(rect, property);
                 moveToNextLine(ref rect);
             }
         }
         { // useUnscaledTime
             property.NextVisible(true);
-            PropertyField(rect, property);
+            EditorGUI.PropertyField(rect, property);
             moveToNextLine(ref rect);
         }
         { // useFixedUpdate
@@ -122,6 +128,7 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
             bool useFixedUpdateObsolete = property.boolValue;
             var useFixedUpdateProp = property.Copy();
 
+            // _updateType
             property.NextVisible(false);
             var current = (_UpdateType)property.enumValueIndex;
             if (useFixedUpdateObsolete && current != _UpdateType.FixedUpdate) {
@@ -129,22 +136,24 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
                 property.enumValueIndex = (int)_UpdateType.FixedUpdate;
                 property.serializedObject.ApplyModifiedProperties();
             } else {
-                using (var propScope = new PropertyScope(rect, new GUIContent(property.displayName, property.tooltip), property)) {
-                    using (var changeCheck = new ChangeCheckScope()) {
-                        var newUpdateType = (_UpdateType)EnumPopup(rect, propScope.content, current);
-                        if (changeCheck.changed) {
-                            property.enumValueIndex = (int)newUpdateType;
-                            useFixedUpdateProp.boolValue = newUpdateType == _UpdateType.FixedUpdate;
-                        }
-                        moveToNextLine(ref rect);
-                    }
+                if (updateTypeGuiContent == null) {
+                    updateTypeGuiContent = new GUIContent(property.displayName, property.tooltip);
                 }
+                GUIContent guiContent = EditorGUI.BeginProperty(rect, updateTypeGuiContent, property);
+                EditorGUI.BeginChangeCheck();
+                var newUpdateType = (_UpdateType)EditorGUI.EnumPopup(rect, guiContent, current);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    property.enumValueIndex = (int)newUpdateType;
+                    useFixedUpdateProp.boolValue = newUpdateType == _UpdateType.FixedUpdate;
+                }
+                moveToNextLine(ref rect);
+                EditorGUI.EndProperty();
             }
         }
     }
 
-    internal static int drawCycles(Rect rect, [NotNull] SerializedProperty property, bool draw = true, bool allowInfiniteCycles = true) {
-        property.NextVisible(false);
+    internal static int ClampCycles(SerializedProperty property, bool allowInfiniteCycles = true) {
         int val = property.intValue;
         if (val == 0) {
             val = 1;
@@ -152,20 +161,26 @@ internal class TweenSettingsPropDrawer : PropertyDrawer {
             val = allowInfiniteCycles ? -1 : 1;
         }
         property.intValue = val;
-        if (draw) PropertyField(rect, property);
+        return val;
+    }
+
+    internal static int DrawCycles(Rect rect, [NotNull] SerializedProperty property, bool draw = true, bool allowInfiniteCycles = true) {
+        int val = ClampCycles(property, allowInfiniteCycles);
+        if (draw)
+            EditorGUI.PropertyField(rect, property);
         return val;
     }
 
     static void moveToNextLine(ref Rect rect) {
-        rect.y += singleLineHeight + standardVerticalSpacing;
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
     }
 }
 
 [CustomPropertyDrawer(typeof(UpdateType))]
 class UpdateTypePropDrawer : PropertyDrawer {
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => singleLineHeight;
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight;
     public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label) {
         prop.Next(true);
-        PropertyField(pos, prop, label);
+        EditorGUI.PropertyField(pos, prop, label);
     }
 }

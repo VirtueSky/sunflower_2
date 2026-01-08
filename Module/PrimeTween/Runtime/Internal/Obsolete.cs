@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel;
 using JetBrains.Annotations;
 using UnityEngine;
+using TweenType = PrimeTween.TweenAnimation.TweenType;
 
 namespace PrimeTween {
     public partial class PrimeTweenConfig {
@@ -14,18 +15,32 @@ namespace PrimeTween {
         public static bool warnDestroyedTweenHasOnComplete { set {} }
     }
 
-    static class Messages {
+    internal static class ObsoleteMessages {
         /// Obsolete on 2023-08-29
         internal const string obsoleteIsAliveMessage = "please use 'isAlive' (lower case 'i') instead.";
         /// Obsolete on 2023-08-29
         internal const string obsoleteIsPausedMessage = "please use 'isPaused' (lower case 'i') instead.";
         internal const string obsoleteTweenSetCycles = "SetCycles() was renamed to SetRemainingCycles().";
+
+        /// Obsolete on 2025-11-15
+        internal const string tweenSettingsOverloadEndValue = "Use the overload with TweenSettings<T> instead.\n\n" +
+                                                              "For example, instead of:\n" +
+                                                              "Tween.Position(transform, endValue, tweenSettings);\n\n" +
+                                                              "Use this:\n" +
+                                                              "Tween.Position(transform, new TweenSettings<Vector3>(endValue, tweenSettings));\n" +
+                                                              "Tween.Position(transform, new (endValue, tweenSettings)); // shorter syntax";
+        internal const string tweenSettingsOverloadStartEndValue = "Use the overload with TweenSettings<T> instead.\n\n" +
+                                                                   "For example, instead of:\n" +
+                                                                   "Tween.Position(transform, startValue, endValue, tweenSettings);\n\n" +
+                                                                   "Use this:\n" +
+                                                                   "Tween.Position(transform, new TweenSettings<Vector3>(startValue, endValue, tweenSettings));\n" +
+                                                                   "Tween.Position(transform, new (startValue, endValue, tweenSettings)); // shorter syntax";
     }
 
     public partial struct Tween {
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteTweenSetCycles)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteTweenSetCycles)]
         public void SetCycles(bool stopAtEndValue) => SetRemainingCycles(stopAtEndValue);
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteTweenSetCycles)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteTweenSetCycles)]
         public void SetCycles(int cycles) => SetRemainingCycles(cycles);
 
         /// Obsolete on 2023-11-24
@@ -37,10 +52,9 @@ namespace PrimeTween {
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(minMaxExpected)]
         public static int SetPausedAll(bool isPaused, [CanBeNull] object onTarget, int? numMinExpected, int? numMaxExpected = null) => SetPausedAll(isPaused, onTarget);
 
-
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteIsAliveMessage)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteIsAliveMessage)]
         public bool IsAlive => isAlive;
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteIsPausedMessage)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteIsPausedMessage)]
         public bool IsPaused => isPaused;
 
         /// Obsolete on 2023-08-30
@@ -64,11 +78,7 @@ namespace PrimeTween {
         public static Tween LocalScale([NotNull] Transform target, Vector3 startValue, Vector3 endValue, TweenSettings settings) => LocalScale(target, new TweenSettings<Vector3>(startValue, endValue, settings));
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScale([NotNull] Transform target, TweenSettings<Vector3> settings) {
-            return animate(target, ref settings, _tween => {
-                var _target = _tween.target as Transform;
-                var val = _tween.Vector3Val;
-                _target.localScale = val;
-            }, t => (t.target as Transform).localScale.ToContainer(), TweenType.Scale);
+            return animate(target, ref settings, TweenType.Scale);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
@@ -88,13 +98,8 @@ namespace PrimeTween {
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScaleX([NotNull] Transform target, Single startValue, Single endValue, TweenSettings settings) => LocalScaleX(target, new TweenSettings<float>(startValue, endValue, settings));
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
-        public static Tween LocalScaleX([NotNull] Transform target, TweenSettings<float> settings) {
-            return animate(target, ref settings, _tween => {
-                var _target = _tween.target as Transform;
-                var val = _tween.FloatVal;
-                _target.localScale = _target.localScale.WithComponent(0, val);
-            }, t => (t.target as Transform).localScale.x.ToContainer(), TweenType.ScaleX);
-        }
+        public static Tween LocalScaleX([NotNull] Transform target, TweenSettings<float> settings)
+            => animate(target, ref settings, TweenType.ScaleX);
 
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScaleY([NotNull] Transform target, Single endValue, float duration, Ease ease = Ease.Default, int cycles = 1, CycleMode cycleMode = CycleMode.Restart, float startDelay = 0, float endDelay = 0, bool useUnscaledTime = false)
@@ -113,13 +118,8 @@ namespace PrimeTween {
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScaleY([NotNull] Transform target, Single startValue, Single endValue, TweenSettings settings) => LocalScaleY(target, new TweenSettings<float>(startValue, endValue, settings));
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
-        public static Tween LocalScaleY([NotNull] Transform target, TweenSettings<float> settings) {
-            return animate(target, ref settings, _tween => {
-                var _target = _tween.target as Transform;
-                var val = _tween.FloatVal;
-                _target.localScale = _target.localScale.WithComponent(1, val);
-            }, t => (t.target as Transform).localScale.y.ToContainer(), TweenType.ScaleY);
-        }
+        public static Tween LocalScaleY([NotNull] Transform target, TweenSettings<float> settings)
+            => animate(target, ref settings, TweenType.ScaleY);
 
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScaleZ([NotNull] Transform target, Single endValue, float duration, Ease ease = Ease.Default, int cycles = 1, CycleMode cycleMode = CycleMode.Restart, float startDelay = 0, float endDelay = 0, bool useUnscaledTime = false)
@@ -138,13 +138,8 @@ namespace PrimeTween {
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScaleZ([NotNull] Transform target, Single startValue, Single endValue, TweenSettings settings) => LocalScaleZ(target, new TweenSettings<float>(startValue, endValue, settings));
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
-        public static Tween LocalScaleZ([NotNull] Transform target, TweenSettings<float> settings) {
-            return animate(target, ref settings, _tween => {
-                var _target = _tween.target as Transform;
-                var val = _tween.FloatVal;
-                _target.localScale = _target.localScale.WithComponent(2, val);
-            }, t => (t.target as Transform).localScale.z.ToContainer(), TweenType.ScaleZ);
-        }
+        public static Tween LocalScaleZ([NotNull] Transform target, TweenSettings<float> settings)
+            => animate(target, ref settings, TweenType.ScaleZ);
 
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScale([NotNull] Transform target, Single endValue, float duration, Ease ease = Ease.Default, int cycles = 1, CycleMode cycleMode = CycleMode.Restart, float startDelay = 0, float endDelay = 0, bool useUnscaledTime = false)
@@ -164,7 +159,6 @@ namespace PrimeTween {
         public static Tween LocalScale([NotNull] Transform target, Single startValue, Single endValue, TweenSettings settings) => LocalScale(target, new TweenSettings<float>(startValue, endValue, settings));
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween LocalScale([NotNull] Transform target, TweenSettings<float> uniformScaleSettings) => Scale(target, uniformScaleSettings);
-
 
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(localScaleRenamed)]
         public static Tween ShakeLocalScale([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
@@ -188,9 +182,9 @@ namespace PrimeTween {
             return this;
         }
 
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteIsAliveMessage)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteIsAliveMessage)]
         public bool IsAlive => isAlive;
-        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(Messages.obsoleteIsPausedMessage)]
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(ObsoleteMessages.obsoleteIsPausedMessage)]
         public bool IsPaused => isPaused;
 
         const string chainAndInsertCallbackMessage = "The behavior of ChainCallback() and InsertCallback() methods was fixed in version 1.2.0. " +
@@ -198,39 +192,45 @@ namespace PrimeTween {
                                                      "More info: https://github.com/KyryloKuzyk/PrimeTween/discussions/112\n\n";
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(chainAndInsertCallbackMessage)]
         public Sequence ChainCallbackObsolete([NotNull] Action callback, bool warnIfTargetDestroyed = true) {
-            if (tryManipulate()) {
+            if (TryManipulate()) {
                 InsertCallbackObsolete(duration, callback, warnIfTargetDestroyed);
             }
             return this;
         }
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(chainAndInsertCallbackMessage)]
         public Sequence InsertCallbackObsolete(float atTime, Action callback, bool warnIfTargetDestroyed = true) {
-            if (!tryManipulate()) {
+            if (!TryManipulate()) {
                 return this;
             }
-            var delay = PrimeTweenManager.delayWithoutDurationCheck(PrimeTweenManager.dummyTarget, atTime, false);
+            var delay = PrimeTweenManager.DelayWithoutDurationCheck(PrimeTweenManager.dummyTarget, atTime, false);
             Assert.IsTrue(delay.HasValue);
-            delay.Value.tween.OnComplete(callback, warnIfTargetDestroyed);
+            delay.Value.tween.managedData.OnComplete(callback, warnIfTargetDestroyed);
             return Insert(0f, delay.Value);
         }
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(chainAndInsertCallbackMessage)]
         public Sequence ChainCallbackObsolete<T>([NotNull] T target, [NotNull] Action<T> callback, bool warnIfTargetDestroyed = true) where T: class {
-            if (tryManipulate()) {
+            if (TryManipulate()) {
                 InsertCallbackObsolete(duration, target, callback, warnIfTargetDestroyed);
             }
             return this;
         }
         [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete(chainAndInsertCallbackMessage)]
         public Sequence InsertCallbackObsolete<T>(float atTime, [NotNull] T target, Action<T> callback, bool warnIfTargetDestroyed = true) where T: class {
-            if (!tryManipulate()) {
+            if (!TryManipulate()) {
                 return this;
             }
-            var delay = PrimeTweenManager.delayWithoutDurationCheck(target, atTime, false);
+            var delay = PrimeTweenManager.DelayWithoutDurationCheck(target, atTime, false);
             if (!delay.HasValue) {
                 return this;
             }
-            delay.Value.tween.OnComplete(target, callback, warnIfTargetDestroyed);
+            delay.Value.tween.managedData.OnComplete(target, callback, warnIfTargetDestroyed);
             return Insert(0f, delay.Value);
+        }
+
+        /// Obsolete on 2025-09-16
+        [EditorBrowsable(EditorBrowsableState.Never)] [Obsolete("use '" + nameof(Sequence) + "." + nameof(SequenceCycleMode) + "' instead.")]
+        public static Sequence Create(int cycles, CycleMode cycleMode, Ease sequenceEase = Ease.Linear, bool useUnscaledTime = false, UpdateType updateType = default) {
+            return Create(cycles, (SequenceCycleMode)cycleMode, sequenceEase, useUnscaledTime, updateType);
         }
     }
 }

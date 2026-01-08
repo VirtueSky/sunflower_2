@@ -2,8 +2,9 @@
 using VirtueSky.Inspector.Drawers;
 using VirtueSky.Inspector.Elements;
 using VirtueSky.Inspector.Resolvers;
+using UnityEngine;
 
-[assembly: RegisterTriAttributeDrawer(typeof(DropdownDrawer<>), TriDrawerOrder.Decorator)]
+[assembly: RegisterTriAttributeDrawer(typeof(DropdownDrawer<>), TriDrawerOrder.Decorator, ApplyOnArrayElement = true)]
 
 namespace VirtueSky.Inspector.Drawers
 {

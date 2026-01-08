@@ -11,6 +11,8 @@ using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
+using TweenType = PrimeTween.TweenAnimation.TweenType;
 
 namespace PrimeTween {
     public partial struct Tween {
@@ -33,12 +35,8 @@ namespace PrimeTween {
         public static Tween ShakeLocalPosition([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => ShakeLocalPosition(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
-        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        public static Tween ShakeLocalPosition([NotNull] Transform target, ShakeSettings settings) {
-            return shake(TweenType.ShakeLocalPosition, PropType.Vector3, target, settings, (state, shakeVal) => {
-                (state.target as Transform).localPosition = state.startValue.Vector3Val + shakeVal;
-            }, _ => (_.target as Transform).localPosition.ToContainer());
-        }
+        public static Tween ShakeLocalPosition([NotNull] Transform target, ShakeSettings settings)
+            => ShakeTransform(TweenType.ShakeLocalPosition, target, settings);
         public static Tween PunchLocalPosition([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => PunchLocalPosition(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
@@ -47,12 +45,8 @@ namespace PrimeTween {
         public static Tween ShakeLocalRotation([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => ShakeLocalRotation(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
-        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        public static Tween ShakeLocalRotation([NotNull] Transform target, ShakeSettings settings) {
-            return shake(TweenType.ShakeLocalRotation, PropType.Quaternion,  target, settings, (state, shakeVal) => {
-                (state.target as Transform).localRotation = state.startValue.QuaternionVal * Quaternion.Euler(shakeVal);
-            }, t => (t.target as Transform).localRotation.ToContainer());
-        }
+        public static Tween ShakeLocalRotation([NotNull] Transform target, ShakeSettings settings)
+            => ShakeTransform(TweenType.ShakeLocalRotation,  target, settings);
         public static Tween PunchLocalRotation([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => PunchLocalRotation(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
@@ -61,96 +55,84 @@ namespace PrimeTween {
         public static Tween ShakeScale([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => ShakeScale(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
-        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        public static Tween ShakeScale([NotNull] Transform target, ShakeSettings settings) {
-            return shake(TweenType.ShakeScale, PropType.Vector3, target, settings, (state, shakeVal) => {
-                (state.target as Transform).localScale = state.startValue.Vector3Val + shakeVal;
-            }, t => (t.target as Transform).localScale.ToContainer());
-        }
+        public static Tween ShakeScale([NotNull] Transform target, ShakeSettings settings)
+            => ShakeTransform(TweenType.ShakeScale, target, settings);
         public static Tween PunchScale([NotNull] Transform target, Vector3 strength, float duration, float frequency = ShakeSettings.defaultFrequency, bool enableFalloff = true, Ease easeBetweenShakes = Ease.Default, float asymmetryFactor = 0f, int cycles = 1,
             float startDelay = 0, float endDelay = 0, bool useUnscaledTime = PrimeTweenConfig.defaultUseUnscaledTimeForShakes)
             => PunchScale(target, new ShakeSettings(strength, duration, frequency, enableFalloff, easeBetweenShakes, asymmetryFactor, cycles, startDelay, endDelay, useUnscaledTime));
         public static Tween PunchScale([NotNull] Transform target, ShakeSettings settings) => ShakeScale(target, settings.WithPunch());
 
-        static Tween shake(TweenType tweenType, PropType propType, [NotNull] Transform target, ShakeSettings settings, [NotNull] Action<ReusableTween, Vector3> onValueChange, [NotNull] Func<ReusableTween, ValueContainer> getter) {
-            Assert.IsNotNull(onValueChange);
-            Assert.IsNotNull(getter);
-            var tween = PrimeTweenManager.fetchTween();
-            prepareShakeData(settings, tween);
-            tween.customOnValueChange = onValueChange;
+        static Tween ShakeTransform(TweenType tweenType, [NotNull] Transform target, ShakeSettings settings) {
+            if (PrimeTweenManager.Instance.isDestroyed) {
+                return default;
+            }
+            var tween = PrimeTweenManager.FetchTween(settings._updateType);
+            ref var rt = ref tween.managedData;
+            ref var d = ref tween.data;
+
+            prepareShakeData(settings, ref rt, ref d, target);
             var tweenSettings = settings.tweenSettings;
-            tween.Setup(target, ref tweenSettings, state => {
-                var _onValueChange = state.customOnValueChange as Action<ReusableTween, Vector3>;
-                Assert.IsNotNull(_onValueChange);
-                var shakeVal = getShakeVal(state);
-                _onValueChange(state, ValueContainer.Create(shakeVal.x, shakeVal.y, shakeVal.z).Vector3Val);
-            }, getter, true, tweenType);
-            return PrimeTweenManager.Animate(tween);
+            tween.Setup(target, ref tweenSettings, true, tweenType, ref rt, ref d);
+            return PrimeTweenManager.Animate(ref rt, ref d);
         }
 
         public static Tween ShakeCustom<T>([NotNull] T target, Vector3 startValue, ShakeSettings settings, [NotNull] Action<T, Vector3> onValueChange) where T : class {
             Assert.IsNotNull(onValueChange);
-            var tween = PrimeTweenManager.fetchTween();
-            tween.startValue.CopyFrom(ref startValue);
-            prepareShakeData(settings, tween);
+            if (PrimeTweenManager.Instance.isDestroyed) {
+                return default;
+            }
+            var tween = PrimeTweenManager.FetchTween(settings._updateType);
+            ref var rt = ref tween.managedData;
+            ref var d = ref tween.data;
+
+            d.startValue.CopyFrom(ref startValue);
+            prepareShakeData(settings, ref rt, ref d, target);
             tween.customOnValueChange = onValueChange;
             var tweenSettings = settings.tweenSettings;
-            tween.Setup(target, ref tweenSettings, _tween => {
-                var _onValueChange = _tween.customOnValueChange as Action<T, Vector3>;
+            tween.Setup(target, ref tweenSettings, false, TweenType.ShakeCustom, ref rt, ref d);
+            tween.onValueChange = (ref TweenData rt2, ref UnmanagedTweenData d2) => {
+                var _onValueChange = rt2.cold.customOnValueChange as Action<T, Vector3>;
                 Assert.IsNotNull(_onValueChange);
-                var _target = _tween.target as T;
-                var shakeVal = getShakeVal(_tween);
-                var val = ValueContainer.Create(
-                        _tween.startValue.x + shakeVal.x,
-                        _tween.startValue.y + shakeVal.y,
-                        _tween.startValue.z + shakeVal.z).Vector3Val;
-                try {
-                    _onValueChange(_target, val);
-                } catch (Exception e) {
-                    Debug.LogError($"Tween was stopped because of exception in {nameof(onValueChange)} callback, tween: {_tween.GetDescription()}, exception:\n{e}", _tween.target as UnityEngine.Object);
-                    _tween.EmergencyStop();
-                }
-            }, null, false, TweenType.ShakeCustom);
-            return PrimeTweenManager.Animate(tween);
+                var val = d2.startValue.vector3 + getShakeVal(ref rt2, ref d2);
+                _onValueChange(rt2.target as T, val);
+            };
+            return PrimeTweenManager.Animate(ref rt, ref d);
         }
         public static Tween PunchCustom<T>([NotNull] T target, Vector3 startValue, ShakeSettings settings, [NotNull] Action<T, Vector3> onValueChange) where T : class => ShakeCustom(target, startValue, settings.WithPunch(), onValueChange);
 
-        static void prepareShakeData(ShakeSettings settings, [NotNull] ReusableTween tween) {
-            tween.endValue.Reset(); // not used
-            tween.shakeData.Setup(settings, tween);
+        static void prepareShakeData(ShakeSettings settings, ref TweenData rt, ref UnmanagedTweenData d, object target) {
+            rt.endValueOrDiff.Reset(); // not used
+            rt.cold.shakeData.Setup(settings, ref rt, ref d, target);
         }
 
-        static Vector3f getShakeVal([NotNull] ReusableTween tween) {
-            var res = tween.shakeData.getNextVal(tween);
-            float fadeInOutFactor = calcFadeInOutFactor();
-            return new Vector3f(
-                res.x * fadeInOutFactor,
-                res.y * fadeInOutFactor,
-                res.z * fadeInOutFactor);
-            float calcFadeInOutFactor() {
-                var elapsedTimeInterpolating = tween.easedInterpolationFactor * tween.settings.duration;
-                Assert.IsTrue(elapsedTimeInterpolating >= 0f);
-                var duration = tween.settings.duration;
-                if (duration == 0f) {
-                    return 0f;
-                }
-                Assert.IsTrue(duration > 0f);
-                float halfDuration = duration * 0.5f;
-                var oneShakeDuration = 1f / tween.shakeData.frequency;
-                if (oneShakeDuration > halfDuration) {
-                    oneShakeDuration = halfDuration;
-                }
-                float fadeInDuration = oneShakeDuration * 0.5f;
-                if (elapsedTimeInterpolating < fadeInDuration) {
-                    return Mathf.InverseLerp(0f, fadeInDuration, elapsedTimeInterpolating);
-                }
-                var fadeoutStartTime = duration - oneShakeDuration;
-                Assert.IsTrue(fadeoutStartTime > 0f, tween.id);
-                if (elapsedTimeInterpolating > fadeoutStartTime) {
-                    return Mathf.InverseLerp(duration, fadeoutStartTime, elapsedTimeInterpolating);
-                }
-                return 1f;
+        internal static Vector3 getShakeVal(ref TweenData rt, ref UnmanagedTweenData d) {
+            float fadeInOutFactor = calcFadeInOutFactor(ref rt, ref d);
+            return rt.shakeData.getNextVal(ref rt, ref d) * fadeInOutFactor;
+        }
+
+        static float calcFadeInOutFactor(ref TweenData tween, ref UnmanagedTweenData d) {
+            float animationDuration = d.animationDuration;
+            var elapsedTimeInterpolating = d.easedInterpolationFactor * animationDuration;
+            Assert.IsTrue(elapsedTimeInterpolating >= 0f);
+            if (animationDuration == 0f) {
+                return 0f;
             }
+            Assert.IsTrue(animationDuration > 0f);
+            float halfDuration = animationDuration * 0.5f;
+            var oneShakeDuration = 1f / tween.cold.shakeData.frequency;
+            if (oneShakeDuration > halfDuration) {
+                oneShakeDuration = halfDuration;
+            }
+            float fadeInDuration = oneShakeDuration * 0.5f;
+            if (elapsedTimeInterpolating < fadeInDuration) {
+                return Mathf.InverseLerp(0f, fadeInDuration, elapsedTimeInterpolating);
+            }
+            var fadeoutStartTime = animationDuration - oneShakeDuration;
+            Assert.IsTrue(fadeoutStartTime > 0f, tween.cold.id);
+            if (elapsedTimeInterpolating > fadeoutStartTime) {
+                return Mathf.InverseLerp(animationDuration, fadeoutStartTime, elapsedTimeInterpolating);
+            }
+            return 1f;
         }
     }
 
@@ -158,34 +140,34 @@ namespace PrimeTween {
     [Serializable]
     #endif
     internal struct ShakeData {
-        static readonly Random random = new Random();
         float t;
-        Vector3f from, to;
+        Vector3 from, to;
         float symmetryFactor;
         int falloffEaseInt;
         AnimationCurve customStrengthOverTime;
         Ease easeBetweenShakes;
-        const int disabledFalloff = -42;
-        internal bool isAlive => frequency != 0f;
-        internal Vector3f strengthPerAxis { get; private set; }
+        internal Vector3 strengthPerAxis { get; private set; }
         internal float frequency { get; private set; }
         float prevInterpolationFactor;
         int prevCyclesDone;
 
-        internal void Setup(ShakeSettings settings, ReusableTween tween) {
-            tween.isPunch = settings.isPunch;
+        const int disabledFalloff = -42;
+        internal bool isAlive => frequency != 0f;
+
+        internal void Setup(ShakeSettings settings, ref TweenData rt, ref UnmanagedTweenData d, object target) {
+            d.isPunch = settings.isPunch;
             symmetryFactor = Mathf.Clamp01(1 - settings.asymmetry);
             {
                 var _strength = settings.strength;
                 if (_strength == default) {
                     Debug.LogError("Shake's strength is (0, 0, 0).");
                 }
-                strengthPerAxis = new Vector3f(_strength.x, _strength.y, _strength.z);
+                strengthPerAxis = _strength;
             }
             {
                 var _frequency = settings.frequency;
                 if (_frequency <= 0) {
-                    Debug.LogError($"Shake's frequency should be > 0f, but was {_frequency}.");
+                    Debug.LogError($"Shake's frequency should be > 0f, but was {_frequency}.", target as Object);
                     _frequency = ShakeSettings.defaultFrequency;
                 }
                 frequency = _frequency;
@@ -220,17 +202,17 @@ namespace PrimeTween {
                 }
                 easeBetweenShakes = _easeBetweenShakes;
             }
-            onCycleComplete(tween);
+            onCycleComplete(ref rt, ref d);
         }
 
-        internal void onCycleComplete(ReusableTween tween) {
+        internal void onCycleComplete(ref TweenData rt, ref UnmanagedTweenData d) {
             Assert.IsTrue(isAlive);
             resetAfterCycle();
-            tween.shakeSign = tween.isPunch || random.NextDouble() < 0.5;
-            to = generateShakePoint(tween);
+            d.shakeSign = d.isPunch || PrimeTweenManager.random.NextDouble() < 0.5;
+            to = generateShakePoint(ref d);
         }
 
-        static int getMainAxisIndex(Vector3f strengthByAxis) {
+        static int getMainAxisIndex(Vector3 strengthByAxis) {
             int mainAxisIndex = -1;
             float maxStrength = float.NegativeInfinity;
             for (int i = 0; i < 3; i++) {
@@ -244,56 +226,57 @@ namespace PrimeTween {
             return mainAxisIndex;
         }
 
-        internal Vector3f getNextVal([NotNull] ReusableTween tween) {
-            var interpolationFactor = tween.easedInterpolationFactor;
+        internal Vector3 getNextVal(ref TweenData rt, ref UnmanagedTweenData d) {
+            var interpolationFactor = d.easedInterpolationFactor;
             Assert.IsTrue(interpolationFactor <= 1);
 
-            int cyclesDiff = tween.getCyclesDone() - prevCyclesDone;
-            prevCyclesDone = tween.getCyclesDone();
-            if (interpolationFactor == 0f || (cyclesDiff > 0 && tween.getCyclesDone() != tween.settings.cycles)) {
-                onCycleComplete(tween);
+            int cyclesDiff = d.getCyclesDone() - prevCyclesDone;
+            prevCyclesDone = d.getCyclesDone();
+            if (interpolationFactor == 0f || (cyclesDiff > 0 && d.getCyclesDone() != d.cyclesTotal)) {
+                onCycleComplete(ref rt, ref d);
                 prevInterpolationFactor = interpolationFactor;
             }
 
-            var dt = (interpolationFactor - prevInterpolationFactor) * tween.settings.duration;
+            float animationDuration = d.animationDuration;
+            var dt = (interpolationFactor - prevInterpolationFactor) * animationDuration;
             prevInterpolationFactor = interpolationFactor;
 
             var strengthOverTime = calcStrengthOverTime(interpolationFactor);
             var frequencyFactor = Mathf.Clamp01(strengthOverTime * 3f); // handpicked formula that describes the relationship between strength and frequency
-            float getIniVelFactor() {
-                // The initial velocity should twice as big because the first shake starts from zero (twice as short as total range).
-                var elapsedTimeInterpolating = tween.easedInterpolationFactor * tween.settings.duration;
-                var halfShakeDuration = 0.5f / tween.shakeData.frequency;
-                return elapsedTimeInterpolating < halfShakeDuration ? 2f : 1f;
-            }
-            t += frequency * dt * frequencyFactor * getIniVelFactor();
+
+            // The initial velocity should twice as big because the first shake starts from zero (twice as short as total range).
+            var elapsedTimeInterpolating = d.easedInterpolationFactor * animationDuration;
+            var halfShakeDuration = 0.5f / rt.shakeData.frequency;
+            float iniVelFactor = elapsedTimeInterpolating < halfShakeDuration ? 2f : 1f;
+
+            t += frequency * dt * frequencyFactor * iniVelFactor;
             if (t < 0f || t >= 1f) {
-                tween.shakeSign = !tween.shakeSign;
+                d.shakeSign = !d.shakeSign;
                 if (t < 0f) {
                     t = 1f;
                     to = from;
-                    from = generateShakePoint(tween);
+                    from = generateShakePoint(ref d);
                 } else {
                     t = 0f;
                     from = to;
-                    to = generateShakePoint(tween);
+                    to = generateShakePoint(ref d);
                 }
             }
 
-            Vector3f result = default;
+            Vector3 result = default;
             for (int i = 0; i < 3; i++) {
                 result[i] = Mathf.Lerp(from[i], to[i], StandardEasing.Evaluate(t, easeBetweenShakes)) * strengthOverTime;
             }
             return result;
         }
 
-        Vector3f generateShakePoint(ReusableTween tween) {
+        Vector3 generateShakePoint(ref UnmanagedTweenData d) {
             var mainAxisIndex = getMainAxisIndex(strengthPerAxis);
-            Vector3f result = default;
-            float signFloat = tween.shakeSign ? 1f : -1f;
+            Vector3 result = default;
+            float signFloat = d.shakeSign ? 1f : -1f;
             for (int i = 0; i < 3; i++) {
                 var strength = strengthPerAxis[i];
-                if (tween.isPunch) {
+                if (d.isPunch) {
                     result[i] = clampBySymmetryFactor(strength * signFloat, strength, symmetryFactor);
                 } else {
                     result[i] = i == mainAxisIndex ? calcMainAxisEndVal(signFloat, strength, symmetryFactor) : calcNonMainAxisEndVal(strength, symmetryFactor);
@@ -334,11 +317,11 @@ namespace PrimeTween {
         }
 
         static float RandomRange(float minInclusive, float max) {
-            double val = random.NextDouble();
+            double val = PrimeTweenManager.random.NextDouble();
             return (float)(minInclusive + val * (max - minInclusive));
         }
 
-        internal static bool TryTakeStartValueFromOtherShake([NotNull] ReusableTween newTween) {
+        internal static bool TryTakeStartValueFromOtherShake(ref TweenData newTween, ref UnmanagedTweenData newTweenData) {
             if (!newTween.shakeData.isAlive) {
                 return false;
             }
@@ -347,24 +330,25 @@ namespace PrimeTween {
                 return false;
             }
             var shakes = PrimeTweenManager.Instance.shakes;
-            var key = (shakeTransform, newTween.tweenType);
+            var key = (shakeTransform, newTweenData.tweenType);
             if (!shakes.TryGetValue(key, out var data)) {
-                shakes.Add(key, (newTween.getter(newTween), 1));
+                var startValue = Utils.GetAnimatedValue(newTween.target, newTweenData.tweenType, newTween.cold.longParam);
+                shakes.Add(key, (startValue, 1));
                 return false;
             }
             Assert.IsTrue(data.count >= 1);
-            newTween.startValue = data.startValue;
+            newTweenData.startValue = data.startValue;
             // Debug.Log($"tryTakeStartValueFromOtherShake {data.startValue.Vector4Val}");
             data.count++;
             shakes[key] = data;
             return true;
         }
 
-        internal void Reset([NotNull] ReusableTween tween) {
+        internal void Reset(object target, TweenType tweenType) {
             Assert.IsTrue(isAlive);
-            var shakeTransform = tween.target as Transform;
+            var shakeTransform = target as Transform;
             if (shakeTransform != null) {
-                var key = (shakeTransform, tween.tweenType);
+                var key = (shakeTransform, tweenType);
                 var shakes = PrimeTweenManager.Instance.shakes;
                 if (shakes.TryGetValue(key, out var data)) {
                     // no key present if it's a ShakeCustom() with Transform target because custom shakes have startFromCurrent == false and aren't added to shakes dict
