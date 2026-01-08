@@ -70,7 +70,7 @@ namespace PrimeTween {
             var curve = customEasing?.curve;
             if (ease == Ease.Custom && customEasing?.parametricEase == ParametricEase.None) {
                 if (curve == null || !ValidateCustomCurveKeyframes(curve)) {
-                    Debug.LogError(Constants.customAnimationCurveInavalidError);
+                    Debug.LogError(Constants.customAnimationCurveInvalidError);
                     ease = Ease.Default;
                 }
             }
@@ -87,16 +87,6 @@ namespace PrimeTween {
             _useFixedUpdate = updateType == UpdateType.FixedUpdate;
             _updateType = updateType.enumValue;
         }
-
-        #if PRIME_TWEEN_DOTWEEN_ADAPTER
-        internal void SetEasing(Easing easing) {
-            ease = easing.ease == Ease.Default ? PrimeTweenManager.Instance.defaultEase : easing.ease;
-            customEase = easing.curve;
-            parametricEase = easing.parametricEase;
-            parametricEaseStrength = easing.parametricEaseStrength;
-            parametricEasePeriod = easing.parametricEasePeriod;
-        }
-        #endif
 
         public TweenSettings(float duration, Ease ease = Ease.Default, int cycles = 1, CycleMode cycleMode = CycleMode.Restart, float startDelay = 0, float endDelay = 0, bool useUnscaledTime = false, UpdateType updateType = default)
             : this(duration, ease, null, cycles, cycleMode, startDelay, endDelay, useUnscaledTime, updateType) {
@@ -116,27 +106,12 @@ namespace PrimeTween {
             }
         }
 
-        internal void CopyFrom(ref TweenSettings other) {
-            duration = other.duration;
-            ease = other.ease;
-            customEase = other.customEase;
-            cycles = other.cycles;
-            cycleMode = other.cycleMode;
-            startDelay = other.startDelay;
-            endDelay = other.endDelay;
-            useUnscaledTime = other.useUnscaledTime;
-            parametricEase = other.parametricEase;
-            parametricEaseStrength = other.parametricEaseStrength;
-            parametricEasePeriod = other.parametricEasePeriod;
-            updateType = other.updateType;
-        }
-
         internal const float minDuration = 0.0001f;
 
         internal void SetValidValues() {
-            validateFiniteDuration(duration);
-            validateFiniteDuration(startDelay);
-            validateFiniteDuration(endDelay);
+            validateFiniteDuration(ref duration);
+            validateFiniteDuration(ref startDelay);
+            validateFiniteDuration(ref endDelay);
             setCyclesTo1If0(ref cycles);
             if (duration != 0f) {
                 #if UNITY_EDITOR && PRIME_TWEEN_SAFETY_CHECKS
@@ -148,14 +123,13 @@ namespace PrimeTween {
             }
             startDelay = Mathf.Max(0f, startDelay);
             endDelay = Mathf.Max(0f, endDelay);
-            if (cycles == 1) {
-                cycleMode = CycleMode.Restart;
-            }
         }
 
-        internal static void validateFiniteDuration(float f) {
-            Assert.IsFalse(float.IsNaN(f), Constants.durationInvalidError);
-            Assert.IsFalse(float.IsInfinity(f), Constants.durationInvalidError);
+        internal static void validateFiniteDuration(ref float f) {
+            if (float.IsNaN(f) || float.IsInfinity(f)) {
+                Debug.LogError(Constants.durationInvalidError);
+                f = 0f;
+            }
         }
 
         internal static bool ValidateCustomCurve([NotNull] AnimationCurve curve) {
@@ -253,7 +227,7 @@ namespace PrimeTween {
     /// <summary>The standard animation easing types. Different easing curves produce a different animation 'feeling'.<br/>
     /// Play around with different ease types to choose one that suites you the best.
     /// You can also provide a custom AnimationCurve as an ease function or parametrize eases with the Easing.Overshoot/Elastic/BounceExact(...) methods.</summary>
-    public enum Ease { Custom = -1, Default = 0, Linear = 1,
+    public enum Ease : sbyte { Custom = -1, Default = 0, Linear = 1,
         InSine, OutSine, InOutSine,
         InQuad, OutQuad, InOutQuad,
         InCubic, OutCubic, InOutCubic,
@@ -267,15 +241,14 @@ namespace PrimeTween {
     }
 
     /// <summary>Controls the behavior of subsequent cycles when a tween has more than one cycle.</summary>
-    public enum CycleMode {
-        [Tooltip("Restarts the tween from the beginning.")]
-        Restart,
-        [Tooltip("Animates forth and back, like a yoyo. Easing is the same on the backward cycle.")]
-        Yoyo,
-        [Tooltip("At the end of a cycle increments the `endValue` by the difference between `startValue` and `endValue`.\n\n" +
-                 "For example, if a tween moves position.x from 0 to 1, then after the first cycle, the tween will move the position.x from 1 to 2, and so on.")]
-        Incremental,
-        [Tooltip("Rewinds the tween as if time was reversed. Easing is reversed on the backward cycle.")]
-        Rewind
+    public enum CycleMode : byte {
+        [Tooltip(Constants.cycleModeRestartTooltip)]
+        Restart = _CycleMode.Restart,
+        [Tooltip(Constants.cycleModeYoyoTooltip)]
+        Yoyo = _CycleMode.Yoyo,
+        [Tooltip(Constants.cycleModeIncrementalTooltip)]
+        Incremental = _CycleMode.Incremental,
+        [Tooltip(Constants.cycleModeRewindTooltip)]
+        Rewind = _CycleMode.Rewind
     }
 }

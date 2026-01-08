@@ -166,12 +166,13 @@ namespace PrimeTween {
         public Sequence Join(Sequence other) => Group(other);
 
         public Sequence Join(Tween other) {
-            var tween = other.tween;
-            var startDelay = tween.settings.startDelay;
+            ref var otherData = ref other.tween.data;
+            var startDelay = otherData.startDelay;
             if (startDelay > 0) {
                 // For some weird reason, DG.Tweening.Sequence.DoInsert shifts the lastTweenInsertTime by a tween's delay.
-                tween.settings.startDelay = 0;
-                tween.recalculateTotalDuration();
+                otherData.startDelay = 0;
+                float endDelay = otherData.cycleDuration - startDelay - otherData.animationDuration;
+                TweenData.CalculateCycleDuration(endDelay, ref otherData);
                 Group(Tween.Delay(startDelay));
                 ChainLast(other);
                 return this;
@@ -182,8 +183,8 @@ namespace PrimeTween {
         /// <summary>Schedules <see cref="other"/> after the last added tween.
         /// Internal because this API is hard to understand, but needed for adapter.</summary>
         internal Sequence ChainLast(Tween other) {
-            if (tryManipulate()) {
-                Insert(getLastInSelfOrRoot().durationWithWaitDelay, other);
+            if (TryManipulate()) {
+                Insert(GetLastInSelfOrRoot().data.calcDurationWithWaitDependencies(), other);
             }
             return this;
         }
@@ -191,12 +192,13 @@ namespace PrimeTween {
         public Sequence Append(Sequence other) => Chain(other);
 
         public Sequence Append(Tween other) {
-            var tween = other.tween;
-            var startDelay = tween.settings.startDelay;
+            ref var otherData = ref other.tween.data;
+            var startDelay = otherData.startDelay;
             if (startDelay > 0) {
                 // For some weird reason, DG.Tweening.Sequence.DoInsert shifts the lastTweenInsertTime by a tween's delay.
-                tween.settings.startDelay = 0;
-                tween.recalculateTotalDuration();
+                otherData.startDelay = 0;
+                float endDelay = otherData.cycleDuration - startDelay - otherData.animationDuration;
+                TweenData.CalculateCycleDuration(endDelay, ref otherData);
                 Chain(Tween.Delay(startDelay));
             }
             return Chain(other);
@@ -244,8 +246,8 @@ namespace PrimeTween {
             if (!ValidateCanManipulateSequence()) {
                 return this;
             }
-            foreach (var t in getSelfChildren()) {
-                t.tween.waitDelay += interval;
+            foreach (var t in GetSelfChildren()) {
+                t.data.waitDelay += interval;
             }
             duration += interval;
             return this;
@@ -253,8 +255,8 @@ namespace PrimeTween {
 
         public Sequence SetUpdate(bool isIndependentUpdate) {
             Assert.IsTrue(isAlive);
-            Assert.IsTrue(root.tween.isMainSequenceRoot());
-            root.tween.settings.useUnscaledTime = isIndependentUpdate;
+            Assert.IsTrue(root.tween.data.IsMainSequenceRoot());
+            root.tween.data.useUnscaledTime = isIndependentUpdate;
             return this;
         }
 
@@ -277,19 +279,31 @@ namespace PrimeTween {
         }
     }
 
+    internal partial class ColdData {
+        internal void SetEasing(Easing easing) {
+            data.ease = easing.ease == Ease.Default ? PrimeTweenManager.Instance.defaultEase : easing.ease;
+            customEase = easing.curve;
+            parametricEase = easing.parametricEase;
+            parametricEaseStrength = easing.parametricEaseStrength;
+            parametricEasePeriod = easing.parametricEasePeriod;
+        }
+    }
+
     public partial struct Tween {
         public Tween SetEase(Ease ease, float? amplitude = null, float? period = null) {
             Assert.IsTrue(isAlive);
             var parametricEasing = DOTweenAdapter.GetEasing(ease, amplitude, period);
-            tween.settings.SetEasing(parametricEasing);
+            tween.SetEasing(parametricEasing);
             return this;
         }
 
         public Tween SetDelay(float delay) {
             Assert.IsTrue(isAlive);
-            Assert.IsFalse(tween.IsInSequence());
-            tween.settings.startDelay = delay;
-            tween.recalculateTotalDuration();
+            ref var d = ref tween.data;
+            Assert.IsFalse(d.isInSequence);
+            float endDelay = d.cycleDuration - d.startDelay - d.animationDuration;
+            d.startDelay = delay;
+            TweenData.CalculateCycleDuration(endDelay, ref d);
             return this;
         }
 
@@ -298,13 +312,20 @@ namespace PrimeTween {
             if (!isRelative) {
                 return this;
             }
-            var getter = tween.getter;
-            if (getter == null) {
+            ref var rt = ref tween.managedData;
+            ref var d = ref tween.data;
+
+            TweenAnimation.ValueWrapper current;
+            try {
+                current = Utils.GetAnimatedValue(rt.target, d.tweenType, rt.cold.longParam);
+            } catch {
+                Debug.LogError($"{tween.data.tweenType} doesn't support 'SetRelative()'.");
                 return this;
             }
-            tween.endValue = CalculateRelative(tween, getter(tween), tween.endValue);
+
+            rt.endValueOrDiff = CalculateRelative(d, current, rt.endValueOrDiff);
             /*var getter = tween.getter;
-                // todo this doesn't account for double val
+                // p2 todo this doesn't account for double val
                 if (tween.propType == PropType.Quaternion) {
                     if (getter != null) {
                         tween.endValue.QuaternionVal *= getter(tween).QuaternionVal;
@@ -324,7 +345,7 @@ namespace PrimeTween {
         public Tween SetLoops(int loops, LoopType? loopType = null) {
             SetRemainingCycles(loops);
             if (isAlive && loopType.HasValue) {
-                tween.settings.cycleMode = toCycleMode(loopType.Value);
+                tween.data.cycleMode = toCycleMode(loopType.Value);
             }
             return this;
         }
@@ -356,12 +377,14 @@ namespace PrimeTween {
         public bool IsPlaying() => isAlive && !isPaused;
 
         public Tween Pause() {
-            isPaused = true;
+            var copy = this;
+            copy.isPaused = true;
             return this;
         }
 
         public Tween Play() {
-            isPaused = false;
+            var copy = this;
+            copy.isPaused = false;
             return this;
         }
 
@@ -369,21 +392,23 @@ namespace PrimeTween {
         public float Duration(bool includeLoops = true) => includeLoops ? durationTotal : duration;
         public int Loops() => cyclesTotal;
         public int CompletedLoops() => cyclesDone;
-        public float ElapsedDelay() => isAlive ? Mathf.Clamp(elapsedTime, 0f, tween.settings.startDelay) : 0;
+        public float ElapsedDelay() => isAlive ? Mathf.Clamp(elapsedTime, 0f, tween.data.startDelay) : 0;
         public float ElapsedPercentage(bool includeLoops = true) => includeLoops ? progressTotal : progress;
-        public void TogglePause() => isPaused = !isPaused;
+        public void TogglePause() {
+            var copy = this;
+            copy.isPaused = !isPaused;
+        }
 
         public Tween SetEase([NotNull] AnimationCurve animCurve) {
             Assert.IsTrue(isAlive);
-            tween.settings.SetEasing(Easing.Curve(animCurve));
+            tween.SetEasing(Easing.Curve(animCurve));
             return this;
         }
 
         public Tween SetTarget([NotNull] object target) {
             Assert.IsNotNull(target);
             Assert.IsTrue(isAlive);
-            tween.target = target;
-            tween.setUnityTarget(target);
+            tween.managedData.target = target;
             return this;
         }
 
@@ -393,7 +418,7 @@ namespace PrimeTween {
 
         public Tween SetUpdate(bool isIndependentUpdate) {
             Assert.IsTrue(isAlive);
-            tween.settings.useUnscaledTime = isIndependentUpdate;
+            tween.data.useUnscaledTime = isIndependentUpdate;
             return this;
         }
 
@@ -409,53 +434,59 @@ namespace PrimeTween {
         public Tween From(Quaternion fromValue, bool setImmediately = true, bool isRelative = false) => setFrom(setImmediately, isRelative, fromValue.ToContainer(), PropType.Quaternion);
         public Tween From(Rect fromValue, bool setImmediately = true, bool isRelative = false) => setFrom(setImmediately, isRelative, fromValue.ToContainer(), PropType.Rect);
 
-        static ValueContainer CalculateRelative(ReusableTween tween, ValueContainer current, ValueContainer diff) {
-            switch (tween.propType) {
+        static TweenAnimation.ValueWrapper CalculateRelative(UnmanagedTweenData data, TweenAnimation.ValueWrapper current, TweenAnimation.ValueWrapper diff) {
+            switch (Utils.TweenTypeToTweenData(data.tweenType).Item1) {
                 case PropType.Quaternion:
-                    return (current.QuaternionVal * diff.QuaternionVal).ToContainer();
+                    return (current.quaternion * diff.quaternion).ToContainer();
                 case PropType.Double:
                     return (current.DoubleVal + diff.DoubleVal).ToContainer();
                 default:
-                    return (current.Vector4Val + diff.Vector4Val).ToContainer();
+                    return (current.vector4 + diff.vector4).ToContainer();
             }
         }
 
-        Tween setFrom(bool setImmediately, bool isRelative, ValueContainer? fromValue = null, PropType propType = PropType.None) {
-            if (!tryManipulate()) {
+        Tween setFrom(bool setImmediately, bool isRelative, TweenAnimation.ValueWrapper? fromValue = null, PropType propType = PropType.None) {
+            if (!TryManipulate()) {
                 return this;
             }
             if (elapsedTimeTotal != 0f) {
                 Debug.LogError(Constants.animationAlreadyStarted);
                 return this;
             }
-            if (tween.isUnityTargetDestroyed()) {
+            ref var rt = ref tween.managedData;
+            ref var d = ref tween.data;
+            if (rt.IsUnityTargetDestroyed()) {
                 Debug.LogError("Tween's target has been destroyed.");
                 return this;
             }
-            var getter = tween.getter;
-            if (getter == null) {
-                Debug.LogError("Custom tweens don't support 'From()'.");
+
+            TweenAnimation.ValueWrapper current;
+            try {
+                current = Utils.GetAnimatedValue(rt.target, d.tweenType, rt.cold.longParam);
+            } catch {
+                Debug.LogError($"{tween.data.tweenType} doesn't support 'From()'.");
                 return this;
             }
-            var current = getter(tween);
+
             if (isRelative) {
-                tween.endValue = CalculateRelative(tween, current, tween.endValue);
+                rt.endValueOrDiff = CalculateRelative(d, current, rt.endValueOrDiff);
             }
             if (fromValue.HasValue) {
-                if (tween.propType != propType) {
-                    Debug.LogError($"Animated value is {tween.propType}, but '{nameof(From)}()' was called with {propType}. Please provide a correct type.");
+                if (d.propType != propType) {
+                    Debug.LogError($"Animated value is {d.propType}, but '{nameof(From)}()' was called with {propType}. Please provide a correct type.");
                     return this;
                 }
-                tween.startFromCurrent = false;
-                tween.startValue = isRelative ? CalculateRelative(tween, current, fromValue.Value) : fromValue.Value;
+                d.startFromCurrent = false;
+                d.startValue = isRelative ? CalculateRelative(d, current, fromValue.Value) : fromValue.Value;
             } else {
-                tween.startFromCurrent = false;
-                tween.startValue = tween.endValue;
-                tween.endValue = current;
+                d.startFromCurrent = false;
+                d.startValue = rt.endValueOrDiff;
+                rt.endValueOrDiff = current;
             }
-            tween.cacheDiff();
+            TweenData.CacheDiff(ref d, ref rt);
             if (setImmediately) {
-                tween.ReportOnValueChange(0f);
+                d.easedInterpolationFactor = d.calcEasedT(0f);
+                rt.ReportOnValueChange(ref d);
             }
             return this;
         }

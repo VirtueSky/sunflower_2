@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using PrimeTween;
 using UnityEditor;
@@ -17,16 +16,21 @@ internal class PrimeTweenManagerInspector : Editor {
     StringCache currentPoolCapacityCache;
 
     void OnEnable() {
-        tweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager.tweens));
-        lateUpdateTweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager.lateUpdateTweens));
-        fixedUpdateTweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager.fixedUpdateTweens));
+        tweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager._inspectorTweensUpdate));
+        lateUpdateTweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager._inspectorTweensLateUpdate));
+        fixedUpdateTweensProp = serializedObject.FindProperty(nameof(PrimeTweenManager._inspectorTweensFixedUpdate));
         Assert.IsNotNull(tweensProp);
         Assert.IsNotNull(lateUpdateTweensProp);
         Assert.IsNotNull(fixedUpdateTweensProp);
         aliveTweenGuiContent = new GUIContent("Tweens");
         lateUpdateTweenGuiContent = new GUIContent("Late update tweens");
         fixedUpdateTweenGuiContent = new GUIContent("Fixed update tweens");
+
+        PrimeTweenManager._instance._updateInspectorTweens = true;
+        PrimeTweenManager._instance.UpdateInspectorTweens();
     }
+
+    void OnDisable() => PrimeTweenManager._instance._updateInspectorTweens = false;
 
     public override void OnInspectorGUI() {
         using (new EditorGUI.DisabledScope(true)) {
@@ -56,19 +60,12 @@ internal class PrimeTweenManagerInspector : Editor {
         EditorGUILayout.HelpBox("Use " + Constants.setTweensCapacityMethod + " to set tweens capacity.\n" +
                                 "To prevent memory allocations during runtime, choose the value that is greater than the maximum number of simultaneous tweens in your game.", MessageType.None);
 
-        drawList(tweensProp, manager.tweens, aliveTweenGuiContent);
-        drawList(lateUpdateTweensProp, manager.lateUpdateTweens, lateUpdateTweenGuiContent);
-        drawList(fixedUpdateTweensProp, manager.fixedUpdateTweens, fixedUpdateTweenGuiContent);
-        void drawList(SerializedProperty tweensProp, List<ReusableTween> list, GUIContent guiContent) {
-            if (tweensProp.isExpanded) {
-                foreach (var tween in list) {
-                    if (tween != null && string.IsNullOrEmpty(tween.debugDescription)) {
-                        tween.debugDescription = tween.GetDescription();
-                    }
-                }
-            }
+        drawList(tweensProp, aliveTweenGuiContent);
+        drawList(lateUpdateTweensProp, lateUpdateTweenGuiContent);
+        drawList(fixedUpdateTweensProp, fixedUpdateTweenGuiContent);
+        void drawList(SerializedProperty prop, GUIContent guiContent) {
             using (new EditorGUI.DisabledScope(true)) {
-                EditorGUILayout.PropertyField(tweensProp, guiContent);
+                EditorGUILayout.PropertyField(prop, guiContent);
             }
         }
     }

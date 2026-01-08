@@ -383,6 +383,17 @@ MonoBehaviour:
     dependency: 1
     placeInGlobalScope: 0
     generateOnlyOverloads: 0
+  - description: MoveRotation_Rigidbody
+    methodName: MoveRotation
+    targetType: UnityEngine.Rigidbody
+    propertyType: 4
+    propertyName: 
+    propertyGetter: 
+    propertySetter: 
+    dotweenMethodName: 
+    dependency: 3
+    placeInGlobalScope: 0
+    generateOnlyOverloads: 1
   - description: MovePosition_Rigidbody
     methodName: MovePosition
     targetType: UnityEngine.Rigidbody

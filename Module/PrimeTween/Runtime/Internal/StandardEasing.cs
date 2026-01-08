@@ -151,7 +151,10 @@ namespace PrimeTween {
                 case Ease.Custom:
                 case Ease.Default:
                 default:
+                    #if UNITY_2019_1_OR_NEWER
+                    // Burst doesn't support string literals in Unity 2018
                     UnityEngine.Debug.LogError($"Invalid ease type: {ease}.");
+                    #endif
                     return t;
             }
         }

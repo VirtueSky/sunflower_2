@@ -29,7 +29,7 @@ namespace PrimeTween {
         Easing(Ease ease, [CanBeNull] AnimationCurve curve) {
             if (ease == Ease.Custom) {
                 if (curve == null || !TweenSettings.ValidateCustomCurveKeyframes(curve)) {
-                    Debug.LogError(Constants.customAnimationCurveInavalidError);
+                    Debug.LogError(Constants.customAnimationCurveInvalidError);
                     ease = Ease.Default;
                 }
             }
@@ -103,15 +103,14 @@ namespace PrimeTween {
             }
         }
 
-        internal static float Evaluate(float t, [NotNull] ReusableTween tween) {
-            var settings = tween.settings;
-            var parametricEase = settings.parametricEase;
-            var strength = settings.parametricEaseStrength;
+        internal static float EvaluateParametricEase(float t, ref TweenData rt, ref UnmanagedTweenData d) {
+            var parametricEase = rt.cold.parametricEase;
+            var strength = rt.cold.parametricEaseStrength;
             if (parametricEase == ParametricEase.BounceExact) {
-                var fullAmplitude = tween.propType == PropType.Quaternion ?
-                    ValueContainer.QuaternionAngle(tween.startValue, tween.endValue) :
-                    tween.diff.Vector4Magnitude();
-                // todo account for double
+                var fullAmplitude = d.propType == PropType.Quaternion ?
+                    TweenAnimation.ValueWrapper.QuaternionAngle(d.startValue, rt.endValueOrDiff) :
+                    rt.endValueOrDiff.Vector4Magnitude();
+                // p2 todo account for double
                 /*double calcFullAmplitude() {
                     switch (tween.propType) {
                         case PropType.Quaternion:
@@ -125,7 +124,7 @@ namespace PrimeTween {
                 float strengthFactor = fullAmplitude < 0.0001f ? 1f : 1f / (fullAmplitude * (1f - firstBounceAmpl));
                 return Bounce(t, strength * strengthFactor);
             }
-            return Evaluate(t, parametricEase, strength, settings.parametricEasePeriod, settings.duration);
+            return Evaluate(t, parametricEase, strength, rt.cold.parametricEasePeriod, d.cycleDuration);
         }
 
         const float firstBounceAmpl = 0.75f;
@@ -148,8 +147,8 @@ namespace PrimeTween {
         }
 
         #if PRIME_TWEEN_DOTWEEN_ADAPTER
-        /// Can't be public API because ParametricEase.BounceExact can only be evaluated with these params: propType, startValue, endValue
-        /// <see cref="Evaluate(float,PrimeTween.ReusableTween)"/>
+        /// Can't be a public API because ParametricEase.BounceExact can only be evaluated with these params: propType, startValue, endValue
+        /// <see cref="EvaluateParametricEase"/>
         internal float Evaluate(float interpolationFactor) {
             if (ease == Ease.Custom) {
                 if (parametricEase != ParametricEase.None) {
@@ -176,7 +175,7 @@ namespace PrimeTween {
         }
     }
 
-    internal enum ParametricEase {
+    internal enum ParametricEase : byte {
         None = 0,
         Overshoot = 5,
         Bounce = 7,

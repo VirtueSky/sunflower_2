@@ -6,7 +6,7 @@ using static UnityEditor.EditorGUI;
 using static UnityEditor.EditorGUIUtility;
 
 [CustomPropertyDrawer(typeof(ShakeSettings))]
-internal class TweenShakeSettingsPropDrawer : PropertyDrawer { // todo rename to ShakeSettingsPropDrawer
+internal class ShakeSettingsPropDrawer : PropertyDrawer {
     public override float GetPropertyHeight([NotNull] SerializedProperty property, GUIContent label) {
         if (!property.isExpanded) {
             return singleLineHeight;
@@ -100,7 +100,8 @@ internal class TweenShakeSettingsPropDrawer : PropertyDrawer { // todo rename to
             }
             propertyField();
         }
-        TweenSettingsPropDrawer.drawCycles(rect, property);
+        property.NextVisible(false);
+        TweenSettingsPropDrawer.DrawCycles(rect, property);
         moveToNextLine();
         TweenSettingsPropDrawer.drawStartDelayTillEnd(ref rect, property);
         indentLevel--;

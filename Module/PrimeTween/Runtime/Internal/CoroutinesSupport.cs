@@ -13,17 +13,16 @@ namespace PrimeTween {
         /// </code></example>
         [NotNull]
         public IEnumerator ToYieldInstruction() {
-            if (!isAlive || !tryManipulate()) {
+            if (!isAlive || !TryManipulate()) {
                 // ReSharper disable once NotDisposedResourceIsReturned
                 return Enumerable.Empty<object>().GetEnumerator();
             }
-            var result = tween.coroutineEnumerator;
-            result.SetTween(this);
-            return result;
+            tween.StartCoroutineEnumerator();
+            return tween;
         }
 
         bool IEnumerator.MoveNext() {
-            PrimeTweenManager.Instance.warnStructBoxingInCoroutineOnce(id);
+            PrimeTweenManager.Instance.warnStructBoxingInCoroutineOnce(id, tween?.managedData.target as UnityEngine.Object);
             return isAlive;
         }
 
@@ -49,7 +48,7 @@ namespace PrimeTween {
         public IEnumerator ToYieldInstruction() => root.ToYieldInstruction();
 
         bool IEnumerator.MoveNext() {
-            PrimeTweenManager.Instance.warnStructBoxingInCoroutineOnce(id);
+            PrimeTweenManager.Instance.warnStructBoxingInCoroutineOnce(id, root.tween?.managedData.target as UnityEngine.Object);
             return isAlive;
         }
 
@@ -63,30 +62,24 @@ namespace PrimeTween {
         void IEnumerator.Reset() => throw new NotSupportedException();
     }
 
-    internal class TweenCoroutineEnumerator : IEnumerator {
-        internal Tween tween;
-        bool isRunning;
-
-        internal void SetTween(Tween _tween) {
-            Assert.IsFalse(isRunning); // todo turn to error?
-            Assert.IsTrue(!tween.IsCreated || tween.id == _tween.id);
-            Assert.IsTrue(_tween.isAlive);
-            tween = _tween;
-            isRunning = true;
+    internal partial class ColdData : IEnumerator {
+        internal void StartCoroutineEnumerator() {
+            Assert.IsFalse(data.isInCoroutine); // p2 todo turn to error?
+            Assert.IsTrue(data.isAlive);
+            data.isInCoroutine = true;
         }
 
         bool IEnumerator.MoveNext() {
-            var result = tween.isAlive;
+            var result = data.isAlive;
             if (!result) {
-                resetEnumerator();
+                ResetCoroutineEnumerator();
             }
             return result;
         }
 
-        internal bool resetEnumerator() {
-            if (tween.IsCreated) {
-                tween = default;
-                isRunning = false;
+        internal bool ResetCoroutineEnumerator() {
+            if (data.isInCoroutine) {
+                data.isInCoroutine = false;
                 return true;
             }
             return false;
@@ -94,8 +87,8 @@ namespace PrimeTween {
 
         object IEnumerator.Current {
             get {
-                Assert.IsTrue(tween.isAlive); // todo throws if debugger is attached
-				Assert.IsTrue(isRunning);
+                Assert.IsTrue(data.isAlive); // p2 todo throws if debugger is attached
+                Assert.IsTrue(data.isInCoroutine);
                 return null;
             }
         }

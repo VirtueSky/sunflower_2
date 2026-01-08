@@ -19,7 +19,7 @@ namespace PrimeTween {
             readonly Tween tween;
 
             internal TweenAwaiter(Tween tween) {
-                if (tween.isAlive && !tween.tryManipulate()) {
+                if (tween.isAlive && !tween.TryManipulate()) {
                     this.tween = default;
                 } else {
                     this.tween = tween;
@@ -35,20 +35,22 @@ namespace PrimeTween {
                 try {
                     Assert.IsTrue(tween.isAlive);
                     var infiniteSettings = new TweenSettings<float>(0, 0, float.MaxValue, Ease.Linear, -1);
-                    var wait = animate(tween.tween, ref infiniteSettings, t => {
-                        if (t._isAlive) {
-                            var target = t.target as ReusableTween;
-                            if (t.longParam != target.id || !target._isAlive) {
-                                t.ForceComplete();
-                            }
-                        }
-                    }, null, TweenType.Callback);
+                    var wait = animate(tween.tween, ref infiniteSettings, TweenAnimation.TweenType.TweenAwaiter);
                     Assert.IsTrue(wait.isAlive);
                     wait.tween.longParam = tween.id;
-                    wait.tween.OnComplete(continuation, true);
+                    wait.tween.managedData.OnComplete(continuation, true);
                 } catch (Exception e) {
                     Debug.LogException(e);
                     throw;
+                }
+            }
+
+            internal static void UpdateTweenAwaiter(ref TweenData rt, ref UnmanagedTweenData d) {
+                if (d.isAlive) {
+                    var target = rt.target as ColdData;
+                    if (rt.cold.longParam != target.id || !target.data.isAlive) {
+                        rt.ForceComplete(ref d);
+                    }
                 }
             }
 
