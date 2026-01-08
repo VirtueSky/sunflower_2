@@ -20,7 +20,7 @@ namespace VirtueSky.Inspector
             return new OverrideScope(overrideContext);
         }
 
-        public struct EnterPropertyScope : IDisposable
+        public struct EnterPropertyScope
         {
             private TriPropertyOverrideContext _previousContext;
 
@@ -32,7 +32,7 @@ namespace VirtueSky.Inspector
                 return this;
             }
 
-            public void Dispose()
+            public void EndProperty()
             {
                 Override = Current;
                 Current = _previousContext;

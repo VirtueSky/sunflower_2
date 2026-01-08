@@ -56,12 +56,21 @@ namespace VirtueSky.Inspector.Elements
 
             GUI.enabled &= _property.IsEnabled;
             EditorGUI.showMixedValue = _property.IsValueMixed;
+            var overrideCtx = TriPropertyOverrideContext.BeginProperty();
 
-            using (TriPropertyOverrideContext.BeginProperty())
+            if (_property.TryGetSerializedProperty(out var serializedProperty))
             {
-                base.OnGUI(position);
+                EditorGUI.BeginProperty(position, null, serializedProperty);
             }
 
+            base.OnGUI(position);
+
+            if (_property.TryGetSerializedProperty(out _))
+            {
+                EditorGUI.EndProperty();
+            }
+
+            overrideCtx.EndProperty();
             EditorGUI.showMixedValue = oldShowMixedValue;
             GUI.enabled = oldEnabled;
         }
