@@ -28,15 +28,13 @@ namespace VirtueSky.Ads
             LevelPlay.ValidateIntegration();
             LevelPlay.Init(AdSettings.AppKey);
 #endif
-            LoadInterstitial();
-            LoadRewarded();
-            LoadBanner();
         }
 
         public override AdUnit InterstitialAdUnit() => AdSettings.LevelPlayInterstitialAdUnit;
 
         public override void LoadInterstitial()
         {
+            if (AdSettings.LevelPlayInterstitialAdUnit == null) return;
             if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady()) AdSettings.LevelPlayInterstitialAdUnit.Load();
         }
 
@@ -44,6 +42,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
+            if (AdSettings.LevelPlayRewardAdUnit == null) return;
             if (!AdSettings.LevelPlayRewardAdUnit.IsReady()) AdSettings.LevelPlayRewardAdUnit.Load();
         }
 
@@ -73,6 +72,7 @@ namespace VirtueSky.Ads
 
         public override void LoadBanner()
         {
+            if (AdSettings.LevelPlayBannerAdUnit == null) return;
             AdSettings.LevelPlayBannerAdUnit.Load();
         }
 
@@ -102,6 +102,9 @@ namespace VirtueSky.Ads
         void SdkInitializationCompletedEvent(LevelPlayConfiguration config)
         {
             SdkInitializationCompleted = true;
+            LoadInterstitial();
+            LoadRewarded();
+            LoadBanner();
         }
 #endif
 
