@@ -10,8 +10,10 @@ using Object = UnityEngine.Object;
 
 namespace VirtueSky.Inspector.Elements
 {
-    public class TriListElement : TriElement
+     public class TriListElement : TriElement
     {
+        private const int MinElementsForVirtualization = 25;
+
         private const float ListExtraWidth = 7f;
         private const float DraggableAreaExtraWidth = 14f;
 
@@ -19,8 +21,11 @@ namespace VirtueSky.Inspector.Elements
         private readonly ReorderableList _reorderableListGui;
         private readonly bool _alwaysExpanded;
         private readonly bool _showElementLabels;
+        private readonly bool _showAlternatingBackground;
 
         private float _lastContentWidth;
+        private int? _lastInvisibleElement;
+        private int? _lastVisibleElement;
 
         protected ReorderableList ListGui => _reorderableListGui;
 
@@ -31,13 +36,16 @@ namespace VirtueSky.Inspector.Elements
             _property = property;
             _alwaysExpanded = settings?.AlwaysExpanded ?? false;
             _showElementLabels = settings?.ShowElementLabels ?? false;
+            _showAlternatingBackground = settings?.ShowAlternatingBackground ?? true;
             _reorderableListGui = new ReorderableList(null, _property.ArrayElementType)
             {
+                showDefaultBackground = settings?.ShowDefaultBackground ?? true,
                 draggable = settings?.Draggable ?? true,
                 displayAdd = settings == null || !settings.HideAddButton,
                 displayRemove = settings == null || !settings.HideRemoveButton,
                 drawHeaderCallback = DrawHeaderCallback,
                 elementHeightCallback = ElementHeightCallback,
+                drawElementBackgroundCallback = DrawElementBackgroundCallback,
                 drawElementCallback = DrawElementCallback,
                 onAddCallback = AddElementCallback,
                 onRemoveCallback = RemoveElementCallback,
@@ -60,11 +68,11 @@ namespace VirtueSky.Inspector.Elements
             }
             else if (_property.Value != null)
             {
-                _reorderableListGui.list = (IList)_property.Value;
+                _reorderableListGui.list = (IList) _property.Value;
             }
             else if (_reorderableListGui.list == null)
             {
-                _reorderableListGui.list = (IList)(_property.FieldType.IsArray
+                _reorderableListGui.list = (IList) (_property.FieldType.IsArray
                     ? Array.CreateInstance(_property.ArrayElementType, 0)
                     : Activator.CreateInstance(_property.FieldType));
             }
@@ -109,11 +117,20 @@ namespace VirtueSky.Inspector.Elements
         {
             if (!_property.IsExpanded)
             {
+                _lastInvisibleElement = null;
+                _lastVisibleElement = null;
+
                 ReorderableListProxy.DoListHeader(_reorderableListGui, new Rect(position)
                 {
                     yMax = position.yMax - 4,
                 });
                 return;
+            }
+
+            if (_reorderableListGui.count < MinElementsForVirtualization)
+            {
+                _lastInvisibleElement = null;
+                _lastVisibleElement = null;
             }
 
             var labelWidthExtra = ListExtraWidth + DraggableAreaExtraWidth;
@@ -142,7 +159,7 @@ namespace VirtueSky.Inspector.Elements
 
             _property.SetValues(targetIndex =>
             {
-                var value = (IList)_property.GetValue(targetIndex);
+                var value = (IList) _property.GetValue(targetIndex);
 
                 if (_property.FieldType.IsArray)
                 {
@@ -160,7 +177,7 @@ namespace VirtueSky.Inspector.Elements
                 {
                     if (value == null)
                     {
-                        value = (IList)Activator.CreateInstance(_property.FieldType);
+                        value = (IList) Activator.CreateInstance(_property.FieldType);
                     }
 
                     var newElement = addedReferenceValue != null
@@ -188,7 +205,7 @@ namespace VirtueSky.Inspector.Elements
 
             _property.SetValues(targetIndex =>
             {
-                var value = (IList)_property.GetValue(targetIndex);
+                var value = (IList) _property.GetValue(targetIndex);
 
                 if (_property.FieldType.IsArray)
                 {
@@ -218,7 +235,7 @@ namespace VirtueSky.Inspector.Elements
 
             _property.SetValues(targetIndex =>
             {
-                var value = (IList)_property.GetValue(targetIndex);
+                var value = (IList) _property.GetValue(targetIndex);
 
                 if (value == mainValue)
                 {
@@ -266,7 +283,7 @@ namespace VirtueSky.Inspector.Elements
 
             _property.SetValues(targetIndex =>
             {
-                var value = (IList)_property.GetValue(targetIndex);
+                var value = (IList) _property.GetValue(targetIndex);
 
                 if (_property.FieldType.IsArray)
                 {
@@ -279,7 +296,7 @@ namespace VirtueSky.Inspector.Elements
                 {
                     if (value == null)
                     {
-                        value = (IList)Activator.CreateInstance(_property.FieldType);
+                        value = (IList) Activator.CreateInstance(_property.FieldType);
                     }
 
                     while (value.Count > arraySize)
@@ -368,7 +385,6 @@ namespace VirtueSky.Inspector.Elements
             if (EditorGUI.EndChangeCheck())
             {
                 SetArraySizeCallback(newArraySize);
-                GUIUtility.ExitGUI();
                 return;
             }
 
@@ -395,12 +411,68 @@ namespace VirtueSky.Inspector.Elements
                 Event.current.Use();
             }
         }
+        
+        private void DrawElementBackgroundCallback(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            if (_lastInvisibleElement.HasValue && index + 1 < _lastInvisibleElement.Value ||
+                _lastVisibleElement.HasValue && index - 1 > _lastVisibleElement.Value)
+            {
+                if (index != _reorderableListGui.index)
+                {
+                    return;
+                }
+            }
+
+            if (_showAlternatingBackground && index % 2 != 0)
+            {
+                EditorGUI.DrawRect(rect, new Color(0.1f, 0.1f, 0.1f, 0.15f));
+            }
+
+            ReorderableList.defaultBehaviours.DrawElementBackground(rect, index, isActive, isFocused,
+                _reorderableListGui.draggable);
+        }
 
         private void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
         {
             if (index >= ChildrenCount)
             {
                 return;
+            }
+
+            if (_lastInvisibleElement.HasValue && index + 1 < _lastInvisibleElement.Value ||
+                _lastVisibleElement.HasValue && index - 1 > _lastVisibleElement.Value)
+            {
+                if (index != _reorderableListGui.index)
+                {
+                    return;
+                }
+            }
+
+            if (_reorderableListGui.count > MinElementsForVirtualization)
+            {
+                if (Event.current.type == EventType.Repaint)
+                {
+                    var windowRect = GUIClipProxy.VisibleRect;
+                    var rectInWindow = GUIClipProxy.UnClipToWindow(rect);
+
+                    if (rectInWindow.yMax < 0)
+                    {
+                        _lastInvisibleElement = index;
+                    } else if (_lastInvisibleElement == index)
+                    {
+                        _lastInvisibleElement = index / 2;
+                        _lastVisibleElement = index / 2 + 1;
+                        _property.PropertyTree.RequestRepaint();
+                    }
+
+                    if (rectInWindow.y < windowRect.height)
+                    {
+                        if (!_lastVisibleElement.HasValue || index > _lastVisibleElement.Value)
+                        {
+                            _lastVisibleElement = index;
+                        }
+                    }
+                }
             }
 
             if (!_reorderableListGui.draggable)
@@ -421,6 +493,15 @@ namespace VirtueSky.Inspector.Elements
                 return EditorGUIUtility.singleLineHeight;
             }
 
+            if (_lastInvisibleElement.HasValue && index + 1 < _lastInvisibleElement.Value ||
+                _lastVisibleElement.HasValue && index - 1 > _lastVisibleElement.Value)
+            {
+                if (index != _reorderableListGui.index)
+                {
+                    return Mathf.Max(EditorGUIUtility.singleLineHeight, GetChild(index).CachedHeight);
+                }
+            }
+
             return GetChild(index).GetHeight(_lastContentWidth);
         }
 
@@ -434,7 +515,7 @@ namespace VirtueSky.Inspector.Elements
 
         private static Array CloneValue(TriProperty property)
         {
-            var list = (IList)property.Value;
+            var list = (IList) property.Value;
             var template = Array.CreateInstance(property.ArrayElementType, list?.Count ?? 0);
             list?.CopyTo(template, 0);
             return template;

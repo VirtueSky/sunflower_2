@@ -14,12 +14,12 @@ namespace VirtueSky.ControlPanel.Editor
             GUILayout.Space(10);
             if (GUILayout.Button("Open Asset Finder Window (Ctrl+Shift+K / Command+Shift+K)"))
             {
-                AssetFinderWindowAll.ShowWindow();
+                AssetFinderWindowExtension.ShowWindow();
             }
 
             if (GUILayout.Button("Delete Finder Cache"))
             {
-                AssetFinderWindowAll.DeleteFinderCache();
+                AssetFinderWindowExtension.DeleteCache();
             }
 
             GUILayout.EndVertical();

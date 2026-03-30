@@ -2,7 +2,7 @@
 using VirtueSky.Inspector.Resolvers;
 using VirtueSky.Inspector.Validators;
 
-[assembly: RegisterTriAttributeValidator(typeof(DropdownValidator<>))]
+[assembly: RegisterTriAttributeValidator(typeof(DropdownValidator<>), ApplyOnArrayElement = true)]
 
 namespace VirtueSky.Inspector.Validators
 {

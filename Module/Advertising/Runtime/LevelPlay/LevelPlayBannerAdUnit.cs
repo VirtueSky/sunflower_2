@@ -23,12 +23,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
-            bannerAd.OnAdLoadFailed += BannerOnAdLoadFailedEvent;
-            bannerAd.OnAdClicked += BannerOnAdClickedEvent;
-            bannerAd.OnAdDisplayed += BannerOnAdDisplayedEvent;
-            bannerAd.OnAdDisplayFailed += BannerOnAdDisplayFailedEvent;
-            bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
+            _isBannerDestroyed = true;
 #endif
         }
 
@@ -36,16 +31,22 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            if (_isBannerDestroyed) 
+            if (_isBannerDestroyed || bannerAd == null)
             {
                 LevelPlayBannerAd.Config.Builder builder = new LevelPlayBannerAd.Config.Builder();
                 builder.SetPosition(ConvertBannerPosition());
                 builder.SetSize(ConvertBannerSize());
                 var config = builder.Build();
                 bannerAd = new LevelPlayBannerAd(Id, config);
-                bannerAd.LoadAd();
+                bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
+                bannerAd.OnAdLoadFailed += BannerOnAdLoadFailedEvent;
+                bannerAd.OnAdClicked += BannerOnAdClickedEvent;
+                bannerAd.OnAdDisplayed += BannerOnAdDisplayedEvent;
+                bannerAd.OnAdDisplayFailed += BannerOnAdDisplayFailedEvent;
+                bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
                 _isBannerDestroyed = false;
             }
+            bannerAd.LoadAd();
 #endif
         }
 
@@ -66,8 +67,8 @@ namespace VirtueSky.Ads
 
         public override bool IsReady()
         {
-#if VIRTUESKY_ADS && VIRTUESKY_IRONSOURCE
-            return true;
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            return bannerAd != null;
 #else
             return false;
 #endif
@@ -80,7 +81,7 @@ namespace VirtueSky.Ads
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
-            bannerAd.ShowAd();
+            if (bannerAd != null) bannerAd.ShowAd();
 #endif
         }
 
@@ -99,7 +100,11 @@ namespace VirtueSky.Ads
             _isBannerDestroyed = true;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
-            bannerAd.DestroyAd();
+            if (bannerAd != null)
+            {
+                bannerAd.DestroyAd();
+                bannerAd = null;
+            }
 #endif
         }
 
@@ -108,7 +113,7 @@ namespace VirtueSky.Ads
             base.HideBanner();
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = false;
-            bannerAd.HideAd();
+            if (bannerAd != null) bannerAd.HideAd();
 #endif
         }
 
