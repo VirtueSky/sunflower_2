@@ -24,7 +24,7 @@ namespace VirtueSky.Tracking
                 case "max":
                     ad_platform = "AppLovin";
                     break;
-                case "ironsource":
+                case "levelplay":
                     ad_platform = "IronSource";
                     break;
             }
@@ -35,7 +35,7 @@ namespace VirtueSky.Tracking
                 new("ad_platform", ad_platform),
                 new("ad_format", format),
                 new("currency", "USD"),
-                new("ad_unit_name", unitId),
+                new("ad_unit_id", unitId),
                 new("ad_source", network)
             };
 

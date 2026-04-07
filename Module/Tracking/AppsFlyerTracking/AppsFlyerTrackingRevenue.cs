@@ -28,7 +28,7 @@ namespace VirtueSky.Tracking
                 case "max":
                     mediationNetworks = MediationNetwork.ApplovinMax;
                     break;
-                case "ironsource":
+                case "levelplay":
                     mediationNetworks = MediationNetwork.IronSource;
                     break;
             }
