@@ -12,6 +12,7 @@ namespace VirtueSky.Ads
     {
         public AdsSize size;
         public AdsPosition position;
+        public bool isShowOnLoad = false;
         private bool _isBannerDestroyed = true;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
@@ -36,6 +37,7 @@ namespace VirtueSky.Ads
                 LevelPlayBannerAd.Config.Builder builder = new LevelPlayBannerAd.Config.Builder();
                 builder.SetPosition(ConvertBannerPosition());
                 builder.SetSize(ConvertBannerSize());
+                builder.SetDisplayOnLoad(isShowOnLoad);
                 var config = builder.Build();
                 bannerAd = new LevelPlayBannerAd(Id, config);
                 bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
