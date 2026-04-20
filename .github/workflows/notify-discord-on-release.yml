@@ -1,0 +1,51 @@
+name: Notify Discord on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send release info to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_TITLE: ${{ github.event.release.name }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          RELEASE_NOTE: ${{ github.event.release.body }}
+        run: |
+          NOTE="$RELEASE_NOTE"
+
+          if [ -z "$NOTE" ]; then
+            NOTE="(empty)"
+          fi
+
+          if [ ${#NOTE} -gt 1000 ]; then
+            NOTE="${NOTE:0:1000}..."
+          fi
+
+          jq -n \
+            --arg title "$RELEASE_TITLE" \
+            --arg tag "$TAG_NAME" \
+            --arg note "$NOTE" \
+            '{
+              embeds: [
+                {
+                  title: "GitHub Release",
+                  fields: [
+                    { "name": "Release Title", "value": $title, "inline": false },
+                    { "name": "Tag Name", "value": $tag, "inline": false },
+                    { "name": "Release Note", "value": $note, "inline": false }
+                  ]
+                }
+              ]
+            }' > payload.json
+
+          cat payload.json
+
+          curl --fail-with-body \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d @payload.json \
+               "$DISCORD_WEBHOOK_URL"
