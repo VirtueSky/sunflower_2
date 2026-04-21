@@ -10,6 +10,8 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action completedCallback;
 
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
@@ -43,10 +45,10 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-            MaxSdk.ShowInterstitial(Id);
+            MaxSdk.ShowInterstitial(Id, placement: placement);
 #endif
         }
 
@@ -73,6 +75,7 @@ namespace VirtueSky.Ads
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = false;
+            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             if (!string.IsNullOrEmpty(Id)) MaxSdk.LoadInterstitial(Id);
         }
@@ -80,6 +83,7 @@ namespace VirtueSky.Ads
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = true;
+            IsShowing = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -95,7 +99,7 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(info.Revenue,
                 info.NetworkName,
                 unit,
-                info.AdFormat, AdNetwork.Max.ToString());
+                info.AdFormat, AdMediation.AppLovin.ToString());
         }
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)

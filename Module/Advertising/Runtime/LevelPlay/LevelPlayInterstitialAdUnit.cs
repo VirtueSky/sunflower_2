@@ -14,6 +14,8 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         private LevelPlayInterstitialAd interstitialAd;
 #endif
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -47,18 +49,18 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (interstitialAd != null) interstitialAd.ShowAd();
+            if (interstitialAd != null) interstitialAd.ShowAd(placement);
 #endif
         }
 
-        public override AdUnit Show()
+        public override AdUnit Show(string placement = null)
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || AdStatic.IsRemoveAd || !IsReady()) return this;
-            ShowImpl();
+            ShowImpl(placement);
             return this;
         }
 
@@ -91,6 +93,7 @@ namespace VirtueSky.Ads
         void InterstitialOnAdDisplayEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = true;
+            IsShowing = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -110,6 +113,7 @@ namespace VirtueSky.Ads
         void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = false;
+            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             OnClosedAdEvent?.Invoke();
             Load();

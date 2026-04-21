@@ -20,6 +20,8 @@ namespace VirtueSky.Ads
         private LevelPlayBannerAd bannerAd;  
 #endif
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -76,10 +78,11 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = true;
+            IsShowing = true;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
@@ -87,11 +90,11 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit Show()
+        public override AdUnit Show(string placement = null)
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || AdStatic.IsRemoveAd || !IsReady()) return this;
-            ShowImpl();
+            ShowImpl(placement);
             return this;
         }
 
@@ -100,6 +103,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = false;
             _isBannerDestroyed = true;
+            IsShowing = false;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
             if (bannerAd != null)
@@ -115,6 +119,7 @@ namespace VirtueSky.Ads
             base.HideBanner();
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = false;
+            IsShowing = false;
             if (bannerAd != null) bannerAd.HideAd();
 #endif
         }

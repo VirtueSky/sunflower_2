@@ -16,6 +16,8 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private InterstitialAd _interstitialAd;
 #endif
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
             if (useTestId)
@@ -48,7 +50,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _interstitialAd.Show();
@@ -100,6 +102,7 @@ namespace VirtueSky.Ads
         private void OnAdOpening()
         {
             AdStatic.IsShowingAd = true;
+            IsShowing = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -113,6 +116,7 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
+            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             OnClosedAdEvent?.Invoke();
             Destroy();
@@ -123,7 +127,7 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(value.Value / 1000000f,
                 "Admob",
                 Id,
-                "InterstitialAd", AdNetwork.Admob.ToString());
+                "InterstitialAd", AdMediation.Admob.ToString());
         }
 
         private void OnAdLoaded()

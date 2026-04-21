@@ -25,6 +25,8 @@ namespace VirtueSky.Ads
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
             if (useTestId)
@@ -94,10 +96,11 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _isBannerShowing = true;
+            IsShowing = true;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             if (_bannerView == null)
@@ -114,6 +117,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (_bannerView == null) return;
             _isBannerShowing = false;
+            IsShowing = false;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
             _bannerView.Destroy();
@@ -126,6 +130,7 @@ namespace VirtueSky.Ads
             base.HideBanner();
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _isBannerShowing = false;
+            IsShowing = false;
             if (_bannerView != null) _bannerView.Hide();
 #endif
         }
@@ -187,7 +192,7 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(value.Value / 1000000f,
                 "Admob",
                 Id,
-                "BannerAd", AdNetwork.Admob.ToString());
+                "BannerAd", AdMediation.Admob.ToString());
         }
 
         private void OnAdOpening()

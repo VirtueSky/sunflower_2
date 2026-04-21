@@ -25,6 +25,8 @@ namespace VirtueSky.Ads
 #endif
         private DateTime _expireTime;
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
             if (useTestId)
@@ -57,7 +59,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _appOpenAd.Show();
@@ -107,6 +109,7 @@ namespace VirtueSky.Ads
         {
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
             AdStatic.IsShowingAd = true;
+            IsShowing = true;
             Common.CallActionAndClean(ref displayedCallback);
             OnDisplayedAdEvent?.Invoke();
         }
@@ -121,6 +124,7 @@ namespace VirtueSky.Ads
         {
             AdStatic.waitAppOpenClosedAction?.Invoke();
             AdStatic.IsShowingAd = false;
+            IsShowing = false;
             Common.CallActionAndClean(ref closedCallback);
             OnClosedAdEvent?.Invoke();
             Destroy();
@@ -131,7 +135,7 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(value.Value / 1000000f,
                 "Admob",
                 Id,
-                "AppOpenAd", AdNetwork.Admob.ToString());
+                "AppOpenAd", AdMediation.Admob.ToString());
         }
 
         private void OnAdLoaded()

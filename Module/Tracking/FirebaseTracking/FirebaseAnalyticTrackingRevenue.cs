@@ -21,7 +21,7 @@ namespace VirtueSky.Tracking
                     if (autoTrackAdImpressionAdmob) return;
                     ad_platform = "Admob";
                     break;
-                case "max":
+                case "applovin":
                     ad_platform = "AppLovin";
                     break;
                 case "levelplay":

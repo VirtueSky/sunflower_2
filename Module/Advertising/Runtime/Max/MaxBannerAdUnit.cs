@@ -14,6 +14,8 @@ namespace VirtueSky.Ads
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
@@ -64,10 +66,11 @@ namespace VirtueSky.Ads
             return !string.IsNullOrEmpty(Id);
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             _isBannerShowing = true;
+            IsShowing = true;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
@@ -81,6 +84,7 @@ namespace VirtueSky.Ads
             if (string.IsNullOrEmpty(Id)) return;
             _isBannerShowing = false;
             _isBannerDestroyed = true;
+            IsShowing = false;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
             MaxSdk.DestroyBanner(Id);
@@ -92,6 +96,7 @@ namespace VirtueSky.Ads
             base.HideBanner();
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             _isBannerShowing = false;
+            IsShowing = false;
             if (string.IsNullOrEmpty(Id)) return;
             MaxSdk.HideBanner(Id);
 #endif
@@ -120,7 +125,7 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(info.Revenue,
                 info.NetworkName,
                 unit,
-                info.AdFormat, AdNetwork.Max.ToString());
+                info.AdFormat, AdMediation.AppLovin.ToString());
         }
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)

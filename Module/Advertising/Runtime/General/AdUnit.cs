@@ -27,6 +27,8 @@ namespace VirtueSky.Ads
         public Action OnClickedAdEvent;
 
         [NonSerialized] private string runtimeId = String.Empty;
+        
+        public abstract bool IsShowing { get; internal set; }
 
         public string Id
         {
@@ -56,12 +58,12 @@ namespace VirtueSky.Ads
         public abstract void Load();
         public abstract bool IsReady();
 
-        public virtual AdUnit Show()
+        public virtual AdUnit Show(string placement = null)
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || string.IsNullOrEmpty(Id) || AdStatic.IsRemoveAd || !IsReady())
                 return this;
-            ShowImpl();
+            ShowImpl(placement);
             return this;
         }
 
@@ -73,7 +75,7 @@ namespace VirtueSky.Ads
             closedCallback = null;
         }
 
-        protected abstract void ShowImpl();
+        protected abstract void ShowImpl(string placement = null);
         public abstract void Destroy();
 
         public virtual void HideBanner()
