@@ -35,8 +35,8 @@ namespace VirtueSky.Audio
         private static event Action OnPauseMusicEvent;
         private static event Action OnResumeMusicEvent;
 
-        private static event Action<float> OnVolumeSfxChangedEvent;
-        private static event Action<float> OnVolumeMusicChangedEvent;
+        public static event Action<float> OnVolumeSfxChangedEvent;
+        public static event Action<float> OnVolumeMusicChangedEvent;
 
         private void Awake()
         {
