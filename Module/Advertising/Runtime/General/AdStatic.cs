@@ -60,37 +60,37 @@ namespace VirtueSky.Ads
         internal static Action waitAppOpenDisplayedAction;
         internal static Action waitAppOpenClosedAction;
 
-        public static AdUnit OnDisplayed(this AdUnit unit, Action onDisplayed)
+        public static AdUnit OnDisplayed(this AdUnit unit, Action<AdsInfo> onDisplayed)
         {
             unit.displayedCallback = onDisplayed;
             return unit;
         }
 
-        public static AdUnit OnClosed(this AdUnit unit, Action onClosed)
+        public static AdUnit OnClosed(this AdUnit unit, Action<AdsInfo> onClosed)
         {
             unit.closedCallback = onClosed;
             return unit;
         }
 
-        public static AdUnit OnLoaded(this AdUnit unit, Action onLoaded)
+        public static AdUnit OnLoaded(this AdUnit unit, Action<AdsInfo> onLoaded)
         {
             unit.loadedCallback = onLoaded;
             return unit;
         }
 
-        public static AdUnit OnFailedToLoad(this AdUnit unit, Action onFailedToLoad)
+        public static AdUnit OnFailedToLoad(this AdUnit unit, Action<AdsError> onFailedToLoad)
         {
             unit.failedToLoadCallback = onFailedToLoad;
             return unit;
         }
 
-        public static AdUnit OnFailedToDisplay(this AdUnit unit, Action onFailedToDisplay)
+        public static AdUnit OnFailedToDisplay(this AdUnit unit, Action<AdsError> onFailedToDisplay)
         {
             unit.failedToDisplayCallback = onFailedToDisplay;
             return unit;
         }
 
-        public static AdUnit OnClicked(this AdUnit unit, Action onClicked)
+        public static AdUnit OnClicked(this AdUnit unit, Action<AdsInfo> onClicked)
         {
             unit.clickedCallback = onClicked;
             return unit;

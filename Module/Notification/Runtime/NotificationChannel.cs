@@ -13,13 +13,24 @@ namespace VirtueSky.Notifications
     public class NotificationChannel : ScriptableObject
     {
         [SerializeField] private string identifier;
+        [SerializeField] private ScheduleMode scheduleMode = ScheduleMode.RelativeTime;
 
+        // === Relative Time Settings ===
+        [ShowIf(nameof(scheduleMode), ScheduleMode.RelativeTime)]
         [SerializeField] private bool isRemoteConfigTimeSchedule;
 
         [ShowIf(nameof(isRemoteConfigTimeSchedule))] [SerializeField]
         private string keyRemoteConfig;
 
+        [ShowIf(nameof(scheduleMode), ScheduleMode.RelativeTime)]
         [SerializeField] private int minute = 720;
+
+        // === Specific Time Settings ===
+        [ShowIf(nameof(scheduleMode), ScheduleMode.SpecificTime)]
+        [SerializeField, Range(0, 23)] private int targetHour = 18; // 6h tối
+
+        [ShowIf(nameof(scheduleMode), ScheduleMode.SpecificTime)]
+        [SerializeField, Range(0, 59)] private int targetMinute = 0;
 
         [SerializeField] private bool repeat;
         [SerializeField] internal bool bigPicture;
@@ -49,6 +60,18 @@ namespace VirtueSky.Notifications
             return isRemoteConfigTimeSchedule ? GameData.Get(keyRemoteConfig, minute) : minute;
         }
 
+        DateTime? GetFireTime()
+        {
+            if (scheduleMode == ScheduleMode.SpecificTime)
+            {
+                var now = DateTime.Now;
+                return new DateTime(now.Year, now.Month, now.Day,
+                    targetHour, targetMinute, 0);
+            }
+
+            return null; // RelativeTime mode không cần DateTime cụ thể
+        }
+
         public void Send()
         {
             if (!Application.isMobilePlatform) return;
@@ -70,15 +93,58 @@ namespace VirtueSky.Notifications
 
             string pathPicture = Path.Combine(Application.persistentDataPath, namePicture);
 
+            if (scheduleMode == ScheduleMode.SpecificTime)
+            {
+                // Schedule vào giờ cụ thể
+                var fireTime = GetFireTime();
+                if (fireTime.HasValue)
+                {
+                    NotificationConsole.ScheduleAtSpecificTime(identifier,
+                        data.title,
+                        data.message,
+                        fireTime.Value,
+                        smallIcon: smallIcon,
+                        largeIcon: largeIcon,
+                        bigPicture: bigPicture,
+                        namePicture: pathPicture,
+                        repeat: repeat); // Repeat interval cố định 24h
+                }
+            }
+            else
+            {
+                // Schedule theo khoảng thời gian tương đối (logic cũ)
+                NotificationConsole.Schedule(identifier,
+                    data.title,
+                    data.message,
+                    TimeSpan.FromMinutes(GetTimeSchedule()),
+                    smallIcon: smallIcon,
+                    largeIcon: largeIcon,
+                    bigPicture: bigPicture,
+                    namePicture: pathPicture,
+                    repeat: repeat);
+            }
+        }
+
+        /// <summary>
+        /// Schedule notification with a custom delay time.
+        /// Used for scheduling notifications after app quit.
+        /// </summary>
+        public void ScheduleWithDelay(TimeSpan delay)
+        {
+            if (!Application.isMobilePlatform) return;
+            var data = datas.PickRandom();
+
+            string pathPicture = Path.Combine(Application.persistentDataPath, namePicture);
+
             NotificationConsole.Schedule(identifier,
                 data.title,
                 data.message,
-                TimeSpan.FromMinutes(GetTimeSchedule()),
+                delay,
                 smallIcon: smallIcon,
                 largeIcon: largeIcon,
                 bigPicture: bigPicture,
                 namePicture: pathPicture,
-                repeat: repeat);
+                repeat: false); // Không repeat khi schedule từ quit app
         }
 
         public void CancelAllScheduled()
@@ -105,5 +171,10 @@ namespace VirtueSky.Notifications
             this.title = title;
             this.message = message;
         }
+    }
+    public enum ScheduleMode
+    {
+        RelativeTime,    // Schedule sau X phút từ thời điểm hiện tại
+        SpecificTime     // Schedule vào giờ cụ thể (ví dụ: 6h tối ngày mai)
     }
 }

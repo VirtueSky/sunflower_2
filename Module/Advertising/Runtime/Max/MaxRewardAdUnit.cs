@@ -12,6 +12,8 @@ namespace VirtueSky.Ads
         public bool IsEarnRewarded { get; private set; }
 
 
+        public override bool IsShowing { get; internal set; }
+
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
@@ -45,18 +47,18 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-            MaxSdk.ShowRewardedAd(Id);
+            MaxSdk.ShowRewardedAd(Id, placement: placement);
 #endif
         }
 
-        public override AdUnit Show()
+        public override AdUnit Show(string placement = null)
         {
             ResetChainCallback();
             if (!UnityEngine.Application.isMobilePlatform || !IsReady()) return this;
-            ShowImpl();
+            ShowImpl(placement);
             return this;
         }
 
@@ -85,39 +87,45 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(info.Revenue,
                 info.NetworkName,
                 unit,
-                info.AdFormat, AdNetwork.Max.ToString());
+                info.AdFormat, AdMediation.AppLovin.ToString());
         }
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(info.Message);
+            var errorInfo = new AdsError(info);
+            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+            OnFailedToLoadAdEvent?.Invoke(errorInfo);
         }
 
         private void OnAdClicked(string arg1, MaxSdkBase.AdInfo arg2)
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(arg2);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
 
         private void OnAdDisplayFailed(string unit, MaxSdkBase.ErrorInfo errorInfo,
             MaxSdkBase.AdInfo info)
         {
-            Common.CallActionAndClean(ref failedToDisplayCallback);
-            OnFailedToDisplayAdEvent?.Invoke(errorInfo.Message);
+            var error = new AdsError(errorInfo);
+            Common.CallActionAndClean(ref failedToDisplayCallback, error);
+            OnFailedToDisplayAdEvent?.Invoke(error);
         }
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var adsInfo = new AdsInfo(info);
+            Common.CallActionAndClean(ref loadedCallback, adsInfo);
+            OnLoadAdEvent?.Invoke(adsInfo);
         }
 
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = false;
-            Common.CallActionAndClean(ref closedCallback);
-            OnClosedAdEvent?.Invoke();
+            IsShowing = false;
+            var adsInfo = new AdsInfo(info);
+            Common.CallActionAndClean(ref closedCallback, adsInfo);
+            OnClosedAdEvent?.Invoke(adsInfo);
             if (!IsReady()) MaxSdk.LoadRewardedAd(Id);
             if (IsEarnRewarded)
             {
@@ -132,8 +140,10 @@ namespace VirtueSky.Ads
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = true;
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            IsShowing = true;
+            var adsInfo = new AdsInfo(info);
+            Common.CallActionAndClean(ref displayedCallback, adsInfo);
+            OnDisplayedAdEvent?.Invoke(adsInfo);
         }
 #endif
 

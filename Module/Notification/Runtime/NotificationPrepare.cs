@@ -16,6 +16,10 @@ namespace VirtueSky.Notifications
         [Space, SerializeField] private bool autoSchedule = true;
         [SerializeField] private List<NotificationChannel> channels = new List<NotificationChannel>();
 
+        [Header("Schedule On Quit/Pause")]
+        [SerializeField] private bool scheduleOnQuit = true;
+        [SerializeField] private List<NotificationChannel> channelsOnQuit = new List<NotificationChannel>();
+
         private void Awake()
         {
             if (dontDestroyOnLoad)
@@ -30,10 +34,43 @@ namespace VirtueSky.Notifications
             PermissionPostNotification();
             Prepare();
 #endif
-            if (autoSchedule)
+            CancelAllScheduledNotifications();
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
             {
-                AutoSchedule();
+                ScheduleOnQuit();
+                if (autoSchedule)
+                {
+                    AutoSchedule();
+                }
             }
+            else
+            {
+                CancelAllScheduledNotifications();
+            }
+        }
+
+        private void ScheduleOnQuit()
+        {
+            if (!scheduleOnQuit) return;
+            if (!Application.isMobilePlatform) return;
+
+            foreach (var channel in channelsOnQuit)
+            {
+                if (channel != null)
+                {
+                    channel.Schedule();
+                }
+            }
+        }
+
+        private void CancelAllScheduledNotifications()
+        {
+            if (!Application.isMobilePlatform) return;
+            NotificationConsole.CancelAllScheduled();
         }
 
         void AutoSchedule()
@@ -53,6 +90,12 @@ namespace VirtueSky.Notifications
                 var strs = new List<string>();
 
                 foreach (var channel in channels)
+                {
+                    if (!channel.bigPicture) continue;
+                    if (!strs.Contains(channel.namePicture)) strs.Add(channel.namePicture);
+                }
+
+                foreach (var channel in channelsOnQuit)
                 {
                     if (!channel.bigPicture) continue;
                     if (!strs.Contains(channel.namePicture)) strs.Add(channel.namePicture);

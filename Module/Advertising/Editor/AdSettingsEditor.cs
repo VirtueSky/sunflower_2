@@ -12,7 +12,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _adCheckingInterval;
         private SerializedProperty _adLoadingInterval;
 
-        private SerializedProperty _useMax;
+        private SerializedProperty _useAppLovin;
         private SerializedProperty _useAdmob;
         private SerializedProperty _useLevelPlay;
         private SerializedProperty _enableTrackAdRevenue;
@@ -51,7 +51,7 @@ namespace VirtueSky.Ads
             _adCheckingInterval = serializedObject.FindProperty("adCheckingInterval");
             _adLoadingInterval = serializedObject.FindProperty("adLoadingInterval");
 
-            _useMax = serializedObject.FindProperty("useMax");
+            _useAppLovin = serializedObject.FindProperty("useAppLovin");
             _useAdmob = serializedObject.FindProperty("useAdmob");
             _useLevelPlay = serializedObject.FindProperty("useLevelPlay");
             _enableTrackAdRevenue = serializedObject.FindProperty("enableTrackAdRevenue");
@@ -97,7 +97,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_adCheckingInterval);
             EditorGUILayout.PropertyField(_adLoadingInterval);
 
-            EditorGUILayout.PropertyField(_useMax);
+            EditorGUILayout.PropertyField(_useAppLovin);
             EditorGUILayout.PropertyField(_useAdmob);
             EditorGUILayout.PropertyField(_useLevelPlay);
             EditorGUILayout.PropertyField(_enableTrackAdRevenue);
@@ -109,7 +109,7 @@ namespace VirtueSky.Ads
 
             GUILayout.Space(10);
 
-            if (_useMax.boolValue) DrawMax();
+            if (_useAppLovin.boolValue) DrawMax();
             if (_useAdmob.boolValue) DrawAdmob();
             if (_useLevelPlay.boolValue) DrawIronSource();
 

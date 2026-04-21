@@ -38,6 +38,8 @@ namespace VirtueSky.Ads
         private readonly WaitForSeconds _waitReload = new WaitForSeconds(5);
         private IEnumerator _reload;
 
+        public override bool IsShowing { get; internal set; }
+
         /// <summary>
         /// Init ads and register callback tracking revenue
         /// </summary>
@@ -82,7 +84,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl()
+        protected override void ShowImpl(string placement = null)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (_nativeOverlayAd != null) _nativeOverlayAd.Show();
@@ -307,26 +309,32 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref loadedCallback, info);
+            OnLoadAdEvent?.Invoke(info);
         }
 
         private void OnAdClosed()
         {
-            Common.CallActionAndClean(ref closedCallback);
-            OnClosedAdEvent?.Invoke();
+            IsShowing = false;
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref closedCallback, info);
+            OnClosedAdEvent?.Invoke(info);
         }
 
         private void OnAdOpening()
         {
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            IsShowing = true;
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref displayedCallback, info);
+            OnDisplayedAdEvent?.Invoke(info);
         }
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
 
         private void OnAdPaided(AdValue value)
@@ -334,13 +342,14 @@ namespace VirtueSky.Ads
             paidedCallback?.Invoke(value.Value / 1000000f,
                 "Admob",
                 Id,
-                "NativeOverlayAd", AdNetwork.Admob.ToString());
+                "NativeOverlayAd", AdMediation.Admob.ToString());
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(error.GetMessage());
+            var info = new AdsError(error);
+            Common.CallActionAndClean(ref failedToLoadCallback, info);
+            OnFailedToLoadAdEvent?.Invoke(info);
             if (_reload != null) App.StopCoroutine(_reload);
             _reload = DelayReload();
             App.StartCoroutine(_reload);
