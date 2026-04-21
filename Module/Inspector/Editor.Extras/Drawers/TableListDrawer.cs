@@ -251,15 +251,33 @@ namespace VirtueSky.Inspector.Drawers
 
                         if (index == 0)
                         {
-                            foreach (var kvp in ((TableRowElement) (_cellElementContainer.GetChild(0))).Elements)
+                            var firstRowElement = (TableRowElement) (_cellElementContainer.GetChild(0));
+                            for (var ci = 0; ci < firstRowElement.Elements.Count; ci++)
                             {
-                                columns.Add(new MultiColumnHeaderState.Column
+                                var kvp = firstRowElement.Elements[ci];
+                                var col = new MultiColumnHeaderState.Column
                                 {
                                     headerContent = kvp.Value,
                                     headerTextAlignment = TextAlignment.Center,
                                     autoResize = true,
                                     canSort = false,
-                                });
+                                };
+
+                                // Check for [TableColumnWidth] on the matching child property
+                                var childProps = _property.ArrayElementProperties[0].ChildrenProperties;
+                                if (ci < childProps.Count)
+                                {
+                                    var childProp = childProps[ci];
+                                    if (childProp.TryGetAttribute(out TableColumnWidthAttribute widthAttr))
+                                    {
+                                        col.width      = widthAttr.Width;
+                                        col.minWidth   = widthAttr.MinWidth;
+                                        col.maxWidth   = widthAttr.MaxWidth;
+                                        col.autoResize = widthAttr.AutoResize;
+                                    }
+                                }
+
+                                columns.Add(col);
                             }
                         }
                     }
