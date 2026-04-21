@@ -309,28 +309,32 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref loadedCallback, info);
+            OnLoadAdEvent?.Invoke(info);
         }
 
         private void OnAdClosed()
         {
             IsShowing = false;
-            Common.CallActionAndClean(ref closedCallback);
-            OnClosedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref closedCallback, info);
+            OnClosedAdEvent?.Invoke(info);
         }
 
         private void OnAdOpening()
         {
             IsShowing = true;
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref displayedCallback, info);
+            OnDisplayedAdEvent?.Invoke(info);
         }
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
 
         private void OnAdPaided(AdValue value)
@@ -343,8 +347,9 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(error.GetMessage());
+            var info = new AdsError(error);
+            Common.CallActionAndClean(ref failedToLoadCallback, info);
+            OnFailedToLoadAdEvent?.Invoke(info);
             if (_reload != null) App.StopCoroutine(_reload);
             _reload = DelayReload();
             App.StartCoroutine(_reload);

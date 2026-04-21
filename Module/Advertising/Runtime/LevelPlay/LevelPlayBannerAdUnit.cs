@@ -153,33 +153,38 @@ namespace VirtueSky.Ads
 
         void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref loadedCallback, info);
+            OnLoadAdEvent?.Invoke(info);
         }
 
         void BannerOnAdLoadFailedEvent(LevelPlayAdError ironSourceError)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ErrorMessage);
+            var errorInfo = new AdsError(ironSourceError);
+            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+            OnFailedToLoadAdEvent?.Invoke(errorInfo);
             Destroy();
         }
 
         void BannerOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
 
         void BannerOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
         {
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref displayedCallback, info);
+            OnDisplayedAdEvent?.Invoke(info);
         }
 
         void BannerOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
-            Common.CallActionAndClean(ref failedToDisplayCallback);
-            OnFailedToDisplayAdEvent?.Invoke(adError.ErrorMessage);
+            var errorInfo = new AdsError(adError);
+            Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
+            OnFailedToDisplayAdEvent?.Invoke(errorInfo);
         }
 
         void BannerOnAdLeftApplicationEvent(LevelPlayAdInfo adInfo)

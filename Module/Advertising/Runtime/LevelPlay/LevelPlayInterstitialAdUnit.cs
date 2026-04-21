@@ -80,34 +80,39 @@ namespace VirtueSky.Ads
 
         void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref loadedCallback, info);
+            OnLoadAdEvent?.Invoke(info);
         }
 
         void InterstitialOnAdLoadFailed(LevelPlayAdError ironSourceError)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(ironSourceError.ErrorMessage);
+            var errorInfo = new AdsError(ironSourceError);
+            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+            OnFailedToLoadAdEvent?.Invoke(errorInfo);
         }
 
         void InterstitialOnAdDisplayEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref displayedCallback, info);
+            OnDisplayedAdEvent?.Invoke(info);
         }
 
         void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
         
         void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
-            Common.CallActionAndClean(ref failedToDisplayCallback);
-            OnFailedToDisplayAdEvent?.Invoke(adError.ErrorMessage);
+            var errorInfo = new AdsError(adError);
+            Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
+            OnFailedToDisplayAdEvent?.Invoke(errorInfo);
         }
 
         void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
@@ -115,7 +120,9 @@ namespace VirtueSky.Ads
             AdStatic.IsShowingAd = false;
             IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
-            OnClosedAdEvent?.Invoke();
+            var info = new AdsInfo(adInfo);
+            Common.CallActionAndClean(ref closedCallback, info);
+            OnClosedAdEvent?.Invoke(info);
             Load();
         }
        

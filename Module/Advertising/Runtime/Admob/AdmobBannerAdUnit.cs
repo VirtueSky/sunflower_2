@@ -155,8 +155,9 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback);
-            OnClickedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref clickedCallback, info);
+            OnClickedAdEvent?.Invoke(info);
         }
 
         public AdPosition ConvertPosition()
@@ -197,20 +198,23 @@ namespace VirtueSky.Ads
 
         private void OnAdOpening()
         {
-            Common.CallActionAndClean(ref displayedCallback);
-            OnDisplayedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref displayedCallback, info);
+            OnDisplayedAdEvent?.Invoke(info);
         }
 
         private void OnAdLoaded()
         {
-            Common.CallActionAndClean(ref loadedCallback);
-            OnLoadAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref loadedCallback, info);
+            OnLoadAdEvent?.Invoke(info);
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
-            Common.CallActionAndClean(ref failedToLoadCallback);
-            OnFailedToLoadAdEvent?.Invoke(error.GetMessage());
+            var errorInfo = new AdsError(error);
+            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+            OnFailedToLoadAdEvent?.Invoke(errorInfo);
             if (_reload != null) App.StopCoroutine(_reload);
             _reload = DelayBannerReload();
             App.StartCoroutine(_reload);
@@ -218,8 +222,9 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
-            Common.CallActionAndClean(ref closedCallback);
-            OnClosedAdEvent?.Invoke();
+            var info = new AdsInfo(AdMediation.Admob);
+            Common.CallActionAndClean(ref closedCallback, info);
+            OnClosedAdEvent?.Invoke(info);
         }
 
         private IEnumerator DelayBannerReload()

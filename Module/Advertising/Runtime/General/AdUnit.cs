@@ -11,20 +11,20 @@ namespace VirtueSky.Ads
         [SerializeField] protected string iOSId;
 
 
-        [NonSerialized] internal Action loadedCallback;
-        [NonSerialized] internal Action failedToLoadCallback;
-        [NonSerialized] internal Action displayedCallback;
-        [NonSerialized] internal Action failedToDisplayCallback;
-        [NonSerialized] internal Action closedCallback;
-        [NonSerialized] internal Action clickedCallback;
+        [NonSerialized] internal Action<AdsInfo> loadedCallback;
+        [NonSerialized] internal Action<AdsError> failedToLoadCallback;
+        [NonSerialized] internal Action<AdsInfo> displayedCallback;
+        [NonSerialized] internal Action<AdsError> failedToDisplayCallback;
+        [NonSerialized] internal Action<AdsInfo> closedCallback;
+        [NonSerialized] internal Action<AdsInfo> clickedCallback;
         [NonSerialized] public Action<double, string, string, string, string> paidedCallback;
 
-        public Action OnLoadAdEvent;
-        public Action<string> OnFailedToLoadAdEvent;
-        public Action OnDisplayedAdEvent;
-        public Action<string> OnFailedToDisplayAdEvent;
-        public Action OnClosedAdEvent;
-        public Action OnClickedAdEvent;
+        public Action<AdsInfo> OnLoadAdEvent;
+        public Action<AdsError> OnFailedToLoadAdEvent;
+        public Action<AdsInfo> OnDisplayedAdEvent;
+        public Action<AdsError> OnFailedToDisplayAdEvent;
+        public Action<AdsInfo> OnClosedAdEvent;
+        public Action<AdsInfo> OnClickedAdEvent;
 
         [NonSerialized] private string runtimeId = String.Empty;
         
