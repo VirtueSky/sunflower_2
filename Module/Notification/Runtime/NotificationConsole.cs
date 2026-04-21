@@ -15,16 +15,7 @@ namespace VirtueSky.Notifications
             bool bigPicture = false,
             string namePicture = "")
         {
-            Schedule(identifier,
-                title,
-                text,
-                TimeSpan.FromMilliseconds(250),
-                largeIcon,
-                channelName,
-                channelDescription,
-                smallIcon,
-                bigPicture,
-                namePicture);
+            Schedule(identifier, title, text, TimeSpan.FromMilliseconds(250), largeIcon, channelName, channelDescription, smallIcon, bigPicture, namePicture);
         }
 
         internal static void Schedule(
@@ -50,19 +41,37 @@ namespace VirtueSky.Notifications
                 bigPictureStyle = new Unity.Notifications.Android.BigPictureStyle
                     { Picture = namePicture, ContentTitle = title, ContentDescription = text };
             }
-
-            NotificationAndroid.Schedule(identifier,
-                title,
-                text,
-                timeOffset,
-                largeIcon,
-                channelName,
-                channelDescription,
-                smallIcon,
-                bigPictureStyle,
-                repeat);
+            NotificationAndroid.Schedule(identifier, title, text, timeOffset, largeIcon, channelName, channelDescription, smallIcon, bigPictureStyle, repeat);
 #elif UNITY_IOS && VIRTUESKY_NOTIFICATION
             NotificationIOS.Schedule(identifier, title, "", text, timeOffset, repeat);
+#endif
+        }
+
+        internal static void ScheduleAtSpecificTime(
+            string identifier,
+            string title,
+            string text,
+            DateTime fireTime,
+            string largeIcon = null,
+            string channelName = "Nova",
+            string channelDescription = "Newsletter Announcement",
+            string smallIcon = null,
+            bool bigPicture = false,
+            string namePicture = "",
+            bool repeat = false)
+        {
+            if (string.IsNullOrEmpty(smallIcon)) smallIcon = "icon_0";
+            if (string.IsNullOrEmpty(largeIcon)) largeIcon = "icon_1";
+
+#if UNITY_ANDROID && VIRTUESKY_NOTIFICATION
+            Unity.Notifications.Android.BigPictureStyle? bigPictureStyle = null;
+            if (bigPicture)
+            {
+                bigPictureStyle = new Unity.Notifications.Android.BigPictureStyle { Picture = namePicture, ContentTitle = title, ContentDescription = text };
+            }
+            NotificationAndroid.ScheduleAtSpecificTime(identifier, title, text, fireTime, largeIcon, channelName, channelDescription, smallIcon, bigPictureStyle, repeat);
+#elif UNITY_IOS && VIRTUESKY_NOTIFICATION
+            NotificationIOS.ScheduleAtSpecificTime(identifier, title, "", text, fireTime, repeat);
 #endif
         }
 
