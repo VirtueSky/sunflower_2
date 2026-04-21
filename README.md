@@ -23,9 +23,22 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-- for version `1.7.1`
+- for version `1.7.2`
 ```json
-"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.7.1",
+{
+  "scopedRegistries": [
+    {
+      "name": "npm",
+      "url": "https://registry.npmjs.org/",
+      "scopes": [
+        "com.kyrylokuzyk"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.wolf-org.sunflower2": "https://github.com/VirtueSky/sunflower_2.git#1.7.2"
+  }
+}
 ```
 - depencies:
 ```json
