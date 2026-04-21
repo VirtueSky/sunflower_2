@@ -23,9 +23,22 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-- for version `1.7.1`
+- for version `1.7.2`
 ```json
-"com.wolf-org.sunflower2":"https://github.com/VirtueSky/sunflower_2.git#1.7.1",
+{
+  "scopedRegistries": [
+    {
+      "name": "npm",
+      "url": "https://registry.npmjs.org/",
+      "scopes": [
+        "com.kyrylokuzyk"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.wolf-org.sunflower2": "https://github.com/VirtueSky/sunflower_2.git#1.7.2"
+  }
+}
 ```
 - depencies:
 ```json
@@ -68,4 +81,4 @@
 - [See Document](https://github.com/wolf-package/unity-common/wiki)
 - [Project Implement](https://github.com/VirtueSky/TheBeginning_2)
 
-[Discord](https://discord.gg/WaCGX5Ex)
+[Join Discord to receive update notifications](https://discord.gg/WaCGX5Ex)
