@@ -20,6 +20,11 @@ namespace VirtueSky.Component
             {
                 component.matchWidthOrHeight = camera.aspect > aspectRatio ? 1 : 0;
             }
+            else
+            {
+                float screenAspect = (float)Screen.width / Screen.height;
+                component.matchWidthOrHeight = screenAspect > aspectRatio ? 1 : 0;
+            }
         }
 
         void GetCanvas()
