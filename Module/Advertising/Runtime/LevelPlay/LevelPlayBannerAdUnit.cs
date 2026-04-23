@@ -16,6 +16,7 @@ namespace VirtueSky.Ads
         private bool _isBannerDestroyed = true;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
+        private string _placement;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         private LevelPlayBannerAd bannerAd;  
 #endif
@@ -40,6 +41,7 @@ namespace VirtueSky.Ads
                 builder.SetPosition(ConvertBannerPosition());
                 builder.SetSize(ConvertBannerSize());
                 builder.SetDisplayOnLoad(isShowOnLoad);
+                builder.SetPlacementName(_placement);
                 var config = builder.Build();
                 bannerAd = new LevelPlayBannerAd(Id, config);
                 bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
@@ -59,7 +61,7 @@ namespace VirtueSky.Ads
             if (_previousBannerShowStatus)
             {
                 _previousBannerShowStatus = false;
-                Show();
+                Show(_placement);
             }
         }
 
@@ -83,6 +85,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = true;
             IsShowing = true;
+            _placement = placement;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
