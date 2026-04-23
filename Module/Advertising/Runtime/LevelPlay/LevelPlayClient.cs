@@ -89,9 +89,9 @@ namespace VirtueSky.Ads
         {
             if (impressionData.Revenue != null)
             {
-                AppTracking.TrackRevenue((double)impressionData.Revenue, impressionData.AdNetwork,
-                    impressionData.MediationAdUnitId,
-                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+                AdSettings.LevelPlayBannerAdUnit.OnAdPaidEvent(impressionData);
+                AdSettings.LevelPlayInterstitialAdUnit.OnAdPaidEvent(impressionData);
+                AdSettings.LevelPlayRewardAdUnit.OnAdPaidEvent(impressionData);
             }
         }
 
@@ -99,6 +99,7 @@ namespace VirtueSky.Ads
         {
             LevelPlay.SetPauseGame(pauseStatus);
         }
+
         void SdkInitializationCompletedEvent(LevelPlayConfiguration config)
         {
             SdkInitializationCompleted = true;
@@ -107,6 +108,5 @@ namespace VirtueSky.Ads
             LoadBanner();
         }
 #endif
-
     }
 }

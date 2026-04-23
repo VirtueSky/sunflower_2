@@ -1,6 +1,7 @@
 using System;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 using Unity.Services.LevelPlay;
+using VirtueSky.Tracking;
 #endif
 using UnityEngine;
 using VirtueSky.Misc;
@@ -18,7 +19,7 @@ namespace VirtueSky.Ads
         private bool _previousBannerShowStatus;
         private string _placement;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-        private LevelPlayBannerAd bannerAd;  
+        private LevelPlayBannerAd bannerAd;
 #endif
 
         public override bool IsShowing { get; internal set; }
@@ -28,6 +29,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
             _isBannerDestroyed = true;
+            paidedCallback += AppTracking.TrackRevenue;
 #endif
         }
 
@@ -52,6 +54,7 @@ namespace VirtueSky.Ads
                 bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
                 _isBannerDestroyed = false;
             }
+
             bannerAd.LoadAd();
 #endif
         }
@@ -153,6 +156,16 @@ namespace VirtueSky.Ads
         }
 
         #region Fun Callback
+
+        internal void OnAdPaidEvent(LevelPlayImpressionData impressionData)
+        {
+            if (impressionData.MediationAdUnitId.Equals(Id))
+            {
+                paidedCallback?.Invoke((double)impressionData.Revenue, impressionData.AdNetwork,
+                    impressionData.MediationAdUnitId,
+                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+            }
+        }
 
         void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
