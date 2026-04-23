@@ -49,14 +49,14 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (interstitialAd != null) interstitialAd.ShowAd(placement);
 #endif
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || AdStatic.IsRemoveAd || !IsReady()) return this;

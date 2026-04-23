@@ -58,7 +58,7 @@ namespace VirtueSky.Ads
         public abstract void Load();
         public abstract bool IsReady();
 
-        public virtual AdUnit Show(string placement = null)
+        public virtual AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || string.IsNullOrEmpty(Id) || AdStatic.IsRemoveAd || !IsReady())
@@ -75,7 +75,7 @@ namespace VirtueSky.Ads
             closedCallback = null;
         }
 
-        protected abstract void ShowImpl(string placement = null);
+        protected abstract void ShowImpl(string placement = "");
         public abstract void Destroy();
 
         public virtual void HideBanner()

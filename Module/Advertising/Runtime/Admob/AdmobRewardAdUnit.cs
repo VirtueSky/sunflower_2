@@ -51,7 +51,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _rewardedAd.Show(UserRewardEarnedCallback);
@@ -65,7 +65,7 @@ namespace VirtueSky.Ads
             skippedCallback = null;
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!UnityEngine.Application.isMobilePlatform || string.IsNullOrEmpty(Id) || !IsReady())

@@ -47,14 +47,14 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             MaxSdk.ShowRewardedAd(Id, placement: placement);
 #endif
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!UnityEngine.Application.isMobilePlatform || !IsReady()) return this;
