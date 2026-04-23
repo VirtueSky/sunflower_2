@@ -97,7 +97,10 @@ namespace VirtueSky.Ads
 
         private void OnAppStateChange(bool pauseStatus)
         {
-            LevelPlay.SetPauseGame(pauseStatus);
+            if (SdkInitializationCompleted)
+            {
+                LevelPlay.SetPauseGame(pauseStatus);
+            }
         }
 
         void SdkInitializationCompletedEvent(LevelPlayConfiguration config)
