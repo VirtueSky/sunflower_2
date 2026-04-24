@@ -33,6 +33,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
+            if(AdSettings.MaxRewardAdUnit.IsShowing) return;
             if (!AdSettings.MaxRewardAdUnit.IsReady()) AdSettings.MaxRewardAdUnit.Load();
         }
 

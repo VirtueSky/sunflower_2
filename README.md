@@ -23,7 +23,7 @@
 ### 1: Download the repo and drop it into folder `Assets`
 ### 2: Add the line below to `Packages/manifest.json`
 
-- for version `1.7.4`
+- for version `1.7.5`
 ```json
 {
   "scopedRegistries": [
@@ -36,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "com.wolf-org.sunflower2": "https://github.com/VirtueSky/sunflower_2.git#1.7.4"
+    "com.wolf-org.sunflower2": "https://github.com/VirtueSky/sunflower_2.git#1.7.5"
   }
 }
 ```

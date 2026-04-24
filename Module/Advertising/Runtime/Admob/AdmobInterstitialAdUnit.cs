@@ -50,7 +50,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _interstitialAd.Show();
@@ -119,12 +119,12 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
             Destroy();
+            IsShowing = false;
         }
 
         private void OnAdPaided(AdValue value)

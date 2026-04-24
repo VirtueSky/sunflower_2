@@ -45,7 +45,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             MaxSdk.ShowInterstitial(Id, placement: placement);
@@ -76,11 +76,11 @@ namespace VirtueSky.Ads
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref closedCallback, adsInfo);
             OnClosedAdEvent?.Invoke(adsInfo);
+            IsShowing = false;
             if (!string.IsNullOrEmpty(Id)) MaxSdk.LoadInterstitial(Id);
         }
 

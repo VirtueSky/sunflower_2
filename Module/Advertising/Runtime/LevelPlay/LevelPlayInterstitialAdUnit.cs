@@ -4,6 +4,7 @@ using Unity.Services.LevelPlay;
 #endif
 using UnityEngine;
 using VirtueSky.Misc;
+using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
 {
@@ -20,6 +21,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
+            paidedCallback += AppTracking.TrackRevenue;
 #endif
         }
 
@@ -49,14 +51,14 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (interstitialAd != null) interstitialAd.ShowAd(placement);
 #endif
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || AdStatic.IsRemoveAd || !IsReady()) return this;
@@ -77,6 +79,16 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
         #region Fun Callback
+
+        internal void OnAdPaidEvent(LevelPlayImpressionData impressionData)
+        {
+            if (impressionData.MediationAdUnitId.Equals(Id))
+            {
+                paidedCallback?.Invoke((double)impressionData.Revenue, impressionData.AdNetwork,
+                    impressionData.MediationAdUnitId,
+                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+            }
+        }
 
         void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
@@ -107,7 +119,7 @@ namespace VirtueSky.Ads
             Common.CallActionAndClean(ref clickedCallback, info);
             OnClickedAdEvent?.Invoke(info);
         }
-        
+
         void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
             var errorInfo = new AdsError(adError);
@@ -118,14 +130,13 @@ namespace VirtueSky.Ads
         void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             var info = new AdsInfo(adInfo);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
+            IsShowing = false;
             Load();
         }
-       
 
         #endregion
 

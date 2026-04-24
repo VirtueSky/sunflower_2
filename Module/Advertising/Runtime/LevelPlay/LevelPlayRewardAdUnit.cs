@@ -1,8 +1,10 @@
 using System;
+using VirtueSky.Core;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 using Unity.Services.LevelPlay;
 #endif
 using VirtueSky.Misc;
+using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
 {
@@ -11,7 +13,11 @@ namespace VirtueSky.Ads
     {
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
+        [NonSerialized] internal Action receivedRewardCallback;
         public bool IsEarnRewarded { get; private set; }
+        private const float FinalizeCloseDelay = 0.2f;
+        private DelayHandle _finalizeCloseHandle;
+        
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         LevelPlayRewardedAd rewardedAd;
 #endif
@@ -21,6 +27,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
+            paidedCallback += AppTracking.TrackRevenue;
 #endif
         }
 
@@ -51,14 +58,14 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (rewardedAd != null) rewardedAd.ShowAd(placement);
 #endif
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!UnityEngine.Application.isMobilePlatform || !IsReady()) return this;
@@ -68,18 +75,37 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
+            IsShowing = false;
         }
-
+        
+        private void ResetFinalizeCloseHandle()
+        {
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = null;
+        }
+        
         protected override void ResetChainCallback()
         {
             base.ResetChainCallback();
             completedCallback = null;
             skippedCallback = null;
+            receivedRewardCallback = null;
+            IsEarnRewarded = false;
         }
 
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
         #region Fun Callback
+
+        internal void OnAdPaidEvent(LevelPlayImpressionData impressionData)
+        {
+            if (impressionData.MediationAdUnitId.Equals(Id))
+            {
+                paidedCallback?.Invoke((double)impressionData.Revenue, impressionData.AdNetwork,
+                    impressionData.MediationAdUnitId,
+                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+            }
+        }
 
         void OnAdLoaded(LevelPlayAdInfo adInfo)
         {
@@ -107,19 +133,11 @@ namespace VirtueSky.Ads
         void RewardedVideoOnAdClosedEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             var info = new AdsInfo(adInfo);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
-            if (!IsReady() && rewardedAd != null) rewardedAd.LoadAd();
-            if (IsEarnRewarded)
-            {
-                Common.CallActionAndClean(ref completedCallback);
-                IsEarnRewarded = false;
-                return;
-            }
-
-            Common.CallActionAndClean(ref skippedCallback);
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
 
         void RewardedVideoOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError ironSourceError)
@@ -132,6 +150,7 @@ namespace VirtueSky.Ads
         void RewardedVideoOnAdRewardedEvent(LevelPlayAdInfo info, LevelPlayReward reward)
         {
             IsEarnRewarded = true;
+            Common.CallActionAndClean(ref receivedRewardCallback);
         }
 
         void RewardedVideoOnAdClickedEvent(LevelPlayAdInfo adInfo)
@@ -140,7 +159,23 @@ namespace VirtueSky.Ads
             Common.CallActionAndClean(ref clickedCallback, info);
             OnClickedAdEvent?.Invoke(info);
         }
+        private void FinalizeClose()
+        {
+            _finalizeCloseHandle = null;
+            if (!IsReady() && rewardedAd != null) rewardedAd.LoadAd();
+            if (IsEarnRewarded)
+            {
+                Common.CallActionAndClean(ref completedCallback);
+                IsEarnRewarded = false;
+                ResetFinalizeCloseHandle();
+                IsShowing = false;
+                return;
+            }
 
+            Common.CallActionAndClean(ref skippedCallback);
+            ResetFinalizeCloseHandle();
+            IsShowing = false;
+        }
         #endregion
 
 #endif

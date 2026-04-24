@@ -1,6 +1,7 @@
 using System;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 using Unity.Services.LevelPlay;
+using VirtueSky.Tracking;
 #endif
 using UnityEngine;
 using VirtueSky.Misc;
@@ -16,8 +17,9 @@ namespace VirtueSky.Ads
         private bool _isBannerDestroyed = true;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
+        private string _placement;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-        private LevelPlayBannerAd bannerAd;  
+        private LevelPlayBannerAd bannerAd;
 #endif
 
         public override bool IsShowing { get; internal set; }
@@ -27,6 +29,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
             _isBannerDestroyed = true;
+            paidedCallback += AppTracking.TrackRevenue;
 #endif
         }
 
@@ -40,6 +43,7 @@ namespace VirtueSky.Ads
                 builder.SetPosition(ConvertBannerPosition());
                 builder.SetSize(ConvertBannerSize());
                 builder.SetDisplayOnLoad(isShowOnLoad);
+                builder.SetPlacementName(_placement);
                 var config = builder.Build();
                 bannerAd = new LevelPlayBannerAd(Id, config);
                 bannerAd.OnAdLoaded += BannerOnAdLoadedEvent;
@@ -50,6 +54,7 @@ namespace VirtueSky.Ads
                 bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
                 _isBannerDestroyed = false;
             }
+
             bannerAd.LoadAd();
 #endif
         }
@@ -59,7 +64,7 @@ namespace VirtueSky.Ads
             if (_previousBannerShowStatus)
             {
                 _previousBannerShowStatus = false;
-                Show();
+                Show(_placement);
             }
         }
 
@@ -78,11 +83,12 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        protected override void ShowImpl(string placement = null)
+        protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             _isBannerShowing = true;
             IsShowing = true;
+            _placement = placement;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
             Load();
@@ -90,7 +96,7 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit Show(string placement = null)
+        public override AdUnit Show(string placement = "")
         {
             ResetChainCallback();
             if (!Application.isMobilePlatform || AdStatic.IsRemoveAd || !IsReady()) return this;
@@ -150,6 +156,16 @@ namespace VirtueSky.Ads
         }
 
         #region Fun Callback
+
+        internal void OnAdPaidEvent(LevelPlayImpressionData impressionData)
+        {
+            if (impressionData.MediationAdUnitId.Equals(Id))
+            {
+                paidedCallback?.Invoke((double)impressionData.Revenue, impressionData.AdNetwork,
+                    impressionData.MediationAdUnitId,
+                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+            }
+        }
 
         void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
