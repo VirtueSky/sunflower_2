@@ -1,4 +1,5 @@
 using System;
+using VirtueSky.Core;
 #if VIRTUESKY_ADMOB && VIRTUESKY_ADS
 using GoogleMobileAds.Api;
 using VirtueSky.Tracking;
@@ -18,6 +19,8 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private RewardedInterstitialAd _rewardedInterstitialAd;
 #endif
+        private const float FinalizeCloseDelay = 0.2f;
+        private DelayHandle _finalizeCloseHandle;
         public override bool IsShowing { get; internal set; }
 
         public override void Init()
@@ -64,6 +67,8 @@ namespace VirtueSky.Ads
             base.ResetChainCallback();
             completedCallback = null;
             skippedCallback = null;
+            receivedRewardCallback = null;
+            IsEarnRewarded = false;
         }
 
         public override AdUnit Show(string placement = "")
@@ -83,8 +88,13 @@ namespace VirtueSky.Ads
             _rewardedInterstitialAd = null;
             IsEarnRewarded = false;
 #endif
+            IsShowing = false;
         }
-
+        private void ResetFinalizeCloseHandle()
+        {
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = null;
+        }
         #region Fun Callback
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
@@ -158,21 +168,30 @@ namespace VirtueSky.Ads
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
-            if (IsEarnRewarded)
-            {
-                Common.CallActionAndClean(ref completedCallback);
-                _rewardedInterstitialAd.Destroy();
-                return;
-            }
-
-            Common.CallActionAndClean(ref skippedCallback);
-            _rewardedInterstitialAd.Destroy();
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
 
         private void UserEarnedRewardCallback(Reward reward)
         {
             IsEarnRewarded = true;
             Common.CallActionAndClean(ref receivedRewardCallback);
+        }
+        private void FinalizeClose()
+        {
+            _finalizeCloseHandle = null;
+            if (IsEarnRewarded)
+            {
+                Common.CallActionAndClean(ref completedCallback);
+                IsEarnRewarded = false;
+                ResetFinalizeCloseHandle();
+                Destroy();
+                return;
+            }
+
+            Common.CallActionAndClean(ref skippedCallback);
+            ResetFinalizeCloseHandle();
+            Destroy();
         }
 #endif
 

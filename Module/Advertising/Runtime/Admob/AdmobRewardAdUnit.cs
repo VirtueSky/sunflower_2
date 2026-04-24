@@ -1,4 +1,5 @@
 using System;
+using VirtueSky.Core;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
 #endif
@@ -15,9 +16,13 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
         [NonSerialized] internal Action receivedRewardCallback;
+
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private RewardedAd _rewardedAd;
 #endif
+        private const float FinalizeCloseDelay = 0.2f;
+        private DelayHandle _finalizeCloseHandle;
+        
         public override bool IsShowing { get; internal set; }
 
         public override void Init()
@@ -64,6 +69,8 @@ namespace VirtueSky.Ads
             base.ResetChainCallback();
             completedCallback = null;
             skippedCallback = null;
+            receivedRewardCallback = null;
+            IsEarnRewarded = false;
         }
 
         public override AdUnit Show(string placement = "")
@@ -83,6 +90,12 @@ namespace VirtueSky.Ads
             _rewardedAd = null;
             IsEarnRewarded = false;
 #endif
+            IsShowing = false;
+        }
+        private void ResetFinalizeCloseHandle()
+        {
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = null;
         }
 
         #region Fun Callback
@@ -140,19 +153,11 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
-            if (IsEarnRewarded)
-            {
-                Common.CallActionAndClean(ref completedCallback);
-                Destroy();
-                return;
-            }
-
-            Common.CallActionAndClean(ref skippedCallback);
-            Destroy();
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
 
         private void OnAdLoaded()
@@ -173,6 +178,22 @@ namespace VirtueSky.Ads
         {
             IsEarnRewarded = true;
             Common.CallActionAndClean(ref receivedRewardCallback);
+        }
+        private void FinalizeClose()
+        {
+            _finalizeCloseHandle = null;
+            if (IsEarnRewarded)
+            {
+                Common.CallActionAndClean(ref completedCallback);
+                IsEarnRewarded = false;
+                ResetFinalizeCloseHandle();
+                Destroy();
+                return;
+            }
+
+            Common.CallActionAndClean(ref skippedCallback);
+            ResetFinalizeCloseHandle();
+            Destroy();
         }
 #endif
 

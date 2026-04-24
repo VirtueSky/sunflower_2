@@ -1,4 +1,5 @@
 using System;
+using VirtueSky.Core;
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
 
@@ -11,7 +12,8 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action skippedCallback;
         [NonSerialized] internal Action receivedRewardCallback;
         public bool IsEarnRewarded { get; private set; }
-
+        private const float FinalizeCloseDelay = 0.2f;
+        private DelayHandle _finalizeCloseHandle;
 
         public override bool IsShowing { get; internal set; }
 
@@ -65,13 +67,20 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
+            IsShowing = false;
         }
-
+        private void ResetFinalizeCloseHandle()
+        {
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = null;
+        }
         protected override void ResetChainCallback()
         {
             base.ResetChainCallback();
             completedCallback = null;
             skippedCallback = null;
+            receivedRewardCallback = null;
+            IsEarnRewarded = false;
         }
 
         #region Func Callback
@@ -124,19 +133,11 @@ namespace VirtueSky.Ads
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref closedCallback, adsInfo);
             OnClosedAdEvent?.Invoke(adsInfo);
-            if (!IsReady()) MaxSdk.LoadRewardedAd(Id);
-            if (IsEarnRewarded)
-            {
-                Common.CallActionAndClean(ref completedCallback);
-                IsEarnRewarded = false;
-                return;
-            }
-
-            Common.CallActionAndClean(ref skippedCallback);
+            App.CancelDelay(_finalizeCloseHandle);
+            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
 
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
@@ -146,6 +147,23 @@ namespace VirtueSky.Ads
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref displayedCallback, adsInfo);
             OnDisplayedAdEvent?.Invoke(adsInfo);
+        }
+        private void FinalizeClose()
+        {
+            _finalizeCloseHandle = null;
+            if (!IsReady()) MaxSdk.LoadRewardedAd(Id);
+            if (IsEarnRewarded)
+            {
+                Common.CallActionAndClean(ref completedCallback);
+                IsEarnRewarded = false;
+                ResetFinalizeCloseHandle();
+                IsShowing = false;
+                return;
+            }
+
+            Common.CallActionAndClean(ref skippedCallback);
+            ResetFinalizeCloseHandle();
+            IsShowing = false;
         }
 #endif
 
