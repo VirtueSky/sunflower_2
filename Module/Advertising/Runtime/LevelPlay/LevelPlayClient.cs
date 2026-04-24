@@ -42,7 +42,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
-            if (AdSettings.LevelPlayRewardAdUnit == null) return;
+            if (AdSettings.LevelPlayRewardAdUnit == null || AdSettings.LevelPlayRewardAdUnit.IsShowing) return;
             if (!AdSettings.LevelPlayRewardAdUnit.IsReady()) AdSettings.LevelPlayRewardAdUnit.Load();
         }
 

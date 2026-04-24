@@ -130,11 +130,11 @@ namespace VirtueSky.Ads
         void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
         {
             AdStatic.IsShowingAd = false;
-            IsShowing = false;
             Common.CallActionAndClean(ref completedCallback);
             var info = new AdsInfo(adInfo);
             Common.CallActionAndClean(ref closedCallback, info);
             OnClosedAdEvent?.Invoke(info);
+            IsShowing = false;
             Load();
         }
 

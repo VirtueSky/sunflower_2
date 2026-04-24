@@ -55,6 +55,7 @@ namespace VirtueSky.Ads
 
         public override void LoadInterstitial()
         {
+            if(AdSettings.AdmobRewardAdUnit.IsShowing) return;
             if (!AdSettings.AdmobInterstitialAdUnit.IsReady()) AdSettings.AdmobInterstitialAdUnit.Load();
         }
 
@@ -62,6 +63,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
+            if(AdSettings.AdmobRewardAdUnit.IsShowing) return;
             if (!AdSettings.AdmobRewardAdUnit.IsReady()) AdSettings.AdmobRewardAdUnit.Load();
         }
 
