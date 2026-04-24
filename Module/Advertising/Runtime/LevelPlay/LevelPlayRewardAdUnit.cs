@@ -12,6 +12,7 @@ namespace VirtueSky.Ads
     {
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
+        [NonSerialized] internal Action receivedRewardCallback;
         public bool IsEarnRewarded { get; private set; }
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         LevelPlayRewardedAd rewardedAd;
@@ -144,6 +145,7 @@ namespace VirtueSky.Ads
         void RewardedVideoOnAdRewardedEvent(LevelPlayAdInfo info, LevelPlayReward reward)
         {
             IsEarnRewarded = true;
+            Common.CallActionAndClean(ref receivedRewardCallback);
         }
 
         void RewardedVideoOnAdClickedEvent(LevelPlayAdInfo adInfo)

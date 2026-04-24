@@ -14,6 +14,7 @@ namespace VirtueSky.Ads
         public bool useTestId;
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
+        [NonSerialized] internal Action receivedRewardCallback;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private RewardedAd _rewardedAd;
 #endif
@@ -171,6 +172,7 @@ namespace VirtueSky.Ads
         private void UserRewardEarnedCallback(Reward reward)
         {
             IsEarnRewarded = true;
+            Common.CallActionAndClean(ref receivedRewardCallback);
         }
 #endif
 

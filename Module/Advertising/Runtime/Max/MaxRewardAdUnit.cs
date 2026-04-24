@@ -9,6 +9,7 @@ namespace VirtueSky.Ads
     {
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
+        [NonSerialized] internal Action receivedRewardCallback;
         public bool IsEarnRewarded { get; private set; }
 
 
@@ -80,6 +81,7 @@ namespace VirtueSky.Ads
             MaxSdkBase.AdInfo info)
         {
             IsEarnRewarded = true;
+            Common.CallActionAndClean(ref receivedRewardCallback);
         }
 
         private void OnAdRevenuePaid(string unit, MaxSdkBase.AdInfo info)
