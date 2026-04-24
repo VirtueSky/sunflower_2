@@ -151,5 +151,25 @@ namespace VirtueSky.Ads
 
             return unit;
         }
+        public static AdUnit OnReceivedReward(this AdUnit unit, Action onReceivedReward)
+        {
+            switch (unit)
+            {
+                case AdmobRewardAdUnit admobReward:
+                    admobReward.receivedRewardCallback = onReceivedReward;
+                    return unit;
+                case AdmobRewardedInterstitialAdUnit admobRewardInter:
+                    admobRewardInter.receivedRewardCallback = onReceivedReward;
+                    return unit;
+                case MaxRewardAdUnit maxReward:
+                    maxReward.receivedRewardCallback = onReceivedReward;
+                    return unit;
+                case LevelPlayRewardAdUnit levelPlayRewardAdUnit:
+                    levelPlayRewardAdUnit.receivedRewardCallback = onReceivedReward;
+                    return unit;
+            }
+
+            return unit;
+        }
     }
 }
