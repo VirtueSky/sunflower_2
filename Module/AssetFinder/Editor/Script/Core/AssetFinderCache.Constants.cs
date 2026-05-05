@@ -4,7 +4,7 @@ namespace VirtueSky.AssetFinder.Editor
 {
     internal partial class AssetFinderCache
     {
-        internal const string DEFAULT_CACHE_PATH = "Assets/_Sunflower/Editor/FinderCache/AssetFinderCache.asset";
+        internal const string DEFAULT_CACHE_PATH = "Assets/_Root/Editor/FinderCache/AssetFinderCache.asset";
         internal const string CACHE_VERSION = "2.6.4";
 
         internal static int cacheStamp;
