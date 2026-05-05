@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace VirtueSky.AudioEditor
 {
-    internal static class EditorAudioPreview
+    public static class EditorAudioPreview
     {
         static readonly Type AudioUtilType;
         static readonly MethodInfo PlayMethod;

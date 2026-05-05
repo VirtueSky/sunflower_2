@@ -29,23 +29,52 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            var configBuilder = new LevelPlayInterstitialAd.Config.Builder();
-            var config = configBuilder.Build();
-            interstitialAd = new LevelPlayInterstitialAd(Id, config);
-            interstitialAd.OnAdLoaded += InterstitialOnAdLoadedEvent;
-            interstitialAd.OnAdLoadFailed += InterstitialOnAdLoadFailed;
-            interstitialAd.OnAdDisplayed += InterstitialOnAdDisplayEvent;
-            interstitialAd.OnAdClicked += InterstitialOnAdClickedEvent;
-            interstitialAd.OnAdDisplayFailed += InterstitialOnAdDisplayFailedEvent;
-            interstitialAd.OnAdClosed += InterstitialOnAdClosedEvent;
-            interstitialAd.LoadAd();
+            if (string.IsNullOrEmpty(Id))
+            {
+                Debug.LogWarning("LevelPlay interstitial load skipped because ad unit id is empty.");
+                return;
+            }
+
+            try
+            {
+                if (interstitialAd == null)
+                {
+                    var configBuilder = new LevelPlayInterstitialAd.Config.Builder();
+                    var config = configBuilder.Build();
+                    interstitialAd = new LevelPlayInterstitialAd(Id, config);
+                    interstitialAd.OnAdLoaded += InterstitialOnAdLoadedEvent;
+                    interstitialAd.OnAdLoadFailed += InterstitialOnAdLoadFailed;
+                    interstitialAd.OnAdDisplayed += InterstitialOnAdDisplayEvent;
+                    interstitialAd.OnAdClicked += InterstitialOnAdClickedEvent;
+                    interstitialAd.OnAdDisplayFailed += InterstitialOnAdDisplayFailedEvent;
+                    interstitialAd.OnAdClosed += InterstitialOnAdClosedEvent;
+                }
+
+                interstitialAd.LoadAd();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"LevelPlay interstitial load failed during SDK call, resetting ad instance. {e}");
+                ResetInterstitialAd();
+            }
 #endif
         }
 
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            return interstitialAd != null && interstitialAd.IsAdReady();
+            if (interstitialAd == null) return false;
+
+            try
+            {
+                return interstitialAd.IsAdReady();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"LevelPlay interstitial IsAdReady failed, resetting ad instance. {e}");
+                ResetInterstitialAd();
+                return false;
+            }
 #else
             return false;
 #endif
@@ -68,6 +97,7 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
+            ResetInterstitialAd();
         }
 
         protected override void ResetChainCallback()
@@ -75,7 +105,20 @@ namespace VirtueSky.Ads
             base.ResetChainCallback();
             completedCallback = null;
         }
-
+        private void ResetInterstitialAd()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            if (interstitialAd == null) return;
+            interstitialAd.OnAdLoaded -= InterstitialOnAdLoadedEvent;
+            interstitialAd.OnAdLoadFailed -= InterstitialOnAdLoadFailed;
+            interstitialAd.OnAdDisplayed -= InterstitialOnAdDisplayEvent;
+            interstitialAd.OnAdClicked -= InterstitialOnAdClickedEvent;
+            interstitialAd.OnAdDisplayFailed -= InterstitialOnAdDisplayFailedEvent;
+            interstitialAd.OnAdClosed -= InterstitialOnAdClosedEvent;
+            interstitialAd = null;   
+#endif
+        }
+        
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
         #region Fun Callback
@@ -102,6 +145,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(ironSourceError);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ResetInterstitialAd();
         }
 
         void InterstitialOnAdDisplayEvent(LevelPlayAdInfo adInfo)
@@ -125,6 +169,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(adError);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            ResetInterstitialAd();
         }
 
         void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
@@ -137,7 +182,6 @@ namespace VirtueSky.Ads
             IsShowing = false;
             Load();
         }
-
         #endregion
 
 #endif

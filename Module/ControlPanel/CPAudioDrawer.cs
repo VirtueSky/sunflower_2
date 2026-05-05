@@ -7,6 +7,7 @@ using VirtueSky.AudioEditor;
 using Object = UnityEngine.Object;
 
 
+
 namespace VirtueSky.ControlPanel.Editor
 {
     public static class CPAudioDrawer
@@ -59,6 +60,11 @@ namespace VirtueSky.ControlPanel.Editor
         private static string renamingText = "";
         private static bool isRenaming = false;
 
+        // Auto-preview setting and state
+        private static bool autoPreviewSound = false;
+        private static SoundData lastPlayedSoundData = null;
+        private static bool pendingAutoPreview = false;
+
         #endregion
 
         #region Initialization & Cleanup
@@ -67,6 +73,14 @@ namespace VirtueSky.ControlPanel.Editor
         private static void Initialize()
         {
             EditorApplication.quitting += Cleanup;
+
+            // Load auto-preview setting from EditorPrefs
+            autoPreviewSound = EditorPrefs.GetBool("CPAudioDrawer_AutoPreview", false);
+
+            // Inject delegates vào bridge để SoundDataEditor có thể gọi mà không cần reference trực tiếp
+            SoundDataEditorBridge.IsAutoPreviewEnabled = () => autoPreviewSound;
+            SoundDataEditorBridge.SetLastPlayedSoundData = sd => lastPlayedSoundData = sd;
+            SoundDataEditorBridge.GetLastPlayedSoundData = () => lastPlayedSoundData;
         }
 
         [UnityEditor.Callbacks.DidReloadScripts]
@@ -353,6 +367,24 @@ namespace VirtueSky.ControlPanel.Editor
                 needsRefresh = true;
             }
 
+            GUILayout.Space(6);
+
+            // Toggle Auto Preview nhanh ngay trong Explore tab
+            EditorGUI.BeginChangeCheck();
+            var toggleLabel = new GUIContent("Auto Preview",
+                "Tự động phát preview khi click vào SoundData");
+            autoPreviewSound = GUILayout.Toggle(autoPreviewSound, toggleLabel,
+                GUILayout.Width(100));
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorPrefs.SetBool("CPAudioDrawer_AutoPreview", autoPreviewSound);
+                if (!autoPreviewSound)
+                {
+                    EditorAudioPreview.Stop();
+                    lastPlayedSoundData = null;
+                }
+            }
+
             GUILayout.FlexibleSpace();
 
             var filteredCount = GetFilteredSoundDataAssets().Count;
@@ -559,6 +591,12 @@ namespace VirtueSky.ControlPanel.Editor
             {
                 selectedSoundData = soundData;
                 DestroyEditor(ref soundDataEditor);
+
+                // Đánh dấu cần auto-preview; SoundDataEditor sẽ gọi PlayFromHead khi được khởi tạo
+                if (autoPreviewSound && soundData != null)
+                {
+                    pendingAutoPreview = true;
+                }
             }
         }
 
@@ -611,6 +649,13 @@ namespace VirtueSky.ControlPanel.Editor
                     sdEditor.SetExternalRepaintCallback(hostWindow != null
                         ? new Action(hostWindow.Repaint)
                         : null);
+
+                    // Gọi PlayFromHead ngay sau khi editor được tạo nếu đang chờ auto-preview
+                    if (pendingAutoPreview)
+                    {
+                        pendingAutoPreview = false;
+                        sdEditor.PlayFromHead();
+                    }
                 }
 
                 EditorGUI.BeginChangeCheck();
@@ -720,9 +765,32 @@ namespace VirtueSky.ControlPanel.Editor
             }
 
             GUILayout.Space(10);
+
+            // Auto-preview toggle (đồng bộ với toggle trong Explore tab)
+            EditorGUI.BeginChangeCheck();
+            autoPreviewSound = EditorGUILayout.Toggle("Auto Preview Sound", autoPreviewSound);
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorPrefs.SetBool("CPAudioDrawer_AutoPreview", autoPreviewSound);
+                if (!autoPreviewSound)
+                {
+                    EditorAudioPreview.Stop();
+                    lastPlayedSoundData = null;
+                }
+            }
+
+            EditorGUILayout.HelpBox(
+                autoPreviewSound
+                    ? "ON: Clicking a SoundData will automatically preview its first audio clip. " +
+                      "Clicking a different SoundData will stop the previous preview and play the new one."
+                    : "OFF: Clicking a SoundData only shows its info in the Inspector as normal.",
+                autoPreviewSound ? MessageType.Info : MessageType.None);
+
+            GUILayout.Space(10);
             GUILayout.EndVertical();
         }
 
         #endregion
+
     }
 }

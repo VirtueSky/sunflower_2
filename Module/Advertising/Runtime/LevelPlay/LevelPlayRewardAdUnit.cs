@@ -35,24 +35,53 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            var configBuilder = new LevelPlayRewardedAd.Config.Builder();
-            var config = configBuilder.Build();
-            rewardedAd = new LevelPlayRewardedAd(Id, config);
-            rewardedAd.OnAdLoaded += OnAdLoaded;
-            rewardedAd.OnAdDisplayed += RewardedVideoOnAdDisplayedEvent;
-            rewardedAd.OnAdClosed += RewardedVideoOnAdClosedEvent;
-            rewardedAd.OnAdDisplayFailed += RewardedVideoOnAdDisplayFailedEvent;
-            rewardedAd.OnAdRewarded += RewardedVideoOnAdRewardedEvent;
-            rewardedAd.OnAdClicked += RewardedVideoOnAdClickedEvent;
-            rewardedAd.OnAdLoadFailed += RewardedVideoOnAdLoadFailedEvent;
-            rewardedAd.LoadAd();
+            if (string.IsNullOrEmpty(Id))
+            {
+                UnityEngine.Debug.LogWarning("LevelPlay rewarded load skipped because ad unit id is empty.");
+                return;
+            }
+
+            try
+            {
+                if (rewardedAd == null)
+                {
+                    var configBuilder = new LevelPlayRewardedAd.Config.Builder();
+                    var config = configBuilder.Build();
+                    rewardedAd = new LevelPlayRewardedAd(Id, config);
+                    rewardedAd.OnAdLoaded += OnAdLoaded;
+                    rewardedAd.OnAdDisplayed += RewardedVideoOnAdDisplayedEvent;
+                    rewardedAd.OnAdClosed += RewardedVideoOnAdClosedEvent;
+                    rewardedAd.OnAdDisplayFailed += RewardedVideoOnAdDisplayFailedEvent;
+                    rewardedAd.OnAdRewarded += RewardedVideoOnAdRewardedEvent;
+                    rewardedAd.OnAdClicked += RewardedVideoOnAdClickedEvent;
+                    rewardedAd.OnAdLoadFailed += RewardedVideoOnAdLoadFailedEvent;
+                }
+
+                rewardedAd.LoadAd();
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning($"LevelPlay rewarded load failed during SDK call, resetting ad instance. {e}");
+                ResetRewardedAd();
+            }
 #endif
         }
 
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            return rewardedAd != null && rewardedAd.IsAdReady();
+            if (rewardedAd == null) return false;
+
+            try
+            {
+                return rewardedAd.IsAdReady();
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning($"LevelPlay rewarded IsAdReady failed, resetting ad instance. {e}");
+                ResetRewardedAd();
+                return false;
+            }
 #else
             return false;
 #endif
@@ -76,6 +105,7 @@ namespace VirtueSky.Ads
         public override void Destroy()
         {
             IsShowing = false;
+             ResetRewardedAd();
         }
         
         private void ResetFinalizeCloseHandle()
@@ -91,6 +121,20 @@ namespace VirtueSky.Ads
             skippedCallback = null;
             receivedRewardCallback = null;
             IsEarnRewarded = false;
+        }
+        private void ResetRewardedAd()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            if (rewardedAd == null) return;
+            rewardedAd.OnAdLoaded -= OnAdLoaded;
+            rewardedAd.OnAdDisplayed -= RewardedVideoOnAdDisplayedEvent;
+            rewardedAd.OnAdClosed -= RewardedVideoOnAdClosedEvent;
+            rewardedAd.OnAdDisplayFailed -= RewardedVideoOnAdDisplayFailedEvent;
+            rewardedAd.OnAdRewarded -= RewardedVideoOnAdRewardedEvent;
+            rewardedAd.OnAdClicked -= RewardedVideoOnAdClickedEvent;
+            rewardedAd.OnAdLoadFailed -= RewardedVideoOnAdLoadFailedEvent;
+            rewardedAd = null;  
+#endif
         }
 
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -119,6 +163,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(ironSourceError);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ResetRewardedAd();
         }
 
         void RewardedVideoOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
@@ -145,6 +190,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(ironSourceError);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            ResetRewardedAd();
         }
 
         void RewardedVideoOnAdRewardedEvent(LevelPlayAdInfo info, LevelPlayReward reward)
@@ -177,7 +223,7 @@ namespace VirtueSky.Ads
             IsShowing = false;
         }
         #endregion
-
+        
 #endif
     }
 }
