@@ -39,6 +39,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _iOSAppKey;
 
         private SerializedProperty _useTestAppKey;
+        private SerializedProperty _enableTestSuite;
         private SerializedProperty _levelPlayBannerAdUnit;
         private SerializedProperty _levelPlayInterstitialAdUnit;
         private SerializedProperty _levelPlayRewardAdUnit;
@@ -75,6 +76,7 @@ namespace VirtueSky.Ads
             _androidAppKey = serializedObject.FindProperty("androidAppKey");
             _iOSAppKey = serializedObject.FindProperty("iOSAppKey");
             _useTestAppKey = serializedObject.FindProperty("useTestAppKey");
+            _enableTestSuite = serializedObject.FindProperty("enableTestSuite");
             _levelPlayBannerAdUnit = serializedObject.FindProperty("levelPlayBannerAdUnit");
             _levelPlayInterstitialAdUnit = serializedObject.FindProperty("levelPlayInterstitialAdUnit");
             _levelPlayRewardAdUnit = serializedObject.FindProperty("levelPlayRewardAdUnit");
@@ -172,6 +174,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.PropertyField(_androidAppKey);
             EditorGUILayout.PropertyField(_iOSAppKey);
             EditorGUILayout.PropertyField(_useTestAppKey);
+            EditorGUILayout.PropertyField(_enableTestSuite);
             EditorGUILayout.PropertyField(_levelPlayBannerAdUnit);
             EditorGUILayout.PropertyField(_levelPlayInterstitialAdUnit);
             EditorGUILayout.PropertyField(_levelPlayRewardAdUnit);

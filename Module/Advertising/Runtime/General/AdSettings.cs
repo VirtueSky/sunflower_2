@@ -80,8 +80,9 @@ namespace VirtueSky.Ads
 
         [SerializeField] private string androidAppKey;
         [SerializeField] private string iOSAppKey;
-        
+
         [SerializeField] private bool useTestAppKey;
+        [SerializeField] private bool enableTestSuite;
         [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
         [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnit;
@@ -121,6 +122,7 @@ namespace VirtueSky.Ads
         }
 
         public static bool UseTestAppKey => Instance.useTestAppKey;
+        public static bool EnableTestSuite => Instance.enableTestSuite;
         public static LevelPlayBannerAdUnit LevelPlayBannerAdUnit => Instance.levelPlayBannerAdUnit;
 
         public static LevelPlayInterstitialAdUnit LevelPlayInterstitialAdUnit =>
