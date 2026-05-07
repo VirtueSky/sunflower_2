@@ -363,6 +363,10 @@ namespace VirtueSky.Ads
         #region Public API
 
         // API for single mediation
+        /// <summary>
+        /// Get ad client for current mediation, return null if the ad client is not supported or not set up in AdSettings. You can call this method to get the ad client for current mediation and then call the method of ad client to load or show ad, for example: Advertising.CurrentAdClient().InterstitialAdUnit().Load(); Note that you should check IsInitAdClient property before calling this method to make sure the ad client is initialized and ready, otherwise it may cause potential error.
+        /// </summary>
+        /// <returns></returns>
         public static AdClient CurrentAdClient()
         {
             return AdSettings.CurrentMediation switch
@@ -373,26 +377,127 @@ namespace VirtueSky.Ads
             };
         }
 
+        /// <summary>
+        /// Get banner ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit BannerAd() => instance.GetBannerAdUnit(AdSettings.CurrentMediation);
+
+        /// <summary>
+        /// Get interstitial ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit InterstitialAd() => instance.GetInterAdUnit(AdSettings.CurrentMediation);
+
+        /// <summary>
+        /// Get reward ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit RewardAd() => instance.GetRewardAdUnit(AdSettings.CurrentMediation);
+
+        /// <summary>
+        /// Get rewarded interstitial ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit RewardedInterstitialAd() => instance.GetRewardInterAdUnit(AdSettings.CurrentMediation);
+
+        /// <summary>
+        /// Get app open ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit AppOpenAd() => instance.GetAppOpenAdUnit(AdSettings.CurrentMediation);
+
+        /// <summary>
+        /// Get native overlay ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
         public static AdUnit NativeOverlayAd() => instance.GetNativeOverlayAdUnit(AdSettings.CurrentMediation);
 
+        /// <summary>
+        /// Show ad mediation debugger for current mediation, do nothing if the mediation is not supported or not set up in AdSettings
+        /// </summary>
+        /// <returns></returns>
+        public static void ShowAdMediationDebugger() => CurrentAdClient().ShowAdMediationDebugger();
+
         // API for mutiple medition
+        /// <summary>
+        /// Get banner ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit BannerAd(AdMediation adMediation) => instance.GetBannerAdUnit(adMediation);
+
+        /// <summary>
+        /// Get interstitial ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit InterstitialAd(AdMediation adMediation) => instance.GetInterAdUnit(adMediation);
+
+        /// <summary>
+        /// Get reward ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit RewardAd(AdMediation adMediation) => instance.GetRewardAdUnit(adMediation);
+
+        /// <summary>
+        /// Get rewarded interstitial ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit RewardedInterstitialAd(AdMediation adMediation) => instance.GetRewardInterAdUnit(adMediation);
+
+        /// <summary>
+        /// Get app open ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit AppOpenAd(AdMediation adMediation) => instance.GetAppOpenAdUnit(adMediation);
+
+        /// <summary>
+        /// Get native overlay ad unit for specific mediation, return null if the ad unit is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        /// <returns></returns>
         public static AdUnit NativeOverlayAd(AdMediation adMediation) => instance.GetNativeOverlayAdUnit(adMediation);
 
+        /// <summary>
+        /// Show ad mediation debugger for specific mediation, do nothing if the mediation is not supported or not set up in AdSettings
+        /// </summary>
+        /// <param name="adMediation"></param>
+        public static void ShowAdMediationDebugger(AdMediation adMediation)
+        {
+            switch (adMediation)
+            {
+                case AdMediation.AppLovin:
+                    instance.maxAdClient.ShowAdMediationDebugger();
+                    break;
+                case AdMediation.Admob:
+                    instance.admobAdClient.ShowAdMediationDebugger();
+                    break;
+                case AdMediation.LevelPlay:
+                    instance.levelPlayAdClient.ShowAdMediationDebugger();
+                    break;
+            }
+        }
+
+
         // General
+        /// <summary>
+        /// Return true if the ad client is initialized, otherwise return false. The ad client will be initialized after the GDPR flow if GDPR is enabled, or initialized directly in Start() if GDPR is not enabled. You can check this property to make sure the ad client is ready before calling any method of ad unit to avoid potential error.
+        /// </summary>
         public static bool IsInitAdClient => instance.isInitAdClient;
 
 #if VIRTUESKY_ADMOB
+        /// <summary>
+        /// Load and show GDPR consent form, this method is only for Admob mediation and will do nothing if the current mediation is not Admob or the Admob client is not initialized. You can call this method when you want to trigger the GDPR flow again, for example when user click the "Privacy Settings" button in your game. Note that you should call this method before showing any ad to make sure the consent form can be shown successfully, otherwise it may cause potential error. If you just want to show the GDPR consent form without reloading it, you can call ShowAgainGdpr() method.
+        /// </summary>
         public static void LoadAndShowGdpr() => instance.LoadAndShowConsentForm();
+
+        /// <summary>
+        /// Show GDPR consent form if it's already loaded, this method is only for Admob mediation and will do nothing if the current mediation is not Admob or the Admob client is not initialized. You can call this method when you want to show the GDPR consent form again without reloading it, for example when user click the "Privacy Settings" button in your game. Note that you should call this method before showing any ad to make sure the consent form can be shown successfully, otherwise it may cause potential error. If you want to reload and show the GDPR consent form, you can call LoadAndShowGdpr() method.
+        /// </summary>
         public static void ShowAgainGdpr() => instance.ShowPrivacyOptionsForm();
 #endif
 
