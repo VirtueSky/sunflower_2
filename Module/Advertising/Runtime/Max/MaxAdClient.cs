@@ -26,6 +26,7 @@ namespace VirtueSky.Ads
 
         public override void LoadInterstitial()
         {
+            if(AdSettings.MaxInterstitialAdUnit == null || AdSettings.MaxInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.MaxInterstitialAdUnit.IsReady()) AdSettings.MaxInterstitialAdUnit.Load();
         }
 
@@ -33,7 +34,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
-            if(AdSettings.MaxRewardAdUnit.IsShowing) return;
+            if(AdSettings.MaxRewardAdUnit == null || AdSettings.MaxRewardAdUnit.IsShowing) return;
             if (!AdSettings.MaxRewardAdUnit.IsReady()) AdSettings.MaxRewardAdUnit.Load();
         }
 
