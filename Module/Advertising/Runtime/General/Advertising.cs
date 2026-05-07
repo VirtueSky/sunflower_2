@@ -30,7 +30,7 @@ namespace VirtueSky.Ads
 
         private AdClient maxAdClient;
         private AdClient admobAdClient;
-        private AdClient ironSourceAdClient;
+        private AdClient levelPlayAdClient;
 
         private static Advertising instance;
 
@@ -83,31 +83,33 @@ namespace VirtueSky.Ads
 
         void InitAdClient()
         {
-            var adSettings = AdSettings.Instance;
             AppTracking.Init(AdSettings.EnableTrackAdRevenue);
-            if (AdSettings.UseAppLovin)
-            {
-                maxAdClient = new MaxAdClient();
-                maxAdClient.Initialize();
-                Debug.Log($"Use AdClient: {maxAdClient}".SetColor(Color.cyan));
-            }
-
-            if (AdSettings.UseAdmob)
-            {
-                admobAdClient = new AdmobClient();
-                admobAdClient.Initialize();
-                Debug.Log($"Use AdClient: {admobAdClient}".SetColor(Color.cyan));
-            }
-
-            if (AdSettings.UseLevelPlay)
-            {
-                ironSourceAdClient = new LevelPlayClient();
-                ironSourceAdClient.Initialize();
-                Debug.Log($"Use AdClient: {ironSourceAdClient}".SetColor(Color.cyan));
-            }
-
+            if (IsApplovin()) InitApplovinClient();
+            if (IsAdmob()) InitAdmobClient();
+            if (IsLevelPlay()) InitLevelPlayClient();
             isInitAdClient = true;
             InitAutoLoadAds();
+        }
+
+        void InitApplovinClient()
+        {
+            maxAdClient = new MaxAdClient();
+            maxAdClient.Initialize();
+            Debug.Log($"Use AdClient: {maxAdClient}".SetColor(Color.cyan));
+        }
+
+        void InitAdmobClient()
+        {
+            admobAdClient = new AdmobClient();
+            admobAdClient.Initialize();
+            Debug.Log($"Use AdClient: {admobAdClient}".SetColor(Color.cyan));
+        }
+
+        void InitLevelPlayClient()
+        {
+            levelPlayAdClient = new LevelPlayClient();
+            levelPlayAdClient.Initialize();
+            Debug.Log($"Use AdClient: {levelPlayAdClient}".SetColor(Color.cyan));
         }
 
         private void InitAutoLoadAds()
@@ -135,15 +137,33 @@ namespace VirtueSky.Ads
             AdStatic.IsShowingAd = state;
         }
 
+        private bool IsApplovin()
+        {
+            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseAppLovin) ||
+                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.AppLovin);
+        }
+
+        private bool IsAdmob()
+        {
+            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseAdmob) ||
+                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.Admob);
+        }
+
+        private bool IsLevelPlay()
+        {
+            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseLevelPlay) ||
+                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.LevelPlay);
+        }
+
         #region Method Load Ads
 
         void AutoLoadInterAds()
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadInterstitialAdTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (AdSettings.UseAppLovin) maxAdClient.LoadInterstitial();
-            if (AdSettings.UseAdmob) admobAdClient.LoadInterstitial();
-            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadInterstitial();
+            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadInterstitial();
+            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadInterstitial();
+            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadInterstitial();
             _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -151,9 +171,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (AdSettings.UseAppLovin) maxAdClient.LoadRewarded();
-            if (AdSettings.UseAdmob) admobAdClient.LoadRewarded();
-            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadRewarded();
+            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadRewarded();
+            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadRewarded();
+            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewarded();
             _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -161,9 +181,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedInterstitialTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (AdSettings.UseAppLovin) maxAdClient.LoadRewardedInterstitial();
-            if (AdSettings.UseAdmob) admobAdClient.LoadRewardedInterstitial();
-            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadRewardedInterstitial();
+            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadRewardedInterstitial();
+            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadRewardedInterstitial();
+            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewardedInterstitial();
             _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -171,9 +191,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadAppOpenTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (AdSettings.UseAppLovin) maxAdClient.LoadAppOpen();
-            if (AdSettings.UseAdmob) admobAdClient.LoadAppOpen();
-            if (AdSettings.UseLevelPlay) ironSourceAdClient.LoadAppOpen();
+            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadAppOpen();
+            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadAppOpen();
+            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadAppOpen();
             _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -284,7 +304,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.BannerAdUnit(),
                 AdMediation.Admob => admobAdClient.BannerAdUnit(),
-                _ => ironSourceAdClient.BannerAdUnit()
+                _ => levelPlayAdClient.BannerAdUnit()
             };
         }
 
@@ -294,7 +314,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.InterstitialAdUnit(),
                 AdMediation.Admob => admobAdClient.InterstitialAdUnit(),
-                _ => ironSourceAdClient.InterstitialAdUnit()
+                _ => levelPlayAdClient.InterstitialAdUnit()
             };
         }
 
@@ -304,7 +324,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.RewardAdUnit(),
                 AdMediation.Admob => admobAdClient.RewardAdUnit(),
-                _ => ironSourceAdClient.RewardAdUnit()
+                _ => levelPlayAdClient.RewardAdUnit()
             };
         }
 
@@ -314,7 +334,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.RewardedInterstitialAdUnit(),
                 AdMediation.Admob => admobAdClient.RewardedInterstitialAdUnit(),
-                _ => ironSourceAdClient.RewardedInterstitialAdUnit()
+                _ => levelPlayAdClient.RewardedInterstitialAdUnit()
             };
         }
 
@@ -324,7 +344,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.AppOpenAdUnit(),
                 AdMediation.Admob => admobAdClient.AppOpenAdUnit(),
-                _ => ironSourceAdClient.AppOpenAdUnit()
+                _ => levelPlayAdClient.AppOpenAdUnit()
             };
         }
 
@@ -334,7 +354,7 @@ namespace VirtueSky.Ads
             {
                 AdMediation.AppLovin => maxAdClient.NativeOverlayAdUnit(),
                 AdMediation.Admob => admobAdClient.NativeOverlayAdUnit(),
-                _ => ironSourceAdClient.NativeOverlayAdUnit()
+                _ => levelPlayAdClient.NativeOverlayAdUnit()
             };
         }
 
@@ -342,12 +362,33 @@ namespace VirtueSky.Ads
 
         #region Public API
 
+        // API for single mediation
+        public static AdClient CurrentAdClient()
+        {
+            return AdSettings.CurrentMediation switch
+            {
+                AdMediation.AppLovin => instance.maxAdClient,
+                AdMediation.Admob => instance.admobAdClient,
+                _ => instance.levelPlayAdClient
+            };
+        }
+
+        public static AdUnit BannerAd() => instance.GetBannerAdUnit(AdSettings.CurrentMediation);
+        public static AdUnit InterstitialAd() => instance.GetInterAdUnit(AdSettings.CurrentMediation);
+        public static AdUnit RewardAd() => instance.GetRewardAdUnit(AdSettings.CurrentMediation);
+        public static AdUnit RewardedInterstitialAd() => instance.GetRewardInterAdUnit(AdSettings.CurrentMediation);
+        public static AdUnit AppOpenAd() => instance.GetAppOpenAdUnit(AdSettings.CurrentMediation);
+        public static AdUnit NativeOverlayAd() => instance.GetNativeOverlayAdUnit(AdSettings.CurrentMediation);
+
+        // API for mutiple medition
         public static AdUnit BannerAd(AdMediation adMediation) => instance.GetBannerAdUnit(adMediation);
         public static AdUnit InterstitialAd(AdMediation adMediation) => instance.GetInterAdUnit(adMediation);
         public static AdUnit RewardAd(AdMediation adMediation) => instance.GetRewardAdUnit(adMediation);
         public static AdUnit RewardedInterstitialAd(AdMediation adMediation) => instance.GetRewardInterAdUnit(adMediation);
         public static AdUnit AppOpenAd(AdMediation adMediation) => instance.GetAppOpenAdUnit(adMediation);
         public static AdUnit NativeOverlayAd(AdMediation adMediation) => instance.GetNativeOverlayAdUnit(adMediation);
+
+        // General
         public static bool IsInitAdClient => instance.isInitAdClient;
 
 #if VIRTUESKY_ADMOB

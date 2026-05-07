@@ -3,7 +3,6 @@ using Unity.Services.LevelPlay;
 using UnityEngine;
 #endif
 using VirtueSky.Core;
-using VirtueSky.DataStorage;
 using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
@@ -11,12 +10,6 @@ namespace VirtueSky.Ads
     public class LevelPlayClient : AdClient
     {
         private const float InitialLoadDelay = 0.1f;
-
-        public bool EnableTestSuiteRuntime
-        {
-            get => GameData.Get("LevelPlayEnableTestSuiteRuntime", false);
-            set => GameData.Set("LevelPlayEnableTestSuiteRuntime", value);
-        }
 
         public override void Initialize()
         {
@@ -27,7 +20,7 @@ namespace VirtueSky.Ads
                 AdSettings.IosAppKey = "8545d445";
             }
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (AdSettings.EnableTestSuite || EnableTestSuiteRuntime)
+            if (AdSettings.EnableTestSuite)
             {
                 LevelPlay.SetMetaData("is_test_suite", "enable");
             }

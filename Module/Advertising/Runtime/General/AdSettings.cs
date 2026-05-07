@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VirtueSky.Core;
+using VirtueSky.DataStorage;
 using VirtueSky.Inspector;
 using VirtueSky.Utils;
 
@@ -15,6 +16,11 @@ namespace VirtueSky.Ads
         [SerializeField] private CoreEnum.RuntimeAutoInitType runtimeAutoInitType;
         [Range(5, 100), SerializeField] private float adCheckingInterval = 8f;
         [Range(5, 100), SerializeField] private float adLoadingInterval = 15f;
+
+        [SerializeField] private MediationLoadMode mediationLoadMode = MediationLoadMode.Multiple;
+
+        [SerializeField, Tooltip("Single mediation selected")]
+        private AdMediation currentMediation = AdMediation.AppLovin;
 
         [SerializeField] private bool useAppLovin = true;
         [SerializeField] private bool useAdmob;
@@ -82,7 +88,7 @@ namespace VirtueSky.Ads
         [SerializeField] private string iOSAppKey;
 
         [SerializeField] private bool useTestAppKey;
-        [SerializeField] private bool enableTestSuite;
+        [SerializeField] private bool enableTestSuiteDefault;
         [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
         [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnit;
@@ -122,7 +128,13 @@ namespace VirtueSky.Ads
         }
 
         public static bool UseTestAppKey => Instance.useTestAppKey;
-        public static bool EnableTestSuite => Instance.enableTestSuite;
+
+        public static bool EnableTestSuite
+        {
+            get => GameData.Get("LevelPlayEnableTestSuiteRuntime", Instance.enableTestSuiteDefault);
+            set => GameData.Set("LevelPlayEnableTestSuiteRuntime", value);
+        }
+
         public static LevelPlayBannerAdUnit LevelPlayBannerAdUnit => Instance.levelPlayBannerAdUnit;
 
         public static LevelPlayInterstitialAdUnit LevelPlayInterstitialAdUnit =>
@@ -136,6 +148,14 @@ namespace VirtueSky.Ads
         public static CoreEnum.RuntimeAutoInitType RuntimeAutoInitType => Instance.runtimeAutoInitType;
         public static float AdCheckingInterval => Instance.adCheckingInterval;
         public static float AdLoadingInterval => Instance.adLoadingInterval;
+        public static MediationLoadMode MediationLoadMode => Instance.mediationLoadMode;
+
+
+        public static AdMediation CurrentMediation
+        {
+            get => Instance.currentMediation;
+            set => Instance.currentMediation = value;
+        }
 
         public static bool UseAppLovin => Instance.useAppLovin;
         public static bool UseAdmob => Instance.useAdmob;
@@ -147,9 +167,9 @@ namespace VirtueSky.Ads
 
     public enum AdMediation
     {
-        AppLovin,
-        Admob,
-        LevelPlay
+        AppLovin = 0,
+        Admob = 1,
+        LevelPlay = 2
     }
 
     public enum AdsPosition
@@ -171,5 +191,11 @@ namespace VirtueSky.Ads
         IABBanner = 2, // 468x60
         Leaderboard = 3, // 728x90
         //    SmartBanner = 4,
+    }
+
+    public enum MediationLoadMode
+    {
+        Single = 0, // Load only the selected mediation
+        Multiple = 1 // Load multiple selected mediations simultaneously.
     }
 }
