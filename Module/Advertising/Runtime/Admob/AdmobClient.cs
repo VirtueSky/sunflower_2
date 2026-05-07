@@ -14,7 +14,7 @@ namespace VirtueSky.Ads
 #if UNITY_IOS
             // On Android, Unity is paused when displaying interstitial or rewarded video.
             // This setting makes iOS behave consistently with Android.
-            MobileAds.SetiOSAppPauseOnBackground(true);         
+            MobileAds.SetiOSAppPauseOnBackground(true);
 #endif
             // When true all events raised by GoogleMobileAds will be raised
             // on the Unity main thread. The default value is false.
@@ -55,7 +55,7 @@ namespace VirtueSky.Ads
 
         public override void LoadInterstitial()
         {
-            if(AdSettings.AdmobInterstitialAdUnit == null || AdSettings.AdmobInterstitialAdUnit.IsShowing) return;
+            if (AdSettings.AdmobInterstitialAdUnit == null || AdSettings.AdmobInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.AdmobInterstitialAdUnit.IsReady()) AdSettings.AdmobInterstitialAdUnit.Load();
         }
 
@@ -63,7 +63,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
-            if(AdSettings.AdmobRewardAdUnit == null || AdSettings.AdmobRewardAdUnit.IsShowing) return;
+            if (AdSettings.AdmobRewardAdUnit == null || AdSettings.AdmobRewardAdUnit.IsShowing) return;
             if (!AdSettings.AdmobRewardAdUnit.IsReady()) AdSettings.AdmobRewardAdUnit.Load();
         }
 
@@ -71,6 +71,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewardedInterstitial()
         {
+            if (AdSettings.AdmobRewardedInterstitialAdUnit == null || AdSettings.AdmobRewardedInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.AdmobRewardedInterstitialAdUnit.IsReady())
                 AdSettings.AdmobRewardedInterstitialAdUnit.Load();
         }
@@ -79,6 +80,7 @@ namespace VirtueSky.Ads
 
         public override void LoadAppOpen()
         {
+            if (AdSettings.AdmobAppOpenAdUnit == null) return;
             if (!AdSettings.AdmobAppOpenAdUnit.IsReady()) AdSettings.AdmobAppOpenAdUnit.Load();
         }
 
@@ -92,6 +94,7 @@ namespace VirtueSky.Ads
 
         public override void LoadBanner()
         {
+            if (AdSettings.AdmobBannerAdUnit == null) return;
             AdSettings.AdmobBannerAdUnit.Load();
         }
 
@@ -99,14 +102,12 @@ namespace VirtueSky.Ads
 
         public override void LoadNativeOverlay()
         {
-            if (!AdSettings.AdmobNativeOverlayAdUnit.IsReady())
-            {
-                AdSettings.AdmobNativeOverlayAdUnit.Load();
-            }
+            if (AdSettings.AdmobNativeOverlayAdUnit == null) return;
+            if (!AdSettings.AdmobNativeOverlayAdUnit.IsReady()) AdSettings.AdmobNativeOverlayAdUnit.Load();
         }
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-        public void RegisterAppStateChange()
+        private void RegisterAppStateChange()
         {
             GoogleMobileAds.Api.AppStateEventNotifier.AppStateChanged += OnAppStateChanged;
         }
