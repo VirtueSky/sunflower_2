@@ -36,7 +36,7 @@ namespace VirtueSky.Ads
         public override void LoadInterstitial()
         {
             if(!SdkInitializationCompleted) return;
-            if (AdSettings.LevelPlayInterstitialAdUnit == null) return;
+            if (AdSettings.LevelPlayInterstitialAdUnit == null || AdSettings.LevelPlayInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady()) AdSettings.LevelPlayInterstitialAdUnit.Load();
         }
 

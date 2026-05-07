@@ -97,7 +97,7 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
-            ResetInterstitialAd();
+            ResetInterstitialAd(true);
         }
 
         protected override void ResetChainCallback()
@@ -105,7 +105,7 @@ namespace VirtueSky.Ads
             base.ResetChainCallback();
             completedCallback = null;
         }
-        private void ResetInterstitialAd()
+        private void ResetInterstitialAd(bool isDestroy = false)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (interstitialAd == null) return;
@@ -115,6 +115,7 @@ namespace VirtueSky.Ads
             interstitialAd.OnAdClicked -= InterstitialOnAdClickedEvent;
             interstitialAd.OnAdDisplayFailed -= InterstitialOnAdDisplayFailedEvent;
             interstitialAd.OnAdClosed -= InterstitialOnAdClosedEvent;
+            if(isDestroy) interstitialAd.DestroyAd();
             interstitialAd = null;   
 #endif
         }

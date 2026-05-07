@@ -104,8 +104,8 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
-            IsShowing = false;
-             ResetRewardedAd();
+             IsShowing = false;
+             ResetRewardedAd(true);
         }
         
         private void ResetFinalizeCloseHandle()
@@ -122,7 +122,7 @@ namespace VirtueSky.Ads
             receivedRewardCallback = null;
             IsEarnRewarded = false;
         }
-        private void ResetRewardedAd()
+        private void ResetRewardedAd(bool isDestroy = false)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (rewardedAd == null) return;
@@ -133,6 +133,7 @@ namespace VirtueSky.Ads
             rewardedAd.OnAdRewarded -= RewardedVideoOnAdRewardedEvent;
             rewardedAd.OnAdClicked -= RewardedVideoOnAdClickedEvent;
             rewardedAd.OnAdLoadFailed -= RewardedVideoOnAdLoadFailedEvent;
+            if(isDestroy) rewardedAd.DestroyAd();
             rewardedAd = null;  
 #endif
         }
