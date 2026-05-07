@@ -2,6 +2,7 @@ namespace VirtueSky.Ads
 {
     public abstract class AdClient
     {
+        public bool SdkInitializationCompleted { get; internal set; }
         protected bool statusAppOpenFirstIgnore;
 
         public abstract void Initialize();
@@ -21,5 +22,6 @@ namespace VirtueSky.Ads
         // Native overlay only for admob
         public abstract AdUnit NativeOverlayAdUnit();
         public abstract void LoadNativeOverlay();
+        public abstract void ShowAdMediationDebugger();
     }
 }

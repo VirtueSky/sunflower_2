@@ -2,6 +2,7 @@
 using GoogleMobileAds.Api;
 using VirtueSky.Tracking;
 #endif
+using UnityEngine;
 using VirtueSky.Core;
 
 namespace VirtueSky.Ads
@@ -10,6 +11,7 @@ namespace VirtueSky.Ads
     {
         public override void Initialize()
         {
+            SdkInitializationCompleted = false;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 #if UNITY_IOS
             // On Android, Unity is paused when displaying interstitial or rewarded video.
@@ -20,21 +22,8 @@ namespace VirtueSky.Ads
             // on the Unity main thread. The default value is false.
             // https://developers.google.com/admob/unity/quick-start#raise_ad_events_on_the_unity_main_thread
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
-
-
-            MobileAds.Initialize(initStatus =>
-            {
-                App.RunOnMainThread(() =>
-                {
-                    if (!AdSettings.AdmobEnableTestMode) return;
-                    var configuration = new RequestConfiguration
-                        { TestDeviceIds = AdSettings.AdmobDevicesTest };
-                    MobileAds.SetRequestConfiguration(configuration);
-                });
-            });
-
+            MobileAds.Initialize(OnInitializeComplete);
             FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
-
             AdSettings.AdmobBannerAdUnit.Init();
             AdSettings.AdmobInterstitialAdUnit.Init();
             AdSettings.AdmobRewardAdUnit.Init();
@@ -42,12 +31,6 @@ namespace VirtueSky.Ads
             AdSettings.AdmobAppOpenAdUnit.Init();
             AdSettings.AdmobNativeOverlayAdUnit.Init();
             RegisterAppStateChange();
-            LoadInterstitial();
-            LoadRewarded();
-            LoadRewardedInterstitial();
-            LoadAppOpen();
-            LoadNativeOverlay();
-            LoadBanner();
 #endif
         }
 
@@ -106,6 +89,30 @@ namespace VirtueSky.Ads
             if (!AdSettings.AdmobNativeOverlayAdUnit.IsReady()) AdSettings.AdmobNativeOverlayAdUnit.Load();
         }
 
+        public override void ShowAdMediationDebugger()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (SdkInitializationCompleted)
+            {
+                MobileAds.OpenAdInspector((result) =>
+                {
+                    if (result != null)
+                    {
+                        Debug.LogError($"Failed to open Ad Inspector: {result.GetCode()} / {result.GetMessage()}");
+                    }
+                    else
+                    {
+                        Debug.Log("Ad Inspector opened successfully.");
+                    }
+                });
+            }
+            else
+            {
+                Debug.LogWarning("Failed to open Ad Inspector: SDK not initialized.");
+            }
+#endif
+        }
+
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private void RegisterAppStateChange()
         {
@@ -118,6 +125,24 @@ namespace VirtueSky.Ads
             {
                 if (AdSettings.UseAdmob) ShowAppOpen();
             }
+        }
+
+        private void OnInitializeComplete(InitializationStatus initStatus)
+        {
+            SdkInitializationCompleted = true;
+            App.RunOnMainThread(() =>
+            {
+                if (!AdSettings.AdmobEnableTestMode) return;
+                var configuration = new RequestConfiguration
+                    { TestDeviceIds = AdSettings.AdmobDevicesTest };
+                MobileAds.SetRequestConfiguration(configuration);
+            });
+            LoadInterstitial();
+            LoadRewarded();
+            LoadRewardedInterstitial();
+            LoadAppOpen();
+            LoadNativeOverlay();
+            LoadBanner();
         }
 #endif
     }

@@ -1,3 +1,4 @@
+using UnityEngine;
 using VirtueSky.Core;
 
 namespace VirtueSky.Ads
@@ -6,19 +7,16 @@ namespace VirtueSky.Ads
     {
         public override void Initialize()
         {
+            SdkInitializationCompleted = false;
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             MaxSdk.SetSdkKey(AdSettings.SdkKey);
+            MaxSdkCallbacks.OnSdkInitializedEvent += OnSdkInitialized;
             MaxSdk.InitializeSdk();
             AdSettings.MaxBannerAdUnit.Init();
             AdSettings.MaxInterstitialAdUnit.Init();
             AdSettings.MaxRewardAdUnit.Init();
             AdSettings.MaxAppOpenAdUnit.Init();
             App.AddPauseCallback(OnAppStateChange);
-            LoadInterstitial();
-            LoadRewarded();
-            LoadRewardedInterstitial();
-            LoadAppOpen();
-            LoadBanner();
 #endif
         }
 
@@ -75,6 +73,21 @@ namespace VirtueSky.Ads
         {
         }
 
+        public override void ShowAdMediationDebugger()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
+            if (SdkInitializationCompleted)
+            {
+                MaxSdk.ShowMediationDebugger();
+                Debug.Log("Ad Mediation Debugger opened successfully.");
+            }
+            else
+            {
+                Debug.LogWarning("Failed to open Ad Mediation Debugger: SDK not initialized.");
+            }
+#endif
+        }
+
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
         private void OnAppStateChange(bool pauseStatus)
         {
@@ -82,6 +95,16 @@ namespace VirtueSky.Ads
             {
                 if (AdSettings.UseAppLovin) ShowAppOpen();
             }
+        }
+
+        private void OnSdkInitialized(MaxSdkBase.SdkConfiguration configuration)
+        {
+            SdkInitializationCompleted = true;
+            LoadInterstitial();
+            LoadRewarded();
+            LoadRewardedInterstitial();
+            LoadAppOpen();
+            LoadBanner();
         }
 #endif
     }

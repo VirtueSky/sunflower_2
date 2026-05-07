@@ -1,5 +1,6 @@
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 using Unity.Services.LevelPlay;
+using UnityEngine;
 #endif
 using VirtueSky.Core;
 using VirtueSky.Tracking;
@@ -9,7 +10,6 @@ namespace VirtueSky.Ads
     public class LevelPlayClient : AdClient
     {
         private const float InitialLoadDelay = 0.1f;
-        public bool SdkInitializationCompleted { get; private set; }
 
         public override void Initialize()
         {
@@ -35,7 +35,7 @@ namespace VirtueSky.Ads
 
         public override void LoadInterstitial()
         {
-            if(!SdkInitializationCompleted) return;
+            if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayInterstitialAdUnit == null || AdSettings.LevelPlayInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady()) AdSettings.LevelPlayInterstitialAdUnit.Load();
         }
@@ -44,7 +44,7 @@ namespace VirtueSky.Ads
 
         public override void LoadRewarded()
         {
-            if(!SdkInitializationCompleted) return;
+            if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayRewardAdUnit == null || AdSettings.LevelPlayRewardAdUnit.IsShowing) return;
             if (!AdSettings.LevelPlayRewardAdUnit.IsReady()) AdSettings.LevelPlayRewardAdUnit.Load();
         }
@@ -75,7 +75,7 @@ namespace VirtueSky.Ads
 
         public override void LoadBanner()
         {
-            if(!SdkInitializationCompleted) return;
+            if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayBannerAdUnit == null) return;
             AdSettings.LevelPlayBannerAdUnit.Load();
         }
@@ -87,6 +87,22 @@ namespace VirtueSky.Ads
 
         public override void LoadNativeOverlay()
         {
+        }
+
+        public override void ShowAdMediationDebugger()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
+            if (SdkInitializationCompleted)
+            {
+                LevelPlay.SetMetaData("is_test_suite", "enable");
+                LevelPlay.LaunchTestSuite();
+                Debug.Log("LevelPlay Test Suite Launched");
+            }
+            else
+            {
+                Debug.LogWarning("Failed to launch LevelPlay Test Suite: SDK initialization not completed.");
+            }
+#endif
         }
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         private void ImpressionDataReadyEvent(LevelPlayImpressionData impressionData)
