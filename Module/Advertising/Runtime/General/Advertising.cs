@@ -20,6 +20,7 @@ namespace VirtueSky.Ads
     [EditorIcon("icon_manager"), HideMonoScript]
     public class Advertising : MonoBehaviour
     {
+        [SerializeField] private bool isPersistent = false;
         private IEnumerator autoLoadAdCoroutine;
         private float _lastTimeLoadInterstitialAdTimestamp = DEFAULT_TIMESTAMP;
         private float _lastTimeLoadRewardedTimestamp = DEFAULT_TIMESTAMP;
@@ -31,47 +32,24 @@ namespace VirtueSky.Ads
         private AdClient admobAdClient;
         private AdClient ironSourceAdClient;
 
+        private static Advertising instance;
+
         private bool isInitAdClient = false;
 
-        private static event Func<AdMediation, AdUnit> OnGetBannerAdEvent;
-        private static event Func<AdMediation, AdUnit> OnGetInterAdEvent;
-        private static event Func<AdMediation, AdUnit> OnGetRewardAdEvent;
-        private static event Func<AdMediation, AdUnit> OnGetRewardInterEvent;
-        private static event Func<AdMediation, AdUnit> OnGetAppOpenAdEvent;
-        private static event Func<AdMediation, AdUnit> OnGetNativeOverlayEvent;
-        private static event Func<bool> OnInitAdClientEvent;
-        private static event Action OnLoadAndShowGdprEvent;
-        private static event Action OnShowGdprAgainEvent;
-
-
-        private void OnEnable()
+        private void Awake()
         {
-            OnGetBannerAdEvent += GetBannerAdUnit;
-            OnGetInterAdEvent += GetInterAdUnit;
-            OnGetRewardAdEvent += GetRewardAdUnit;
-            OnGetRewardInterEvent += GetRewardInterAdUnit;
-            OnGetAppOpenAdEvent += GetAppOpenAdUnit;
-            OnGetNativeOverlayEvent += GetNativeOverlayAdUnit;
-            OnInitAdClientEvent += InternalIsInitAdClient;
-#if VIRTUESKY_ADMOB
-            OnLoadAndShowGdprEvent += LoadAndShowConsentForm;
-            OnShowGdprAgainEvent += ShowPrivacyOptionsForm;
-#endif
-        }
+            if (isPersistent)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
 
-        private void OnDisable()
-        {
-            OnGetBannerAdEvent -= GetBannerAdUnit;
-            OnGetInterAdEvent -= GetInterAdUnit;
-            OnGetRewardAdEvent -= GetRewardAdUnit;
-            OnGetRewardInterEvent -= GetRewardInterAdUnit;
-            OnGetAppOpenAdEvent -= GetAppOpenAdUnit;
-            OnGetNativeOverlayEvent -= GetNativeOverlayAdUnit;
-            OnInitAdClientEvent -= InternalIsInitAdClient;
-#if VIRTUESKY_ADMOB
-            OnLoadAndShowGdprEvent -= LoadAndShowConsentForm;
-            OnShowGdprAgainEvent -= ShowPrivacyOptionsForm;
-#endif
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this;
         }
 
         private void Start()
@@ -360,23 +338,21 @@ namespace VirtueSky.Ads
             };
         }
 
-        private bool InternalIsInitAdClient() => isInitAdClient;
-
         #endregion
 
         #region Public API
 
-        public static AdUnit BannerAd(AdMediation adMediation) => OnGetBannerAdEvent?.Invoke(adMediation);
-        public static AdUnit InterstitialAd(AdMediation adMediation) => OnGetInterAdEvent?.Invoke(adMediation);
-        public static AdUnit RewardAd(AdMediation adMediation) => OnGetRewardAdEvent?.Invoke(adMediation);
-        public static AdUnit RewardedInterstitialAd(AdMediation adMediation) => OnGetRewardInterEvent?.Invoke(adMediation);
-        public static AdUnit AppOpenAd(AdMediation adMediation) => OnGetAppOpenAdEvent?.Invoke(adMediation);
-        public static AdUnit NativeOverlayAd(AdMediation adMediation) => OnGetNativeOverlayEvent?.Invoke(adMediation);
-        public static bool IsInitAdClient => (bool)OnInitAdClientEvent?.Invoke();
+        public static AdUnit BannerAd(AdMediation adMediation) => instance.GetBannerAdUnit(adMediation);
+        public static AdUnit InterstitialAd(AdMediation adMediation) => instance.GetInterAdUnit(adMediation);
+        public static AdUnit RewardAd(AdMediation adMediation) => instance.GetRewardAdUnit(adMediation);
+        public static AdUnit RewardedInterstitialAd(AdMediation adMediation) => instance.GetRewardInterAdUnit(adMediation);
+        public static AdUnit AppOpenAd(AdMediation adMediation) => instance.GetAppOpenAdUnit(adMediation);
+        public static AdUnit NativeOverlayAd(AdMediation adMediation) => instance.GetNativeOverlayAdUnit(adMediation);
+        public static bool IsInitAdClient => instance.isInitAdClient;
 
 #if VIRTUESKY_ADMOB
-        public static void LoadAndShowGdpr() => OnLoadAndShowGdprEvent?.Invoke();
-        public static void ShowAgainGdpr() => OnShowGdprAgainEvent?.Invoke();
+        public static void LoadAndShowGdpr() => instance.LoadAndShowConsentForm();
+        public static void ShowAgainGdpr() => instance.ShowPrivacyOptionsForm();
 #endif
 
         #endregion
