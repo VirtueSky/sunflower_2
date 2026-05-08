@@ -25,7 +25,7 @@ namespace VirtueSky.Ads
         public override void LoadInterstitial()
         {
             if (AdSettings.MaxInterstitialAdUnit == null || AdSettings.MaxInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.MaxInterstitialAdUnit.IsReady()) AdSettings.MaxInterstitialAdUnit.Load();
+            if (!AdSettings.MaxInterstitialAdUnit.IsReady() && !AdSettings.MaxInterstitialAdUnit.IsLoading) AdSettings.MaxInterstitialAdUnit.Load();
         }
 
         public override AdUnit RewardAdUnit() => AdSettings.MaxRewardAdUnit;
@@ -33,7 +33,7 @@ namespace VirtueSky.Ads
         public override void LoadRewarded()
         {
             if (AdSettings.MaxRewardAdUnit == null || AdSettings.MaxRewardAdUnit.IsShowing) return;
-            if (!AdSettings.MaxRewardAdUnit.IsReady()) AdSettings.MaxRewardAdUnit.Load();
+            if (!AdSettings.MaxRewardAdUnit.IsReady() && !AdSettings.MaxRewardAdUnit.IsLoading) AdSettings.MaxRewardAdUnit.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit() => null;
@@ -47,7 +47,7 @@ namespace VirtueSky.Ads
         public override void LoadAppOpen()
         {
             if (AdSettings.MaxAppOpenAdUnit == null) return;
-            if (!AdSettings.MaxAppOpenAdUnit.IsReady()) AdSettings.MaxAppOpenAdUnit.Load();
+            if (!AdSettings.MaxAppOpenAdUnit.IsReady() && !AdSettings.MaxAppOpenAdUnit.IsShowing) AdSettings.MaxAppOpenAdUnit.Load();
         }
 
         public override void ShowAppOpen()

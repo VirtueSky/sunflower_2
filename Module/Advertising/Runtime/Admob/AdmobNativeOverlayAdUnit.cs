@@ -39,6 +39,7 @@ namespace VirtueSky.Ads
         private IEnumerator _reload;
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         /// <summary>
         /// Init ads and register callback tracking revenue
@@ -60,6 +61,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
             if (_nativeOverlayAd != null) Destroy();
+            IsLoading = true;
             var adRequest = new AdRequest();
             var option = new NativeAdOptions
             {
@@ -309,6 +311,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
+            IsLoading = false;
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref loadedCallback, info);
             OnLoadAdEvent?.Invoke(info);
@@ -347,6 +350,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
+            IsLoading = false;
             var info = new AdsError(error);
             Common.CallActionAndClean(ref failedToLoadCallback, info);
             OnFailedToLoadAdEvent?.Invoke(info);

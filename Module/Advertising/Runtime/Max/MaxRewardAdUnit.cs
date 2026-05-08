@@ -16,6 +16,7 @@ namespace VirtueSky.Ads
         private DelayHandle _finalizeCloseHandle;
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -37,6 +38,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             if (string.IsNullOrEmpty(Id)) return;
+            IsLoading = true;
             MaxSdk.LoadRewardedAd(Id);
 #endif
         }
@@ -103,6 +105,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(info);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
@@ -125,6 +128,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
+            IsLoading = false;
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref loadedCallback, adsInfo);
             OnLoadAdEvent?.Invoke(adsInfo);
@@ -151,19 +155,20 @@ namespace VirtueSky.Ads
         private void FinalizeClose()
         {
             _finalizeCloseHandle = null;
-            if (!IsReady()) MaxSdk.LoadRewardedAd(Id);
             if (IsEarnRewarded)
             {
                 Common.CallActionAndClean(ref completedCallback);
                 IsEarnRewarded = false;
                 ResetFinalizeCloseHandle();
                 IsShowing = false;
+                if (!IsReady()) Load();
                 return;
             }
 
             Common.CallActionAndClean(ref skippedCallback);
             ResetFinalizeCloseHandle();
             IsShowing = false;
+            if (!IsReady()) Load();
         }
 #endif
 

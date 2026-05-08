@@ -22,6 +22,7 @@ namespace VirtueSky.Ads
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -42,6 +43,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (string.IsNullOrEmpty(Id)) return;
             Destroy();
+            IsLoading = true;
             RewardedInterstitialAd.Load(Id, new AdRequest(), OnAdLoadCallback);
 #endif
         }
@@ -88,6 +90,7 @@ namespace VirtueSky.Ads
             _rewardedInterstitialAd = null;
             IsEarnRewarded = false;
 #endif
+            IsLoading = false;
             IsShowing = false;
         }
         private void ResetFinalizeCloseHandle()
@@ -106,7 +109,7 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-
+            
             _rewardedInterstitialAd = ad;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += OnAdClosed;
             _rewardedInterstitialAd.OnAdFullScreenContentOpened += OnAdOpening;
@@ -125,6 +128,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(error);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
@@ -132,6 +136,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
+            IsLoading = false;
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref loadedCallback, info);
             OnLoadAdEvent?.Invoke(info);
@@ -150,6 +155,8 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(error);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            Destroy();
+            Load();
         }
 
         private void OnAdOpening()
@@ -186,12 +193,14 @@ namespace VirtueSky.Ads
                 IsEarnRewarded = false;
                 ResetFinalizeCloseHandle();
                 Destroy();
+                Load();
                 return;
             }
 
             Common.CallActionAndClean(ref skippedCallback);
             ResetFinalizeCloseHandle();
             Destroy();
+            Load();
         }
 #endif
 

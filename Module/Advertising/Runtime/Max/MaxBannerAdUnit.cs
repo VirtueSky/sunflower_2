@@ -16,6 +16,7 @@ namespace VirtueSky.Ads
         private string _placement;
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -45,6 +46,8 @@ namespace VirtueSky.Ads
                 {
                     MaxSdk.SetBannerPlacement(Id, _placement);
                 }
+
+                IsLoading = true;
                 MaxSdk.CreateBanner(Id, ConvertPosition());
                 _isBannerDestroyed = false;
             }
@@ -136,6 +139,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
+            IsLoading = false;
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref loadedCallback, adsInfo);
             OnLoadAdEvent?.Invoke(adsInfo);
@@ -157,6 +161,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(info);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);

@@ -17,6 +17,7 @@ namespace VirtueSky.Ads
         private InterstitialAd _interstitialAd;
 #endif
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -36,6 +37,7 @@ namespace VirtueSky.Ads
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
 
             Destroy();
+            IsLoading = true;
             InterstitialAd.Load(Id, new AdRequest(), AdLoadCallback);
 
 #endif
@@ -70,6 +72,7 @@ namespace VirtueSky.Ads
             _interstitialAd.Destroy();
             _interstitialAd = null;
 #endif
+            IsLoading = false;
         }
 
         #region Fun Callback
@@ -83,7 +86,7 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-
+            
             _interstitialAd = ad;
             _interstitialAd.OnAdPaid += OnAdPaided;
             _interstitialAd.OnAdFullScreenContentClosed += OnAdClosed;
@@ -114,6 +117,9 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(error);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            IsShowing = false;
+            Destroy();
+            Load();
         }
 
         private void OnAdClosed()
@@ -125,6 +131,7 @@ namespace VirtueSky.Ads
             OnClosedAdEvent?.Invoke(info);
             Destroy();
             IsShowing = false;
+            Load();
         }
 
         private void OnAdPaided(AdValue value)
@@ -137,6 +144,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
+            IsLoading = false;
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref loadedCallback, info);
             OnLoadAdEvent?.Invoke(info);
@@ -144,6 +152,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(error);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);

@@ -39,7 +39,7 @@ namespace VirtueSky.Ads
         public override void LoadInterstitial()
         {
             if (AdSettings.AdmobInterstitialAdUnit == null || AdSettings.AdmobInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobInterstitialAdUnit.IsReady()) AdSettings.AdmobInterstitialAdUnit.Load();
+            if (!AdSettings.AdmobInterstitialAdUnit.IsReady() && !AdSettings.AdmobInterstitialAdUnit.IsLoading) AdSettings.AdmobInterstitialAdUnit.Load();
         }
 
         public override AdUnit RewardAdUnit() => AdSettings.AdmobRewardAdUnit;
@@ -47,7 +47,7 @@ namespace VirtueSky.Ads
         public override void LoadRewarded()
         {
             if (AdSettings.AdmobRewardAdUnit == null || AdSettings.AdmobRewardAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobRewardAdUnit.IsReady()) AdSettings.AdmobRewardAdUnit.Load();
+            if (!AdSettings.AdmobRewardAdUnit.IsReady() && !AdSettings.AdmobRewardAdUnit.IsLoading) AdSettings.AdmobRewardAdUnit.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit() => AdSettings.AdmobRewardedInterstitialAdUnit;
@@ -55,7 +55,7 @@ namespace VirtueSky.Ads
         public override void LoadRewardedInterstitial()
         {
             if (AdSettings.AdmobRewardedInterstitialAdUnit == null || AdSettings.AdmobRewardedInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobRewardedInterstitialAdUnit.IsReady())
+            if (!AdSettings.AdmobRewardedInterstitialAdUnit.IsReady() && !AdSettings.AdmobRewardedInterstitialAdUnit.IsLoading)
                 AdSettings.AdmobRewardedInterstitialAdUnit.Load();
         }
 
@@ -64,7 +64,7 @@ namespace VirtueSky.Ads
         public override void LoadAppOpen()
         {
             if (AdSettings.AdmobAppOpenAdUnit == null) return;
-            if (!AdSettings.AdmobAppOpenAdUnit.IsReady()) AdSettings.AdmobAppOpenAdUnit.Load();
+            if (!AdSettings.AdmobAppOpenAdUnit.IsReady() && !AdSettings.AdmobAppOpenAdUnit.IsShowing) AdSettings.AdmobAppOpenAdUnit.Load();
         }
 
         public override void ShowAppOpen()

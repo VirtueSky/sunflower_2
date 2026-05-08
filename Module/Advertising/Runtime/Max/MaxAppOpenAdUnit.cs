@@ -15,6 +15,7 @@ namespace VirtueSky.Ads
         public float timeBetweenFullScreenAd = 2f;
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -35,6 +36,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            IsLoading = true;
             MaxSdk.LoadAppOpenAd(Id);
 #endif
         }
@@ -65,6 +67,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
+            IsLoading = false;
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref loadedCallback, adsInfo);
             OnLoadAdEvent?.Invoke(adsInfo);
@@ -80,6 +83,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(info);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
@@ -108,8 +112,7 @@ namespace VirtueSky.Ads
             var adsInfo = new AdsInfo(info);
             Common.CallActionAndClean(ref closedCallback, adsInfo);
             OnClosedAdEvent?.Invoke(adsInfo);
-
-            if (!string.IsNullOrEmpty(Id)) MaxSdk.LoadAppOpenAd(Id);
+            Load();
         }
 
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)

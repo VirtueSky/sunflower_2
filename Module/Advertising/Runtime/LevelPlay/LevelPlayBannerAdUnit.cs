@@ -23,6 +23,7 @@ namespace VirtueSky.Ads
 #endif
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -54,7 +55,7 @@ namespace VirtueSky.Ads
                 bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
                 _isBannerDestroyed = false;
             }
-
+            IsLoading = true;
             bannerAd.LoadAd();
 #endif
         }
@@ -169,6 +170,7 @@ namespace VirtueSky.Ads
 
         void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
+            IsLoading = false;
             var info = new AdsInfo(adInfo);
             Common.CallActionAndClean(ref loadedCallback, info);
             OnLoadAdEvent?.Invoke(info);
@@ -176,6 +178,7 @@ namespace VirtueSky.Ads
 
         void BannerOnAdLoadFailedEvent(LevelPlayAdError ironSourceError)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(ironSourceError);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);

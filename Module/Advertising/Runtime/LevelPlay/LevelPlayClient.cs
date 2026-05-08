@@ -42,7 +42,7 @@ namespace VirtueSky.Ads
         {
             if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayInterstitialAdUnit == null || AdSettings.LevelPlayInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady()) AdSettings.LevelPlayInterstitialAdUnit.Load();
+            if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady() && !AdSettings.LevelPlayInterstitialAdUnit.IsLoading) AdSettings.LevelPlayInterstitialAdUnit.Load();
         }
 
         public override AdUnit RewardAdUnit() => AdSettings.LevelPlayRewardAdUnit;
@@ -51,7 +51,7 @@ namespace VirtueSky.Ads
         {
             if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayRewardAdUnit == null || AdSettings.LevelPlayRewardAdUnit.IsShowing) return;
-            if (!AdSettings.LevelPlayRewardAdUnit.IsReady()) AdSettings.LevelPlayRewardAdUnit.Load();
+            if (!AdSettings.LevelPlayRewardAdUnit.IsReady() && !AdSettings.LevelPlayRewardAdUnit.IsLoading) AdSettings.LevelPlayRewardAdUnit.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit()

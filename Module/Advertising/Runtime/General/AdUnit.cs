@@ -29,6 +29,7 @@ namespace VirtueSky.Ads
         [NonSerialized] private string runtimeId = String.Empty;
         
         public abstract bool IsShowing { get; internal set; }
+        public abstract bool IsLoading { get; internal set; }
 
         public string Id
         {

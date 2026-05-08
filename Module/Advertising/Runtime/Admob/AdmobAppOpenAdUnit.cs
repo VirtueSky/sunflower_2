@@ -26,6 +26,7 @@ namespace VirtueSky.Ads
         private DateTime _expireTime;
 
         public override bool IsShowing { get; internal set; }
+        public override bool IsLoading { get; internal set; }
 
         public override void Init()
         {
@@ -45,6 +46,7 @@ namespace VirtueSky.Ads
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
 
             Destroy();
+            IsLoading = true;
             AppOpenAd.Load(Id, new AdRequest(), OnAdLoadCallback);
 #endif
         }
@@ -86,7 +88,7 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-
+            
             _appOpenAd = ad;
             _appOpenAd.OnAdPaid += OnAdPaided;
             _appOpenAd.OnAdFullScreenContentClosed += OnAdClosed;
@@ -144,6 +146,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded()
         {
+            IsLoading = false;
             var info = new AdsInfo(AdMediation.Admob);
             Common.CallActionAndClean(ref loadedCallback, info);
             OnLoadAdEvent?.Invoke(info);
@@ -151,6 +154,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
+            IsLoading = false;
             var errorInfo = new AdsError(error);
             Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
             OnFailedToLoadAdEvent?.Invoke(errorInfo);
