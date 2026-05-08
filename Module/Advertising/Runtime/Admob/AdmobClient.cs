@@ -22,6 +22,7 @@ namespace VirtueSky.Ads
             // on the Unity main thread. The default value is false.
             // https://developers.google.com/admob/unity/quick-start#raise_ad_events_on_the_unity_main_thread
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
+            TestMode();
             MobileAds.Initialize(OnInitializeComplete);
             FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
             AdSettings.AdmobBannerAdUnit.Init();
@@ -130,19 +131,20 @@ namespace VirtueSky.Ads
         private void OnInitializeComplete(InitializationStatus initStatus)
         {
             SdkInitializationCompleted = true;
-            App.RunOnMainThread(() =>
-            {
-                if (!AdSettings.AdmobEnableTestMode) return;
-                var configuration = new RequestConfiguration
-                    { TestDeviceIds = AdSettings.AdmobDevicesTest };
-                MobileAds.SetRequestConfiguration(configuration);
-            });
             LoadInterstitial();
             LoadRewarded();
             LoadRewardedInterstitial();
             LoadAppOpen();
             LoadNativeOverlay();
             LoadBanner();
+        }
+
+        private void TestMode()
+        {
+            if (!AdSettings.AdmobEnableTestMode) return;
+            var configuration = new RequestConfiguration
+                { TestDeviceIds = AdSettings.AdmobDevicesTest };
+            MobileAds.SetRequestConfiguration(configuration);
         }
 #endif
     }
