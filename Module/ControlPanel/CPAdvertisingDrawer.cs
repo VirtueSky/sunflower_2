@@ -92,7 +92,7 @@ namespace VirtueSky.ControlPanel.Editor
             CPUtility.DrawHeader("Define symbols");
             GUILayout.Space(10);
             CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADS);
-            if (AdSettings.UseAppLovin)
+            if (AdSettings.IsApplovin())
             {
 #if !VIRTUESKY_ADS || !VIRTUESKY_APPLOVIN
             EditorGUILayout.HelpBox(
@@ -102,7 +102,7 @@ namespace VirtueSky.ControlPanel.Editor
                 CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_APPLOVIN);
             }
 
-            if (AdSettings.UseAdmob)
+            if (AdSettings.IsAdmob())
             {
 #if !VIRTUESKY_ADS || !VIRTUESKY_ADMOB
             EditorGUILayout.HelpBox(
@@ -112,7 +112,7 @@ namespace VirtueSky.ControlPanel.Editor
                 CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADMOB);
             }
 
-            if (AdSettings.UseLevelPlay)
+            if (AdSettings.IsLevelPlay())
             {
 #if !VIRTUESKY_ADS || !VIRTUESKY_IRONSOURCE
             EditorGUILayout.HelpBox(
@@ -131,7 +131,7 @@ namespace VirtueSky.ControlPanel.Editor
             GUILayout.Space(10);
             CPUtility.DrawHeader("Install Sdk");
             GUILayout.Space(10);
-            if (AdSettings.UseAppLovin)
+            if (AdSettings.IsApplovin())
             {
                 GUILayout.Space(10);
                 if (GUILayout.Button("Install Max Sdk Plugin"))
@@ -142,14 +142,14 @@ namespace VirtueSky.ControlPanel.Editor
                 }
             }
 
-            if (AdSettings.UseAdmob)
+            if (AdSettings.IsAdmob())
             {
                 GUILayout.Space(10);
                 CPUtility.DrawButtonInstallPackage("Install Admob Sdk Plugin", "Remove Admob Sdk Plugin",
                     ConstantPackage.PackageNameAdmob, ConstantPackage.VersionAdmob);
             }
 
-            if (AdSettings.UseLevelPlay)
+            if (AdSettings.IsLevelPlay())
             {
                 GUILayout.Space(10);
                 CPUtility.DrawButtonInstallPackage("Install LevelPlay Sdk Plugin", "Remove LevelPlay Sdk Plugin",

@@ -84,9 +84,9 @@ namespace VirtueSky.Ads
         void InitAdClient()
         {
             AppTracking.Init(AdSettings.EnableTrackAdRevenue);
-            if (IsApplovin()) InitApplovinClient();
-            if (IsAdmob()) InitAdmobClient();
-            if (IsLevelPlay()) InitLevelPlayClient();
+            if (AdSettings.IsApplovin()) InitApplovinClient();
+            if (AdSettings.IsAdmob()) InitAdmobClient();
+            if (AdSettings.IsLevelPlay()) InitLevelPlayClient();
             isInitAdClient = true;
             InitAutoLoadAds();
         }
@@ -137,33 +137,15 @@ namespace VirtueSky.Ads
             AdStatic.IsShowingAd = state;
         }
 
-        private bool IsApplovin()
-        {
-            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseAppLovin) ||
-                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.AppLovin);
-        }
-
-        private bool IsAdmob()
-        {
-            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseAdmob) ||
-                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.Admob);
-        }
-
-        private bool IsLevelPlay()
-        {
-            return (AdSettings.MediationLoadMode == MediationLoadMode.Multiple && AdSettings.UseLevelPlay) ||
-                   (AdSettings.MediationLoadMode == MediationLoadMode.Single && AdSettings.CurrentMediation == AdMediation.LevelPlay);
-        }
-
         #region Method Load Ads
 
         void AutoLoadInterAds()
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadInterstitialAdTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadInterstitial();
-            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadInterstitial();
-            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadInterstitial();
+            if (AdSettings.IsApplovin() && maxAdClient != null) maxAdClient.LoadInterstitial();
+            if (AdSettings.IsAdmob() && admobAdClient != null) admobAdClient.LoadInterstitial();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadInterstitial();
             _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -171,9 +153,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadRewarded();
-            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadRewarded();
-            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewarded();
+            if (AdSettings.IsApplovin() && maxAdClient != null) maxAdClient.LoadRewarded();
+            if (AdSettings.IsAdmob() && admobAdClient != null) admobAdClient.LoadRewarded();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewarded();
             _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -181,9 +163,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadRewardedInterstitialTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadRewardedInterstitial();
-            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadRewardedInterstitial();
-            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewardedInterstitial();
+            if (AdSettings.IsApplovin() && maxAdClient != null) maxAdClient.LoadRewardedInterstitial();
+            if (AdSettings.IsAdmob() && admobAdClient != null) admobAdClient.LoadRewardedInterstitial();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadRewardedInterstitial();
             _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -191,9 +173,9 @@ namespace VirtueSky.Ads
         {
             if (Time.realtimeSinceStartup - _lastTimeLoadAppOpenTimestamp <
                 AdSettings.AdLoadingInterval) return;
-            if (IsApplovin() && maxAdClient != null) maxAdClient.LoadAppOpen();
-            if (IsAdmob() && admobAdClient != null) admobAdClient.LoadAppOpen();
-            if (IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadAppOpen();
+            if (AdSettings.IsApplovin() && maxAdClient != null) maxAdClient.LoadAppOpen();
+            if (AdSettings.IsAdmob() && admobAdClient != null) admobAdClient.LoadAppOpen();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null) levelPlayAdClient.LoadAppOpen();
             _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
         }
 

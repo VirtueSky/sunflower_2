@@ -163,6 +163,36 @@ namespace VirtueSky.Ads
         public static bool EnableTrackAdRevenue => Instance.enableTrackAdRevenue;
         public static bool EnableGDPR => Instance.enableGDPR;
         public static bool EnableGDPRTestMode => Instance.enableGDPRTestMode;
+        
+        /// <summary>
+        /// Check if AppLovin is enabled based on the mediation load mode and selected mediations.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsApplovin()
+        {
+            return (MediationLoadMode == MediationLoadMode.Multiple && UseAppLovin) ||
+                   (MediationLoadMode == MediationLoadMode.Single && CurrentMediation == AdMediation.AppLovin);
+        }
+
+        /// <summary>
+        /// Check if Admob is enabled based on the mediation load mode and selected mediations.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAdmob()
+        {
+            return (MediationLoadMode == MediationLoadMode.Multiple && UseAdmob) ||
+                   (MediationLoadMode == MediationLoadMode.Single && CurrentMediation == AdMediation.Admob);
+        }
+
+        /// <summary>
+        /// Check if LevelPlay is enabled based on the mediation load mode and selected mediations.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLevelPlay()
+        {
+            return (MediationLoadMode == MediationLoadMode.Multiple && UseLevelPlay) ||
+                   (MediationLoadMode == MediationLoadMode.Single && CurrentMediation == AdMediation.LevelPlay);
+        }
     }
 
     public enum AdMediation
