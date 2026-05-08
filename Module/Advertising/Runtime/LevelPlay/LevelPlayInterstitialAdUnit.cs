@@ -83,7 +83,11 @@ namespace VirtueSky.Ads
         protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (interstitialAd != null) interstitialAd.ShowAd(placement);
+            if (interstitialAd != null)
+            {
+                IsShowing = true;
+                interstitialAd.ShowAd(placement);
+            }
 #endif
         }
 
@@ -97,6 +101,7 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
+            IsShowing = false;
             ResetInterstitialAd(true);
         }
 
@@ -105,6 +110,7 @@ namespace VirtueSky.Ads
             base.ResetChainCallback();
             completedCallback = null;
         }
+
         private void ResetInterstitialAd(bool isDestroy = false)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -115,11 +121,11 @@ namespace VirtueSky.Ads
             interstitialAd.OnAdClicked -= InterstitialOnAdClickedEvent;
             interstitialAd.OnAdDisplayFailed -= InterstitialOnAdDisplayFailedEvent;
             interstitialAd.OnAdClosed -= InterstitialOnAdClosedEvent;
-            if(isDestroy) interstitialAd.DestroyAd();
-            interstitialAd = null;   
+            if (isDestroy) interstitialAd.DestroyAd();
+            interstitialAd = null;
 #endif
         }
-        
+
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
 
         #region Fun Callback
@@ -170,6 +176,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(adError);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            IsShowing = false;
             ResetInterstitialAd();
         }
 
@@ -183,6 +190,7 @@ namespace VirtueSky.Ads
             IsShowing = false;
             Load();
         }
+
         #endregion
 
 #endif

@@ -17,7 +17,7 @@ namespace VirtueSky.Ads
         public bool IsEarnRewarded { get; private set; }
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
-        
+
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
         LevelPlayRewardedAd rewardedAd;
 #endif
@@ -90,7 +90,11 @@ namespace VirtueSky.Ads
         protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (rewardedAd != null) rewardedAd.ShowAd(placement);
+            if (rewardedAd != null)
+            {
+                IsShowing = true;
+                rewardedAd.ShowAd(placement);
+            }
 #endif
         }
 
@@ -104,16 +108,16 @@ namespace VirtueSky.Ads
 
         public override void Destroy()
         {
-             IsShowing = false;
-             ResetRewardedAd(true);
+            IsShowing = false;
+            ResetRewardedAd(true);
         }
-        
+
         private void ResetFinalizeCloseHandle()
         {
             App.CancelDelay(_finalizeCloseHandle);
             _finalizeCloseHandle = null;
         }
-        
+
         protected override void ResetChainCallback()
         {
             base.ResetChainCallback();
@@ -122,6 +126,7 @@ namespace VirtueSky.Ads
             receivedRewardCallback = null;
             IsEarnRewarded = false;
         }
+
         private void ResetRewardedAd(bool isDestroy = false)
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -133,8 +138,8 @@ namespace VirtueSky.Ads
             rewardedAd.OnAdRewarded -= RewardedVideoOnAdRewardedEvent;
             rewardedAd.OnAdClicked -= RewardedVideoOnAdClickedEvent;
             rewardedAd.OnAdLoadFailed -= RewardedVideoOnAdLoadFailedEvent;
-            if(isDestroy) rewardedAd.DestroyAd();
-            rewardedAd = null;  
+            if (isDestroy) rewardedAd.DestroyAd();
+            rewardedAd = null;
 #endif
         }
 
@@ -191,6 +196,7 @@ namespace VirtueSky.Ads
             var errorInfo = new AdsError(ironSourceError);
             Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
             OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            IsShowing = false;
             ResetRewardedAd();
         }
 
@@ -206,6 +212,7 @@ namespace VirtueSky.Ads
             Common.CallActionAndClean(ref clickedCallback, info);
             OnClickedAdEvent?.Invoke(info);
         }
+
         private void FinalizeClose()
         {
             _finalizeCloseHandle = null;
@@ -223,8 +230,9 @@ namespace VirtueSky.Ads
             ResetFinalizeCloseHandle();
             IsShowing = false;
         }
+
         #endregion
-        
+
 #endif
     }
 }
