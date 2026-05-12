@@ -93,7 +93,7 @@ namespace VirtueSky.Ads
         {
             if (!pauseStatus && AdSettings.MaxAppOpenAdUnit.autoShow)
             {
-                if (AdSettings.UseAppLovin) ShowAppOpen();
+                if (AdSettings.IsApplovin()) ShowAppOpen();
             }
         }
 

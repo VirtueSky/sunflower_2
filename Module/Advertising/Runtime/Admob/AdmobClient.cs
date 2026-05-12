@@ -40,7 +40,8 @@ namespace VirtueSky.Ads
         public override void LoadInterstitial()
         {
             if (AdSettings.AdmobInterstitialAdUnit == null || AdSettings.AdmobInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobInterstitialAdUnit.IsReady() && !AdSettings.AdmobInterstitialAdUnit.IsLoading) AdSettings.AdmobInterstitialAdUnit.Load();
+            if (!AdSettings.AdmobInterstitialAdUnit.IsReady() && !AdSettings.AdmobInterstitialAdUnit.IsLoading)
+                AdSettings.AdmobInterstitialAdUnit.Load();
         }
 
         public override AdUnit RewardAdUnit() => AdSettings.AdmobRewardAdUnit;
@@ -124,7 +125,7 @@ namespace VirtueSky.Ads
         {
             if (state == GoogleMobileAds.Common.AppState.Foreground && AdSettings.AdmobAppOpenAdUnit.autoShow)
             {
-                if (AdSettings.UseAdmob) ShowAppOpen();
+                if (AdSettings.IsAdmob()) ShowAppOpen();
             }
         }
 
