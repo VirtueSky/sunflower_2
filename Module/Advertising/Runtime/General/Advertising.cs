@@ -11,6 +11,7 @@ using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
 #endif
 using UnityEngine;
+using VirtueSky.Core;
 using VirtueSky.Inspector;
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
@@ -35,6 +36,7 @@ namespace VirtueSky.Ads
         private static Advertising instance;
 
         private bool isInitAdClient = false;
+        private bool isInititalization = false;
 
         private void Awake()
         {
@@ -50,10 +52,36 @@ namespace VirtueSky.Ads
             }
 
             instance = this;
+            isInititalization = false;
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
+            {
+                InternalInitialization();
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable)
+            {
+                InternalInitialization();
+            }
         }
 
         private void Start()
         {
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
+            {
+                InternalInitialization();
+            }
+        }
+
+        private void InternalInitialization()
+        {
+            if (isInititalization) return;
+            isInititalization = true;
             isInitAdClient = false;
             AdStatic.OnChangePreventDisplayAppOpenEvent += OnChangePreventDisplayOpenAd;
             if (AdSettings.EnableGDPR)
@@ -470,6 +498,8 @@ namespace VirtueSky.Ads
         /// Return true if the ad client is initialized, otherwise return false. The ad client will be initialized after the GDPR flow if GDPR is enabled, or initialized directly in Start() if GDPR is not enabled. You can check this property to make sure the ad client is ready before calling any method of ad unit to avoid potential error.
         /// </summary>
         public static bool IsInitAdClient => instance.isInitAdClient;
+
+        public static void Initialization() => instance.InternalInitialization();
 
 #if VIRTUESKY_ADMOB
         /// <summary>

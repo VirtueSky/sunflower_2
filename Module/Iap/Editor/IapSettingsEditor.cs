@@ -11,8 +11,7 @@ namespace VirtueSky.Iap
     public class IapSettingsEditor : Editor
     {
         private IapSettings _iapSettings;
-        private SerializedProperty _runtimeAutoInit;
-        private SerializedProperty _runtimeAutoInitType;
+        private SerializedProperty _runtimeInitType;
         private SerializedProperty _iapDataProducts;
         private SerializedProperty _isValidatePurchase;
         private SerializedProperty _googlePlayStoreKey;
@@ -20,8 +19,7 @@ namespace VirtueSky.Iap
         void Init()
         {
             _iapSettings = target as IapSettings;
-            _runtimeAutoInit = serializedObject.FindProperty("runtimeAutoInit");
-            _runtimeAutoInitType = serializedObject.FindProperty("runtimeAutoInitType");
+            _runtimeInitType = serializedObject.FindProperty("runtimeInitType");
             _iapDataProducts = serializedObject.FindProperty("iapDataProducts");
             _isValidatePurchase = serializedObject.FindProperty("isValidatePurchase");
             _googlePlayStoreKey = serializedObject.FindProperty("googlePlayStoreKey");
@@ -34,11 +32,8 @@ namespace VirtueSky.Iap
             // EditorGUILayout.LabelField("IAP SETTING", EditorStyles.boldLabel);
             // GuiLine(2);
             GUILayout.Space(10);
-            EditorGUILayout.PropertyField(_runtimeAutoInit);
-            if (_runtimeAutoInit.boolValue)
-            {
-                EditorGUILayout.PropertyField(_runtimeAutoInitType);
-            }
+
+            EditorGUILayout.PropertyField(_runtimeInitType);
 
             GUILayout.Space(10);
             EditorGUILayout.PropertyField(_iapDataProducts);
@@ -77,11 +72,11 @@ namespace VirtueSky.Iap
             var iapDataProducts = IapSettings.IapDataProducts;
             for (int i = 0; i < iapDataProducts.Length; i++)
             {
-                var androidItemName = !string.IsNullOrEmpty(iapDataProducts[i].androidId) 
-                    ? iapDataProducts[i].androidId.Split('.').Last() 
+                var androidItemName = !string.IsNullOrEmpty(iapDataProducts[i].androidId)
+                    ? iapDataProducts[i].androidId.Split('.').Last()
                     : "";
-                var iosItemName = !string.IsNullOrEmpty(iapDataProducts[i].iOSId) 
-                    ? iapDataProducts[i].iOSId.Split('.').Last() 
+                var iosItemName = !string.IsNullOrEmpty(iapDataProducts[i].iOSId)
+                    ? iapDataProducts[i].iOSId.Split('.').Last()
                     : "";
 
                 // Android Section
@@ -100,7 +95,8 @@ namespace VirtueSky.Iap
                     str +=
                         $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
 
-                    str += $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapSettings.IapDataProducts[{i}].price;";
+                    str +=
+                        $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapSettings.IapDataProducts[{i}].price;";
                     if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
                     {
                         str +=
@@ -126,7 +122,8 @@ namespace VirtueSky.Iap
                     str +=
                         $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
 
-                    str += $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapSettings.IapDataProducts[{i}].price;";
+                    str +=
+                        $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapSettings.IapDataProducts[{i}].price;";
                     if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
                     {
                         str +=

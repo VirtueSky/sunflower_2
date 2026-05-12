@@ -15,20 +15,25 @@ namespace VirtueSky.Iap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeBeforeSceneLoad()
         {
-            AutoInitialize(CoreEnum.RuntimeAutoInitType.BeforeSceneLoad);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_Start);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void RuntimeAfterSceneLoad()
         {
-            AutoInitialize(CoreEnum.RuntimeAutoInitType.AfterSceneLoad);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_Awake);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_Start);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad);
         }
 
-        private static void AutoInitialize(CoreEnum.RuntimeAutoInitType iapRuntimeAutoInitType)
+        private static void AutoInitialize(CoreEnum.RuntimeInitType iapRuntimeAutoInitType)
         {
             if (IapSettings.Instance == null) return;
-            if (!IapSettings.RuntimeAutoInit) return;
-            if (IapSettings.RuntimeAutoInitType != iapRuntimeAutoInitType) return;
+            if (IapSettings.RuntimeInitType != iapRuntimeAutoInitType) return;
             var iapManager = new GameObject("IapManager");
             iapManager.AddComponent<IapManager>();
             UnityEngine.Object.DontDestroyOnLoad(iapManager);

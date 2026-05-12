@@ -14,7 +14,7 @@ namespace VirtueSky.Iap
     [EditorIcon("icon_manager"), HideMonoScript]
     public class IapManager : MonoBehaviour, IDetailedStoreListener
     {
-        [SerializeField] private bool isDontDestroyOnLoad;
+        [SerializeField] private bool isPersistent;
         public static event Action<string> OnPurchaseSucceedEvent;
         public static event Action<string> OnPurchaseFailedEvent;
 
@@ -22,57 +22,50 @@ namespace VirtueSky.Iap
         private IExtensionProvider _extensionProvider;
         public static bool IsInitialized { get; private set; }
 
-        private static event Func<string, IapDataProduct> OnPurchaseProductByIdEvent;
-        private static event Func<IapDataProduct, IapDataProduct> OnPurchaseProductByIapDataEvent;
-        private static event Func<string, bool> OnIsPurchaseByIdEvent;
-        private static event Func<IapDataProduct, bool> OnIsPurchaseByIapDataEvent;
-        private static event Func<IapDataProduct, Product> OnGetProductByIapDataEvent;
-        private static event Func<string, Product> OnGetProductByIdEvent;
-        private static event Func<IapDataProduct, SubscriptionInfo> OnGetSubscriptionInfo;
-        private static event Action OnRestoreEvent;
+        private static IapManager instance;
 
         private void Awake()
         {
-            if (isDontDestroyOnLoad)
+            if (isPersistent)
             {
                 DontDestroyOnLoad(this.gameObject);
+            }
+
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this;
+
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
+            {
+                InternalInitialization();
             }
         }
 
         private void OnEnable()
         {
-            OnPurchaseProductByIdEvent += InternalPurchaseProductById;
-            OnPurchaseProductByIapDataEvent += InternalPurchaseProductByIapData;
-            OnIsPurchaseByIdEvent += InternalIsPurchasedProductById;
-            OnIsPurchaseByIapDataEvent += InternalIsPurchasedProductByIapData;
-            OnGetProductByIapDataEvent += InternalGetProductByIapData;
-            OnGetProductByIdEvent += InternalGetProductById;
-            OnGetSubscriptionInfo += InternalGetSubscriptionInfo;
-#if UNITY_IOS
-            OnRestoreEvent += InternalRestorePurchase;
-#endif
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable)
+            {
+                InternalInitialization();
+            }
         }
 
-        private void OnDisable()
-        {
-            OnPurchaseProductByIdEvent -= InternalPurchaseProductById;
-            OnPurchaseProductByIapDataEvent -= InternalPurchaseProductByIapData;
-            OnIsPurchaseByIdEvent -= InternalIsPurchasedProductById;
-            OnIsPurchaseByIapDataEvent -= InternalIsPurchasedProductByIapData;
-            OnGetProductByIapDataEvent -= InternalGetProductByIapData;
-            OnGetProductByIdEvent -= InternalGetProductById;
-            OnGetSubscriptionInfo -= InternalGetSubscriptionInfo;
-#if UNITY_IOS
-            OnRestoreEvent -= InternalRestorePurchase;
-#endif
-        }
 
         private void Start()
         {
-            Init();
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
+            {
+                InternalInitialization();
+            }
         }
 
-        private async void Init()
+        private async void InternalInitialization()
         {
             if (IsInitialized) return;
             await UniTask.WaitUntil(() => UnityServiceInitialization.IsUnityServiceReady);
@@ -277,8 +270,9 @@ namespace VirtueSky.Iap
         private bool InternalIsPurchasedProductById(string id)
         {
             if (_controller == null) return false;
-            return ConvertProductType(IapSettings.GetIapProduct(id).iapProductType) is ProductType.NonConsumable or ProductType.Subscription && _controller.products.WithID(id)
-                .hasReceipt;
+            return ConvertProductType(IapSettings.GetIapProduct(id).iapProductType) is ProductType.NonConsumable or ProductType.Subscription &&
+                   _controller.products.WithID(id)
+                       .hasReceipt;
         }
 
         private Product InternalGetProductByIapData(IapDataProduct product)
@@ -295,7 +289,8 @@ namespace VirtueSky.Iap
 
         private SubscriptionInfo InternalGetSubscriptionInfo(IapDataProduct product)
         {
-            if (_controller == null || ConvertProductType(product.iapProductType) != ProductType.Subscription || !_controller.products.WithID(product.Id).hasReceipt) return null;
+            if (_controller == null || ConvertProductType(product.iapProductType) != ProductType.Subscription ||
+                !_controller.products.WithID(product.Id).hasReceipt) return null;
             var subscriptionManager = new SubscriptionManager(InternalGetProductByIapData(product), null);
             return subscriptionManager.getSubscriptionInfo();
         }
@@ -304,21 +299,22 @@ namespace VirtueSky.Iap
 
         #region Public API
 
-        public static IapDataProduct PurchaseProduct(string id) => OnPurchaseProductByIdEvent?.Invoke(id);
+        public static IapDataProduct PurchaseProduct(string id) => instance.InternalPurchaseProductById(id);
 
-        public static IapDataProduct PurchaseProduct(IapDataProduct product) => OnPurchaseProductByIapDataEvent?.Invoke(product);
+        public static IapDataProduct PurchaseProduct(IapDataProduct product) => instance.InternalPurchaseProductByIapData(product);
 
-        public static bool IsPurchasedProduct(IapDataProduct product) => (bool)OnIsPurchaseByIapDataEvent?.Invoke(product);
-        public static bool IsPurchasedProduct(string id) => (bool)OnIsPurchaseByIdEvent?.Invoke(id);
+        public static bool IsPurchasedProduct(IapDataProduct product) => instance.InternalIsPurchasedProductByIapData(product);
+        public static bool IsPurchasedProduct(string id) => instance.InternalIsPurchasedProductById(id);
 
-        public static Product GetProduct(IapDataProduct product) => OnGetProductByIapDataEvent?.Invoke(product);
-        public static Product GetProduct(string id) => OnGetProductByIdEvent?.Invoke(id);
-        public static SubscriptionInfo GetSubscriptionInfo(IapDataProduct product) => OnGetSubscriptionInfo?.Invoke(product);
+        public static Product GetProduct(IapDataProduct product) => instance.InternalGetProductByIapData(product);
+        public static Product GetProduct(string id) => instance.InternalGetProductById(id);
+        public static SubscriptionInfo GetSubscriptionInfo(IapDataProduct product) => instance.InternalGetSubscriptionInfo(product);
 
 #if UNITY_IOS
-        public static void RestorePurchase() => OnRestoreEvent?.Invoke();
+        public static void RestorePurchase() => instance.InternalRestorePurchase();
 
 #endif
+        public static void Initialization() => instance.InternalInitialization();
 
         #endregion
     }

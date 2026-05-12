@@ -11,20 +11,25 @@ namespace VirtueSky.Ads
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeBeforeSceneLoad()
         {
-            AutoInitialize(CoreEnum.RuntimeAutoInitType.BeforeSceneLoad);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad_Start);
+            AutoInitialize(CoreEnum.RuntimeInitType.BeforeSceneLoad);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void RuntimeAfterSceneLoad()
         {
-            AutoInitialize(CoreEnum.RuntimeAutoInitType.AfterSceneLoad);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_Awake);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad_Start);
+            AutoInitialize(CoreEnum.RuntimeInitType.AfterSceneLoad);
         }
 
-        private static void AutoInitialize(CoreEnum.RuntimeAutoInitType adsRuntimeAutoInitType)
+        private static void AutoInitialize(CoreEnum.RuntimeInitType adsRuntimeInitType)
         {
             if (AdSettings.Instance == null) return;
-            if (!AdSettings.RuntimeAutoInit) return;
-            if (AdSettings.RuntimeAutoInitType != adsRuntimeAutoInitType) return;
+            if (AdSettings.RuntimeInitType != adsRuntimeInitType) return;
             var ads = new GameObject("Advertising");
             ads.AddComponent<Advertising>();
             UnityEngine.Object.DontDestroyOnLoad(ads);
@@ -57,6 +62,7 @@ namespace VirtueSky.Ads
                 }
             }
         }
+
         internal static Action waitAppOpenDisplayedAction;
         internal static Action waitAppOpenClosedAction;
 
@@ -151,6 +157,7 @@ namespace VirtueSky.Ads
 
             return unit;
         }
+
         public static AdUnit OnReceivedReward(this AdUnit unit, Action onReceivedReward)
         {
             switch (unit)

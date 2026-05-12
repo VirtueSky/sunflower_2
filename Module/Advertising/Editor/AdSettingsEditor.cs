@@ -7,8 +7,7 @@ namespace VirtueSky.Ads
     public class AdSettingsEditor : Editor
     {
         private AdSettings _adSettings;
-        private SerializedProperty _runtimeAutoInit;
-        private SerializedProperty _runtimeAutoInitType;
+        private SerializedProperty _runtimeInitType;
         private SerializedProperty _adCheckingInterval;
         private SerializedProperty _adLoadingInterval;
 
@@ -51,8 +50,7 @@ namespace VirtueSky.Ads
         void Initialize()
         {
             _adSettings = target as AdSettings;
-            _runtimeAutoInit = serializedObject.FindProperty("runtimeAutoInit");
-            _runtimeAutoInitType = serializedObject.FindProperty("runtimeAutoInitType");
+            _runtimeInitType = serializedObject.FindProperty("runtimeInitType");
             _adCheckingInterval = serializedObject.FindProperty("adCheckingInterval");
             _adLoadingInterval = serializedObject.FindProperty("adLoadingInterval");
 
@@ -95,11 +93,7 @@ namespace VirtueSky.Ads
             // EditorGUILayout.LabelField("ADS SETTING", EditorStyles.boldLabel);
             //   GuiLine(2);
             GUILayout.Space(10);
-            EditorGUILayout.PropertyField(_runtimeAutoInit);
-            if (_runtimeAutoInit.boolValue)
-            {
-                EditorGUILayout.PropertyField(_runtimeAutoInitType);
-            }
+            EditorGUILayout.PropertyField(_runtimeInitType);
 
             GUILayout.Space(10);
             EditorGUILayout.PropertyField(_adCheckingInterval);

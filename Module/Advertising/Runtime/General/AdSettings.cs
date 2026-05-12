@@ -12,8 +12,7 @@ namespace VirtueSky.Ads
     [EditorIcon("icon_scriptable")]
     public class AdSettings : ScriptableSettings<AdSettings>
     {
-        [SerializeField] private bool runtimeAutoInit = true;
-        [SerializeField] private CoreEnum.RuntimeAutoInitType runtimeAutoInitType;
+        [SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
         [Range(5, 100), SerializeField] private float adCheckingInterval = 8f;
         [Range(5, 100), SerializeField] private float adLoadingInterval = 15f;
 
@@ -144,8 +143,7 @@ namespace VirtueSky.Ads
 
         #endregion
 
-        public static bool RuntimeAutoInit => Instance.runtimeAutoInit;
-        public static CoreEnum.RuntimeAutoInitType RuntimeAutoInitType => Instance.runtimeAutoInitType;
+        public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
         public static float AdCheckingInterval => Instance.adCheckingInterval;
         public static float AdLoadingInterval => Instance.adLoadingInterval;
         public static MediationLoadMode MediationLoadMode => Instance.mediationLoadMode;
@@ -163,7 +161,7 @@ namespace VirtueSky.Ads
         public static bool EnableTrackAdRevenue => Instance.enableTrackAdRevenue;
         public static bool EnableGDPR => Instance.enableGDPR;
         public static bool EnableGDPRTestMode => Instance.enableGDPRTestMode;
-        
+
         /// <summary>
         /// Check if AppLovin is enabled based on the mediation load mode and selected mediations.
         /// </summary>
