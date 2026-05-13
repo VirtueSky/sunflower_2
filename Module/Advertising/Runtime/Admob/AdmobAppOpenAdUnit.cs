@@ -22,8 +22,10 @@ namespace VirtueSky.Ads
         public bool useTestId;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private AppOpenAd _appOpenAd;
+        private ResponseInfo adsInfo = null;
 #endif
         private DateTime _expireTime;
+        private AdsInfo cacheAdInfo;
 
         public override bool IsShowing { get; internal set; }
         public override bool IsLoading { get; internal set; }
@@ -88,24 +90,33 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-            
+
             _appOpenAd = ad;
+            adsInfo = ad.GetResponseInfo();
             _appOpenAd.OnAdPaid += OnAdPaided;
             _appOpenAd.OnAdFullScreenContentClosed += OnAdClosed;
             _appOpenAd.OnAdFullScreenContentFailed += OnAdFailedToShow;
             _appOpenAd.OnAdFullScreenContentOpened += OnAdOpening;
             _appOpenAd.OnAdClicked += OnAdClicked;
+            CacheAdsInfo();
             OnAdLoaded();
 
             // App open ads can be preloaded for up to 4 hours.
             _expireTime = DateTime.Now + TimeSpan.FromHours(4);
         }
 
+        private void CacheAdsInfo()
+        {
+            if (cacheAdInfo != null) cacheAdInfo = null;
+            cacheAdInfo = new AdsInfo(AdMediation.Admob);
+            cacheAdInfo.AdFormat = "AppOpenAd";
+            cacheAdInfo.AdNetwork = adsInfo?.GetLoadedAdapterResponseInfo()?.AdSourceName ?? "";
+        }
+
         private void OnAdClicked()
         {
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+            OnClickedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdOpening()
@@ -113,9 +124,8 @@ namespace VirtueSky.Ads
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref displayedCallback, info);
-            OnDisplayedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToShow(AdError obj)
@@ -130,26 +140,26 @@ namespace VirtueSky.Ads
             AdStatic.waitAppOpenClosedAction?.Invoke();
             AdStatic.IsShowingAd = false;
             IsShowing = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref closedCallback, info);
-            OnClosedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+            OnClosedAdEvent?.Invoke(cacheAdInfo);
             Destroy();
         }
 
         private void OnAdPaided(AdValue value)
         {
-            paidedCallback?.Invoke(value.Value / 1000000f,
-                "Admob",
+            cacheAdInfo.Revenue = value.Value / 1000000f;
+
+            paidedCallback?.Invoke(cacheAdInfo.Revenue,
+                cacheAdInfo.AdNetwork,
                 Id,
-                "AppOpenAd", AdMediation.Admob.ToString());
+                cacheAdInfo.AdFormat, AdMediation.Admob.ToString());
         }
 
         private void OnAdLoaded()
         {
             IsLoading = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref loadedCallback, info);
-            OnLoadAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+            OnLoadAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToLoad(LoadAdError error)

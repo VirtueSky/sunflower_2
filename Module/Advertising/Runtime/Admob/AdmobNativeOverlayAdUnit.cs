@@ -34,7 +34,9 @@ namespace VirtueSky.Ads
         public AdsPosition adsPosition = AdsPosition.Bottom;
 
         private NativeOverlayAd _nativeOverlayAd;
+        private ResponseInfo adsInfo = null;
 #endif
+        private AdsInfo cacheAdInfo;
         private readonly WaitForSeconds _waitReload = new WaitForSeconds(5);
         private IEnumerator _reload;
 
@@ -302,50 +304,58 @@ namespace VirtueSky.Ads
             }
 
             _nativeOverlayAd = ad;
+            adsInfo = ad.GetResponseInfo();
             _nativeOverlayAd.OnAdPaid += OnAdPaided;
             _nativeOverlayAd.OnAdClicked += OnAdClicked;
             _nativeOverlayAd.OnAdFullScreenContentOpened += OnAdOpening;
             _nativeOverlayAd.OnAdFullScreenContentClosed += OnAdClosed;
+            CacheAdsInfo();
             OnAdLoaded();
         }
 
         private void OnAdLoaded()
         {
             IsLoading = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref loadedCallback, info);
-            OnLoadAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+            OnLoadAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdClosed()
         {
             IsShowing = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref closedCallback, info);
-            OnClosedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+            OnClosedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdOpening()
         {
             IsShowing = true;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref displayedCallback, info);
-            OnDisplayedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdClicked()
         {
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+            OnClickedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdPaided(AdValue value)
         {
-            paidedCallback?.Invoke(value.Value / 1000000f,
-                "Admob",
+            cacheAdInfo.Revenue = value.Value / 1000000f;
+
+            paidedCallback?.Invoke(cacheAdInfo.Revenue,
+                cacheAdInfo.AdNetwork,
                 Id,
-                "NativeOverlayAd", AdMediation.Admob.ToString());
+                cacheAdInfo.AdFormat, AdMediation.Admob.ToString());
+        }
+
+        private void CacheAdsInfo()
+        {
+            if (cacheAdInfo != null) cacheAdInfo = null;
+            cacheAdInfo = new AdsInfo(AdMediation.Admob);
+            cacheAdInfo.AdFormat = "NativeOverlayAd";
+            cacheAdInfo.AdNetwork = adsInfo?.GetLoadedAdapterResponseInfo()?.AdSourceName ?? "";
         }
 
         private void OnAdFailedToLoad(LoadAdError error)

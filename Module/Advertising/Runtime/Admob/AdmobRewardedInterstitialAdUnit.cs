@@ -18,7 +18,9 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action receivedRewardCallback;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private RewardedInterstitialAd _rewardedInterstitialAd;
+        private ResponseInfo adsInfo = null;
 #endif
+        private AdsInfo cacheAdInfo;
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
         public override bool IsShowing { get; internal set; }
@@ -111,19 +113,20 @@ namespace VirtueSky.Ads
             }
             
             _rewardedInterstitialAd = ad;
+            adsInfo = ad.GetResponseInfo();
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += OnAdClosed;
             _rewardedInterstitialAd.OnAdFullScreenContentOpened += OnAdOpening;
             _rewardedInterstitialAd.OnAdFullScreenContentFailed += OnAdFailedToShow;
             _rewardedInterstitialAd.OnAdPaid += OnAdPaided;
             _rewardedInterstitialAd.OnAdClicked += OnAdClicked;
+            CacheAdsInfo();
             OnAdLoaded();
         }
 
         private void OnAdClicked()
         {
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+            OnClickedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
@@ -137,17 +140,26 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref loadedCallback, info);
-            OnLoadAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+            OnLoadAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdPaided(AdValue value)
         {
-            paidedCallback?.Invoke(value.Value / 1000000f,
-                "Admob",
+            cacheAdInfo.Revenue = value.Value / 1000000f;
+
+            paidedCallback?.Invoke(cacheAdInfo.Revenue,
+                cacheAdInfo.AdNetwork,
                 Id,
-                "RewardedInterstitialAd", AdMediation.Admob.ToString());
+                cacheAdInfo.AdFormat, AdMediation.Admob.ToString());
+        }
+
+        private void CacheAdsInfo()
+        {
+            if (cacheAdInfo != null) cacheAdInfo = null;
+            cacheAdInfo = new AdsInfo(AdMediation.Admob);
+            cacheAdInfo.AdFormat = "RewardedInterstitialAd";
+            cacheAdInfo.AdNetwork = adsInfo?.GetLoadedAdapterResponseInfo()?.AdSourceName ?? "";
         }
 
         private void OnAdFailedToShow(AdError error)
@@ -163,18 +175,16 @@ namespace VirtueSky.Ads
         {
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref displayedCallback, info);
-            OnDisplayedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
             IsShowing = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref closedCallback, info);
-            OnClosedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+            OnClosedAdEvent?.Invoke(cacheAdInfo);
             App.CancelDelay(_finalizeCloseHandle);
             _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }

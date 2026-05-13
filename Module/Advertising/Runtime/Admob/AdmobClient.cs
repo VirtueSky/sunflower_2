@@ -18,10 +18,6 @@ namespace VirtueSky.Ads
             // This setting makes iOS behave consistently with Android.
             MobileAds.SetiOSAppPauseOnBackground(true);
 #endif
-            // When true all events raised by GoogleMobileAds will be raised
-            // on the Unity main thread. The default value is false.
-            // https://developers.google.com/admob/unity/quick-start#raise_ad_events_on_the_unity_main_thread
-            MobileAds.RaiseAdEventsOnUnityMainThread = true;
             TestMode();
             MobileAds.Initialize(OnInitializeComplete);
             FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;

@@ -19,10 +19,12 @@ namespace VirtueSky.Ads
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private RewardedAd _rewardedAd;
+        private ResponseInfo adsInfo = null;
 #endif
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
-        
+        private AdsInfo cacheAdInfo;
+
         public override bool IsShowing { get; internal set; }
         public override bool IsLoading { get; internal set; }
 
@@ -95,6 +97,7 @@ namespace VirtueSky.Ads
             IsLoading = false;
             IsShowing = false;
         }
+
         private void ResetFinalizeCloseHandle()
         {
             App.CancelDelay(_finalizeCloseHandle);
@@ -112,38 +115,48 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-            
+
             _rewardedAd = ad;
+            adsInfo = ad.GetResponseInfo();
             _rewardedAd.OnAdFullScreenContentClosed += OnAdClosed;
             _rewardedAd.OnAdFullScreenContentFailed += OnAdFailedToShow;
             _rewardedAd.OnAdFullScreenContentOpened += OnAdOpening;
             _rewardedAd.OnAdPaid += OnAdPaided;
             _rewardedAd.OnAdClicked += OnAdClicked;
+            CacheAdsInfo();
             OnAdLoaded();
+        }
+
+        private void CacheAdsInfo()
+        {
+            if (cacheAdInfo != null) cacheAdInfo = null;
+            cacheAdInfo = new AdsInfo(AdMediation.Admob);
+            cacheAdInfo.AdFormat = "RewardedAd";
+            cacheAdInfo.AdNetwork = adsInfo?.GetLoadedAdapterResponseInfo()?.AdSourceName ?? "";
         }
 
         private void OnAdClicked()
         {
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+            OnClickedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdPaided(AdValue value)
         {
-            paidedCallback?.Invoke(value.Value / 1000000f,
-                "Admob",
+            cacheAdInfo.Revenue = value.Value / 1000000f;
+
+            paidedCallback?.Invoke(cacheAdInfo.Revenue,
+                cacheAdInfo.AdNetwork,
                 Id,
-                "RewardedAd", AdMediation.Admob.ToString());
+                cacheAdInfo.AdFormat, AdMediation.Admob.ToString());
         }
 
         private void OnAdOpening()
         {
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref displayedCallback, info);
-            OnDisplayedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToShow(AdError obj)
@@ -158,9 +171,8 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref closedCallback, info);
-            OnClosedAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+            OnClosedAdEvent?.Invoke(cacheAdInfo);
             App.CancelDelay(_finalizeCloseHandle);
             _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
@@ -168,9 +180,8 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
-            var info = new AdsInfo(AdMediation.Admob);
-            Common.CallActionAndClean(ref loadedCallback, info);
-            OnLoadAdEvent?.Invoke(info);
+            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+            OnLoadAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
@@ -186,6 +197,7 @@ namespace VirtueSky.Ads
             IsEarnRewarded = true;
             Common.CallActionAndClean(ref receivedRewardCallback);
         }
+
         private void FinalizeClose()
         {
             _finalizeCloseHandle = null;
