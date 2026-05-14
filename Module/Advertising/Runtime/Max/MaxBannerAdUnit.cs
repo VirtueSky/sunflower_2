@@ -141,38 +141,54 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var adsInfo = new AdsInfo(info);
-            Common.CallActionAndClean(ref loadedCallback, adsInfo);
-            OnLoadAdEvent?.Invoke(adsInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref loadedCallback, adsInfo);
+                OnLoadAdEvent?.Invoke(adsInfo);
+            });
         }
 
         private void OnAdClicked(string arg1, MaxSdkBase.AdInfo arg2)
         {
             var info = new AdsInfo(arg2);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref clickedCallback, info);
+                OnClickedAdEvent?.Invoke(info);
+            });
         }
 
         private void OnAdExpanded(string unit, MaxSdkBase.AdInfo info)
         {
             var adsInfo = new AdsInfo(info);
-            Common.CallActionAndClean(ref displayedCallback, adsInfo);
-            OnDisplayedAdEvent?.Invoke(adsInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref displayedCallback, adsInfo);
+                OnDisplayedAdEvent?.Invoke(adsInfo);
+            });
         }
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
-            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
-            OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+                OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            });
+
             Destroy();
         }
 
         private void OnAdCollapsed(string unit, MaxSdkBase.AdInfo info)
         {
             var adsInfo = new AdsInfo(info);
-            Common.CallActionAndClean(ref closedCallback, adsInfo);
-            OnClosedAdEvent?.Invoke(adsInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref closedCallback, adsInfo);
+                OnClosedAdEvent?.Invoke(adsInfo);
+            });
         }
 #endif
 

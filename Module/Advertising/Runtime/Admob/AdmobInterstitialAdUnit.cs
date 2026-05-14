@@ -88,7 +88,7 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-            
+
             _interstitialAd = ad;
             adsInfo = ad.GetResponseInfo();
             _interstitialAd.OnAdPaid += OnAdPaided;
@@ -102,23 +102,33 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
-            OnClickedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+                OnClickedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdOpening()
         {
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
-            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+                OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdFailedToShow(AdError error)
         {
             var errorInfo = new AdsError(error);
-            Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
-            OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
+                OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            });
+
             IsShowing = false;
             Destroy();
             Load();
@@ -127,9 +137,12 @@ namespace VirtueSky.Ads
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
-            Common.CallActionAndClean(ref completedCallback);
-            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
-            OnClosedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref completedCallback);
+                Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+                OnClosedAdEvent?.Invoke(cacheAdInfo);
+            });
             Destroy();
             IsShowing = false;
             Load();
@@ -156,16 +169,22 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
-            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-            OnLoadAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+                OnLoadAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
-            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
-            OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+                OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            });
         }
 #endif
 

@@ -55,6 +55,7 @@ namespace VirtueSky.Ads
                 bannerAd.OnAdLeftApplication += BannerOnAdLeftApplicationEvent;
                 _isBannerDestroyed = false;
             }
+
             IsLoading = true;
             bannerAd.LoadAd();
 #endif
@@ -172,38 +173,54 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var info = new AdsInfo(adInfo);
-            Common.CallActionAndClean(ref loadedCallback, info);
-            OnLoadAdEvent?.Invoke(info);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref loadedCallback, info);
+                OnLoadAdEvent?.Invoke(info);
+            });
         }
 
         void BannerOnAdLoadFailedEvent(LevelPlayAdError ironSourceError)
         {
             IsLoading = false;
             var errorInfo = new AdsError(ironSourceError);
-            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
-            OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+                OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            });
+
             Destroy();
         }
 
         void BannerOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
             var info = new AdsInfo(adInfo);
-            Common.CallActionAndClean(ref clickedCallback, info);
-            OnClickedAdEvent?.Invoke(info);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref clickedCallback, info);
+                OnClickedAdEvent?.Invoke(info);
+            });
         }
 
         void BannerOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
         {
             var info = new AdsInfo(adInfo);
-            Common.CallActionAndClean(ref displayedCallback, info);
-            OnDisplayedAdEvent?.Invoke(info);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref displayedCallback, info);
+                OnDisplayedAdEvent?.Invoke(info);
+            });
         }
 
         void BannerOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
             var errorInfo = new AdsError(adError);
-            Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
-            OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
+                OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            });
         }
 
         void BannerOnAdLeftApplicationEvent(LevelPlayAdInfo adInfo)

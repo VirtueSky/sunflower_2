@@ -95,11 +95,13 @@ namespace VirtueSky.Ads
             IsLoading = false;
             IsShowing = false;
         }
+
         private void ResetFinalizeCloseHandle()
         {
             App.CancelDelay(_finalizeCloseHandle);
             _finalizeCloseHandle = null;
         }
+
         #region Fun Callback
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
@@ -111,7 +113,7 @@ namespace VirtueSky.Ads
                 OnAdFailedToLoad(error);
                 return;
             }
-            
+
             _rewardedInterstitialAd = ad;
             adsInfo = ad.GetResponseInfo();
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += OnAdClosed;
@@ -125,23 +127,32 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
-            OnClickedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+                OnClickedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
-            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
-            OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+                OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            });
         }
 
         private void OnAdLoaded()
         {
             IsLoading = false;
-            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-            OnLoadAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+                OnLoadAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdPaided(AdValue value)
@@ -165,8 +176,12 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError error)
         {
             var errorInfo = new AdsError(error);
-            Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
-            OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
+                OnFailedToDisplayAdEvent?.Invoke(errorInfo);
+            });
+
             Destroy();
             Load();
         }
@@ -175,16 +190,23 @@ namespace VirtueSky.Ads
         {
             AdStatic.IsShowingAd = true;
             IsShowing = true;
-            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
-            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+                OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdClosed()
         {
             AdStatic.IsShowingAd = false;
             IsShowing = false;
-            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
-            OnClosedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+                OnClosedAdEvent?.Invoke(cacheAdInfo);
+            });
+
             App.CancelDelay(_finalizeCloseHandle);
             _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
         }
@@ -192,14 +214,15 @@ namespace VirtueSky.Ads
         private void UserEarnedRewardCallback(Reward reward)
         {
             IsEarnRewarded = true;
-            Common.CallActionAndClean(ref receivedRewardCallback);
+            ExcuteCallbackOnMainThread(() => { Common.CallActionAndClean(ref receivedRewardCallback); });
         }
+
         private void FinalizeClose()
         {
             _finalizeCloseHandle = null;
             if (IsEarnRewarded)
             {
-                Common.CallActionAndClean(ref completedCallback);
+                ExcuteCallbackOnMainThread(() => { Common.CallActionAndClean(ref completedCallback); });
                 IsEarnRewarded = false;
                 ResetFinalizeCloseHandle();
                 Destroy();
@@ -207,7 +230,7 @@ namespace VirtueSky.Ads
                 return;
             }
 
-            Common.CallActionAndClean(ref skippedCallback);
+            ExcuteCallbackOnMainThread(() => { Common.CallActionAndClean(ref skippedCallback); });
             ResetFinalizeCloseHandle();
             Destroy();
             Load();

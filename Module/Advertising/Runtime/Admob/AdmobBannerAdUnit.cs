@@ -60,6 +60,7 @@ namespace VirtueSky.Ads
             {
                 adRequest.Extras.Add("collapsible", ConvertPlacementCollapsible());
             }
+
             _bannerView.LoadAd(adRequest);
 
 #endif
@@ -227,8 +228,12 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
-            Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
-            OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
+                OnFailedToLoadAdEvent?.Invoke(errorInfo);
+            });
+
             if (_reload != null) App.StopCoroutine(_reload);
             _reload = DelayBannerReload();
             App.StartCoroutine(_reload);
@@ -236,8 +241,11 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
-            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
-            OnClosedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+                OnClosedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private IEnumerator DelayBannerReload()

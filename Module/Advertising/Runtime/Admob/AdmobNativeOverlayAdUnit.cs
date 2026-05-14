@@ -316,28 +316,40 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
-            Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-            OnLoadAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
+                OnLoadAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdClosed()
         {
             IsShowing = false;
-            Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
-            OnClosedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref closedCallback, cacheAdInfo);
+                OnClosedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdOpening()
         {
             IsShowing = true;
-            Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
-            OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
+                OnDisplayedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdClicked()
         {
-            Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
-            OnClickedAdEvent?.Invoke(cacheAdInfo);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
+                OnClickedAdEvent?.Invoke(cacheAdInfo);
+            });
         }
 
         private void OnAdPaided(AdValue value)
@@ -362,8 +374,12 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var info = new AdsError(error);
-            Common.CallActionAndClean(ref failedToLoadCallback, info);
-            OnFailedToLoadAdEvent?.Invoke(info);
+            ExcuteCallbackOnMainThread(() =>
+            {
+                Common.CallActionAndClean(ref failedToLoadCallback, info);
+                OnFailedToLoadAdEvent?.Invoke(info);
+            });
+
             if (_reload != null) App.StopCoroutine(_reload);
             _reload = DelayReload();
             App.StartCoroutine(_reload);

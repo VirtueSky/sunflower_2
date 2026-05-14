@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VirtueSky.Core;
 
 namespace VirtueSky.Ads
 {
@@ -27,7 +28,7 @@ namespace VirtueSky.Ads
         public Action<AdsInfo> OnClickedAdEvent;
 
         [NonSerialized] private string runtimeId = String.Empty;
-        
+
         public abstract bool IsShowing { get; internal set; }
         public abstract bool IsLoading { get; internal set; }
 
@@ -81,6 +82,13 @@ namespace VirtueSky.Ads
 
         public virtual void HideBanner()
         {
+        }
+
+        protected void ExcuteCallbackOnMainThread(Action action)
+        {
+            if (action == null)
+                return;
+            App.RunOnMainThread(action);
         }
     }
 }
