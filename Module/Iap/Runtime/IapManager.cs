@@ -165,7 +165,7 @@ namespace VirtueSky.Iap
 
         private void RequestProductData(ConfigurationBuilder builder)
         {
-            foreach (var p in IapSettings.IapDataProducts)
+            foreach (var p in IapSettings.Products)
             {
                 builder.AddProduct(p.Id, ConvertProductType(p.iapProductType));
             }
@@ -174,7 +174,7 @@ namespace VirtueSky.Iap
         private void InternalPurchaseFailed(string id)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
-            foreach (var product in IapSettings.IapDataProducts)
+            foreach (var product in IapSettings.Products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseFailedEvent?.Invoke(product.Id);
@@ -190,7 +190,7 @@ namespace VirtueSky.Iap
 
         void InternalPurchaseSuccess(string id)
         {
-            foreach (var product in IapSettings.IapDataProducts)
+            foreach (var product in IapSettings.Products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseSucceedEvent?.Invoke(product.Id);
@@ -299,22 +299,39 @@ namespace VirtueSky.Iap
 
         #region Public API
 
-        public static IapDataProduct PurchaseProduct(string id) => instance.InternalPurchaseProductById(id);
+        public static IapDataProduct PurchaseProduct(string id) => instance != null ? instance.InternalPurchaseProductById(id) : null;
 
-        public static IapDataProduct PurchaseProduct(IapDataProduct product) => instance.InternalPurchaseProductByIapData(product);
+        public static IapDataProduct PurchaseProduct(IapDataProduct product) =>
+            instance != null ? instance.InternalPurchaseProductByIapData(product) : null;
 
-        public static bool IsPurchasedProduct(IapDataProduct product) => instance.InternalIsPurchasedProductByIapData(product);
-        public static bool IsPurchasedProduct(string id) => instance.InternalIsPurchasedProductById(id);
+        public static bool IsPurchasedProduct(IapDataProduct product) => instance != null && instance.InternalIsPurchasedProductByIapData(product);
 
-        public static Product GetProduct(IapDataProduct product) => instance.InternalGetProductByIapData(product);
-        public static Product GetProduct(string id) => instance.InternalGetProductById(id);
-        public static SubscriptionInfo GetSubscriptionInfo(IapDataProduct product) => instance.InternalGetSubscriptionInfo(product);
+        public static bool IsPurchasedProduct(string id) => instance != null && instance.InternalIsPurchasedProductById(id);
+
+        public static Product GetProduct(IapDataProduct product) => instance != null ? instance.InternalGetProductByIapData(product) : null;
+        public static Product GetProduct(string id) => instance != null ? instance.InternalGetProductById(id) : null;
+
+        public static SubscriptionInfo GetSubscriptionInfo(IapDataProduct product) =>
+            instance != null ? instance.InternalGetSubscriptionInfo(product) : null;
 
 #if UNITY_IOS
-        public static void RestorePurchase() => instance.InternalRestorePurchase();
-
+        public static void RestorePurchase()
+        {
+            if (instance != null)
+            {
+                instance.InternalRestorePurchase();
+            }
+        }
+    }
 #endif
-        public static void Initialization() => instance.InternalInitialization();
+
+        public static void Initialization()
+        {
+            if (instance != null)
+            {
+                instance.InternalInitialization();
+            }
+        }
 
         #endregion
     }

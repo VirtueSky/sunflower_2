@@ -87,6 +87,19 @@ namespace VirtueSky.UtilsEditor
             return so;
         }
 
+        public static T CreateAndGetScriptableAssetByName<T>(string path = "", string assetName = "", bool isPingAsset = true)
+            where T : ScriptableObject
+        {
+            var so = GetScriptableAssetByName<T>(assetName);
+            if (so == null)
+            {
+                CreateScriptableAssets<T>(path, assetName, isPingAsset);
+                so = GetScriptableAssetByName<T>(assetName);
+            }
+
+            return so;
+        }
+
         public static T GetScriptableAsset<T>() where T : ScriptableObject
         {
             return FileExtension.FindAssetAtFolder<T>(new string[] { "Assets" }).FirstOrDefault();

@@ -12,7 +12,8 @@ namespace VirtueSky.Iap
     {
         private IapSettings _iapSettings;
         private SerializedProperty _runtimeInitType;
-        private SerializedProperty _iapDataProducts;
+        private SerializedProperty _skusData;
+        private SerializedProperty _products;
         private SerializedProperty _isValidatePurchase;
         private SerializedProperty _googlePlayStoreKey;
 
@@ -20,7 +21,8 @@ namespace VirtueSky.Iap
         {
             _iapSettings = target as IapSettings;
             _runtimeInitType = serializedObject.FindProperty("runtimeInitType");
-            _iapDataProducts = serializedObject.FindProperty("iapDataProducts");
+            _skusData = serializedObject.FindProperty("skusData");
+            _products = serializedObject.FindProperty("products");
             _isValidatePurchase = serializedObject.FindProperty("isValidatePurchase");
             _googlePlayStoreKey = serializedObject.FindProperty("googlePlayStoreKey");
         }
@@ -29,16 +31,15 @@ namespace VirtueSky.Iap
         {
             serializedObject.Update();
             Init();
-            // EditorGUILayout.LabelField("IAP SETTING", EditorStyles.boldLabel);
-            // GuiLine(2);
             GUILayout.Space(10);
 
             EditorGUILayout.PropertyField(_runtimeInitType);
 
             GUILayout.Space(10);
-            EditorGUILayout.PropertyField(_iapDataProducts);
+            EditorGUILayout.PropertyField(_skusData);
+            EditorGUILayout.PropertyField(_products);
             GUILayout.Space(10);
-            if (GUILayout.Button("Generate Product"))
+            if (GUILayout.Button("Generate Product From SkusData"))
             {
                 GenerateProductImpl();
             }
@@ -60,89 +61,34 @@ namespace VirtueSky.Iap
             serializedObject.ApplyModifiedProperties();
         }
 
-        private const string pathDefaultScript = "Assets/_Root/Scripts";
 
         void GenerateProductImpl()
         {
-            FileExtension.ValidatePath(pathDefaultScript);
-            var productImplPath = $"{pathDefaultScript}/IapProduct.cs";
-            var str = "namespace VirtueSky.Iap\n{";
-            str += "\n\tpublic struct IapProduct\n\t{";
-            str += "\n";
-            var iapDataProducts = IapSettings.IapDataProducts;
-            for (int i = 0; i < iapDataProducts.Length; i++)
+            IapSettings.Products.Clear();
+            var products = IapSettings.Products;
+            var skusData = IapSettings.SkusData;
+            foreach (var data in skusData)
             {
-                var androidItemName = !string.IsNullOrEmpty(iapDataProducts[i].androidId)
-                    ? iapDataProducts[i].androidId.Split('.').Last()
-                    : "";
-                var iosItemName = !string.IsNullOrEmpty(iapDataProducts[i].iOSId)
-                    ? iapDataProducts[i].iOSId.Split('.').Last()
-                    : "";
-
-                // Android Section
-                if (!string.IsNullOrEmpty(iapDataProducts[i].androidId))
+                Debug.Log($"{data.androidId}");
+                bool isCustomName = false;
+                string itemName = data.Id.Split('.').Last();
+                if (!string.IsNullOrEmpty(data.customProductName))
                 {
-                    str += "#if UNITY_ANDROID\n";
-                    str += $"\t\t// {androidItemName.ToUpper()} - ANDROID";
-                    str += $"\n\t\tpublic const string ID_{androidItemName.ToUpper()} = \"{iapDataProducts[i].androidId}\";";
-
-                    str +=
-                        $"\n\t\tpublic static IapDataProduct Purchase{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.PurchaseProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static bool IsPurchased{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.IsPurchasedProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapSettings.IapDataProducts[{i}].price;";
-                    if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
-                    {
-                        str +=
-                            $"\n\t\tpublic static UnityEngine.Purchasing.SubscriptionInfo GetSubscriptionInfo{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(androidItemName)}() => IapManager.GetSubscriptionInfo(IapSettings.IapDataProducts[{i}]);";
-                    }
-
-                    str += "\n#endif\n";
+                    isCustomName = true;
+                    itemName = data.customProductName;
                 }
 
-                // iOS Section
-                if (!string.IsNullOrEmpty(iapDataProducts[i].iOSId))
-                {
-                    str += "#if UNITY_IOS\n";
-                    str += $"\t\t// {iosItemName.ToUpper()} - iOS";
-                    str += $"\n\t\tpublic const string ID_{iosItemName.ToUpper()} = \"{iapDataProducts[i].iOSId}\";";
-
-                    str +=
-                        $"\n\t\tpublic static IapDataProduct Purchase{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.PurchaseProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static bool IsPurchased{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.IsPurchasedProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static UnityEngine.Purchasing.Product GetProduct{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.GetProduct(IapSettings.IapDataProducts[{i}]);";
-
-                    str +=
-                        $"\n\t\tpublic static float PriceConfig{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapSettings.IapDataProducts[{i}].price;";
-                    if (iapDataProducts[i].iapProductType == IapProductType.Subscription)
-                    {
-                        str +=
-                            $"\n\t\tpublic static UnityEngine.Purchasing.SubscriptionInfo GetSubscriptionInfo{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(iosItemName)}() => IapManager.GetSubscriptionInfo(IapSettings.IapDataProducts[{i}]);";
-                    }
-
-                    str += "\n#endif\n";
-                }
-
-                str += "\n";
+                var product = CreateAsset.CreateAndGetScriptableAssetByName<IapDataProduct>($"{FileExtension.DefaultRootPath}/Iap/Products",
+                    isCustomName ? $"{itemName.ToLower()}" : $"iap_{itemName.ToLower()}");
+                product.Init(data.androidId, data.iosId, data.productType);
+                Debug.Log($"{product.androidId}");
+                products.Add(product);
             }
 
-            str += "\n\t}";
-            str += "\n}";
-
-            var writer = new StreamWriter(productImplPath, false);
-            writer.Write(str);
-            writer.Close();
-            AssetDatabase.ImportAsset(productImplPath);
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(target);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
         void ObfuscatorKeyImpl()

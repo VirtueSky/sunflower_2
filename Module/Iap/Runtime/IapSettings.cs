@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VirtueSky.Core;
@@ -10,24 +11,50 @@ namespace VirtueSky.Iap
     public class IapSettings : ScriptableSettings<IapSettings>
     {
         [SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
-        [SerializeField] private IapDataProduct[] iapDataProducts;
+        [SerializeField] private List<IapData> skusData = new List<IapData>();
+        [SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         [SerializeField] private bool isValidatePurchase = true;
 #if UNITY_EDITOR
         [SerializeField, TextArea] private string googlePlayStoreKey;
         public string GooglePlayStoreKey => googlePlayStoreKey;
 #endif
         public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
-        public static IapDataProduct[] IapDataProducts => Instance.iapDataProducts;
+        public static List<IapData> SkusData => Instance.skusData;
+        public static List<IapDataProduct> Products => Instance.products;
         public static bool IsValidatePurchase => Instance.isValidatePurchase;
 
         public static IapDataProduct GetIapProduct(string id)
         {
-            foreach (var product in IapDataProducts)
+            foreach (var product in Products)
             {
                 if (product.Id == id) return product;
             }
 
             return null;
         }
+    }
+
+    [Serializable]
+    public class IapData
+    {
+        public string androidId;
+        public string iosId;
+        public string customProductName;
+
+        public string Id
+        {
+            get
+            {
+#if UNITY_ANDROID
+                return androidId;
+#elif UNITY_IOS
+                return iosId;
+#else
+                return string.Empty;
+#endif
+            }
+        }
+
+        public IapProductType productType;
     }
 }
