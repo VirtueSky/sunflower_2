@@ -15,6 +15,8 @@ namespace VirtueSky.Iap
         private SerializedProperty _skusData;
         private SerializedProperty _products;
         private SerializedProperty _isValidatePurchase;
+        private SerializedProperty _isCustomValidatePurchase;
+        private SerializedProperty _validatePurchase;
         private SerializedProperty _googlePlayStoreKey;
 
         void Init()
@@ -24,6 +26,8 @@ namespace VirtueSky.Iap
             _skusData = serializedObject.FindProperty("skusData");
             _products = serializedObject.FindProperty("products");
             _isValidatePurchase = serializedObject.FindProperty("isValidatePurchase");
+            _isCustomValidatePurchase = serializedObject.FindProperty("isCustomValidatePurchase");
+            _validatePurchase = serializedObject.FindProperty("validatePurchase");
             _googlePlayStoreKey = serializedObject.FindProperty("googlePlayStoreKey");
         }
 
@@ -55,6 +59,13 @@ namespace VirtueSky.Iap
                 if (GUILayout.Button("Obfuscator Key"))
                 {
                     ObfuscatorKeyImpl();
+                }
+
+                GUILayout.Space(10);
+                EditorGUILayout.PropertyField(_isCustomValidatePurchase);
+                if (_isCustomValidatePurchase.boolValue)
+                {
+                    EditorGUILayout.PropertyField(_validatePurchase);
                 }
             }
 

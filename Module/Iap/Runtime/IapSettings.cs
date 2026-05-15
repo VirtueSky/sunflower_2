@@ -14,6 +14,8 @@ namespace VirtueSky.Iap
         [SerializeField] private List<IapData> skusData = new List<IapData>();
         [SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         [SerializeField] private bool isValidatePurchase = true;
+        [SerializeField] private bool isCustomValidatePurchase;
+        [SerializeField] private ValidatePurchase validatePurchase;
 #if UNITY_EDITOR
         [SerializeField, TextArea] private string googlePlayStoreKey;
         public string GooglePlayStoreKey => googlePlayStoreKey;
@@ -22,6 +24,8 @@ namespace VirtueSky.Iap
         public static List<IapData> SkusData => Instance.skusData;
         public static List<IapDataProduct> Products => Instance.products;
         public static bool IsValidatePurchase => Instance.isValidatePurchase;
+        public static bool IsCustomValidatePurchase => Instance.isCustomValidatePurchase;
+        public static ValidatePurchase ValidatePurchase => Instance.validatePurchase;
 
         public static IapDataProduct GetIapProduct(string id)
         {

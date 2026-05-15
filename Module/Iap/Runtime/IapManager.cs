@@ -105,7 +105,13 @@ namespace VirtueSky.Iap
         {
             if (IapSettings.IsValidatePurchase)
             {
-                bool validatedPurchase = true;
+                if (IapSettings.IsCustomValidatePurchase && IapSettings.ValidatePurchase != null)
+                {
+                    if (IapSettings.ValidatePurchase.IsValidate()) PurchaseVerified(purchaseEvent);
+                }
+                else
+                {
+                    bool validatedPurchase = true;
 #if (UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
             var validator =
                 new UnityEngine.Purchasing.Security.CrossPlatformValidator(UnityEngine.Purchasing.Security.GooglePlayTangle.Data(),
@@ -124,7 +130,8 @@ namespace VirtueSky.Iap
                 validatedPurchase = false;
             }
 #endif
-                if (validatedPurchase) PurchaseVerified(purchaseEvent);
+                    if (validatedPurchase) PurchaseVerified(purchaseEvent);
+                }
             }
             else
             {
