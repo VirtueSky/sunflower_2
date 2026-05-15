@@ -62,7 +62,7 @@ namespace VirtueSky.Ads
         public override void LoadAppOpen()
         {
             if (AdSettings.AdmobAppOpenAdUnit == null) return;
-            if (!AdSettings.AdmobAppOpenAdUnit.IsReady() && !AdSettings.AdmobAppOpenAdUnit.IsShowing) AdSettings.AdmobAppOpenAdUnit.Load();
+            if (!AdSettings.AdmobAppOpenAdUnit.IsReady() && !AdSettings.AdmobAppOpenAdUnit.IsLoading) AdSettings.AdmobAppOpenAdUnit.Load();
         }
 
         public override void ShowAppOpen()

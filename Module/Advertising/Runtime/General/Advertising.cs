@@ -242,6 +242,13 @@ namespace VirtueSky.Ads
             if (consentError != null)
             {
                 Debug.Log("error consentError = " + consentError);
+                InitAdClient();
+                return;
+            }
+
+            if (ConsentInformation.CanRequestAds())
+            {
+                InitAdClient();
                 return;
             }
 
@@ -250,6 +257,7 @@ namespace VirtueSky.Ads
                     if (formError != null)
                     {
                         Debug.Log("error consentError = " + consentError);
+                        InitAdClient();
                         return;
                     }
 
@@ -257,11 +265,7 @@ namespace VirtueSky.Ads
                     Debug.Log("CanRequestAds = " + ConsentInformation.CanRequestAds());
 
 
-                    if (ConsentInformation.CanRequestAds())
-                    {
-                        MobileAds.RaiseAdEventsOnUnityMainThread = true;
-                        InitAdClient();
-                    }
+                    InitAdClient();
                 }
             );
         }

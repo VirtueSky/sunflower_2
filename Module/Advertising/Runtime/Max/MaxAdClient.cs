@@ -47,7 +47,7 @@ namespace VirtueSky.Ads
         public override void LoadAppOpen()
         {
             if (AdSettings.MaxAppOpenAdUnit == null) return;
-            if (!AdSettings.MaxAppOpenAdUnit.IsReady() && !AdSettings.MaxAppOpenAdUnit.IsShowing) AdSettings.MaxAppOpenAdUnit.Load();
+            if (!AdSettings.MaxAppOpenAdUnit.IsReady() && !AdSettings.MaxAppOpenAdUnit.IsLoading) AdSettings.MaxAppOpenAdUnit.Load();
         }
 
         public override void ShowAppOpen()
