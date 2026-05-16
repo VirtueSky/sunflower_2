@@ -21,7 +21,7 @@ namespace VirtueSky.Iap
         public float priceConfig;
 
         [NonSerialized] public Action purchaseSuccessCallback;
-        [NonSerialized] public Action purchaseFailedCallback;
+        [NonSerialized] public Action<string> purchaseFailedCallback;
         [NonSerialized] private string remoteConfigId;
 
         public void Init(string androidId, string iosId, IapProductType iapProductType)

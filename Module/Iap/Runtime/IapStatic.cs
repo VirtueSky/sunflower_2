@@ -47,7 +47,7 @@ namespace VirtueSky.Iap
             return product;
         }
 
-        public static IapDataProduct OnFailed(this IapDataProduct product, Action onFailed)
+        public static IapDataProduct OnFailed(this IapDataProduct product, Action<string> onFailed)
         {
             product.purchaseFailedCallback = onFailed;
             return product;

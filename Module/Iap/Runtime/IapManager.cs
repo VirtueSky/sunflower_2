@@ -16,7 +16,7 @@ namespace VirtueSky.Iap
     {
         [SerializeField] private bool isPersistent;
         public static event Action<string> OnPurchaseSucceedEvent;
-        public static event Action<string> OnPurchaseFailedEvent;
+        public static event Action<string, string> OnPurchaseFailedEvent;
 
         private IStoreController _controller;
         private IExtensionProvider _extensionProvider;
@@ -150,13 +150,13 @@ namespace VirtueSky.Iap
 
         public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
         {
-            InternalPurchaseFailed(product.definition.id);
+            InternalPurchaseFailed(product.definition.id, failureReason);
         }
 
 
         public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
         {
-            InternalPurchaseFailed(product.definition.id);
+            InternalPurchaseFailed(product.definition.id, failureDescription.reason);
         }
 
         #endregion
@@ -178,14 +178,14 @@ namespace VirtueSky.Iap
             }
         }
 
-        private void InternalPurchaseFailed(string id)
+        private void InternalPurchaseFailed(string id, PurchaseFailureReason failureReason)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
             foreach (var product in IapSettings.Products)
             {
                 if (product.Id != id) continue;
-                OnPurchaseFailedEvent?.Invoke(product.Id);
-                Common.CallActionAndClean(ref product.purchaseFailedCallback);
+                OnPurchaseFailedEvent?.Invoke(product.Id, failureReason.ToString());
+                Common.CallActionAndClean<string>(ref product.purchaseFailedCallback, failureReason.ToString());
             }
         }
 
