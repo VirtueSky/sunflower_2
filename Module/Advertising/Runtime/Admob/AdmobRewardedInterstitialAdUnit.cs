@@ -21,6 +21,7 @@ namespace VirtueSky.Ads
         private ResponseInfo adsInfo = null;
 #endif
         private AdsInfo cacheAdInfo;
+        private string placement = "";
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
         public override bool IsShowing { get; internal set; }
@@ -61,6 +62,11 @@ namespace VirtueSky.Ads
 
         protected override void ShowImpl(string placement = "")
         {
+            this.placement = placement;
+            if (cacheAdInfo != null)
+            {
+                cacheAdInfo.Placement = placement;
+            }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _rewardedInterstitialAd.Show(UserEarnedRewardCallback);
 #endif

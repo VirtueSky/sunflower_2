@@ -37,6 +37,7 @@ namespace VirtueSky.Ads
         private ResponseInfo adsInfo = null;
 #endif
         private AdsInfo cacheAdInfo;
+        private string placement = "";
         private readonly WaitForSeconds _waitReload = new WaitForSeconds(5);
         private IEnumerator _reload;
 
@@ -90,6 +91,11 @@ namespace VirtueSky.Ads
 
         protected override void ShowImpl(string placement = "")
         {
+            this.placement = placement;
+            if (cacheAdInfo != null)
+            {
+                cacheAdInfo.Placement = placement;
+            }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (_nativeOverlayAd != null) _nativeOverlayAd.Show();
 #endif

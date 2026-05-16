@@ -26,6 +26,7 @@ namespace VirtueSky.Ads
         private IEnumerator _reload;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
+        private string placement = "";
 
         public override bool IsShowing { get; internal set; }
         public override bool IsLoading { get; internal set; }
@@ -102,6 +103,11 @@ namespace VirtueSky.Ads
 
         protected override void ShowImpl(string placement = "")
         {
+            this.placement = placement;
+            if (cacheAdInfo != null)
+            {
+                cacheAdInfo.Placement = placement;
+            }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _isBannerShowing = true;
             IsShowing = true;
