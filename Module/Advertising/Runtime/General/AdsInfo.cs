@@ -58,6 +58,17 @@ namespace VirtueSky.Ads
             AuctionId = "";
         }
 
+        public AdsInfo(AdsInfo adsInfo)
+        {
+            AdUnitId = adsInfo.AdUnitId;
+            AdFormat = adsInfo.AdFormat;
+            Placement = adsInfo.Placement;
+            AdNetwork = adsInfo.AdNetwork;
+            Revenue = adsInfo.Revenue;
+            AdMediation = adsInfo.AdMediation;
+            AuctionId = adsInfo.AuctionId;
+        }
+
         public AdsInfo(AdMediation adMediation)
         {
             AdUnitId = "";
@@ -115,6 +126,13 @@ namespace VirtueSky.Ads
             ErrorCode = -1;
             ErrorMessage = "";
             AdMediation = "";
+        }
+
+        public AdsError(AdsError adsError)
+        {
+            ErrorCode = adsError.ErrorCode;
+            ErrorMessage = adsError.ErrorMessage;
+            AdMediation = adsError.AdMediation;
         }
 
         public AdsError(AdMediation adMediation)
