@@ -10,9 +10,10 @@ namespace VirtueSky.Iap
     [EditorIcon("icon_scriptable")]
     public class IapSettings : ScriptableSettings<IapSettings>
     {
-        [SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
-        [SerializeField] private List<IapData> skusData = new List<IapData>();
-        [SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
+        //[SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
+
+        // [SerializeField] private List<IapData> skusData = new List<IapData>();
+        // [SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         [SerializeField] private bool isValidatePurchase = true;
         [SerializeField] private bool isCustomValidatePurchase;
         [SerializeField] private ValidatePurchase validatePurchase;
@@ -20,22 +21,23 @@ namespace VirtueSky.Iap
         [SerializeField, TextArea] private string googlePlayStoreKey;
         public string GooglePlayStoreKey => googlePlayStoreKey;
 #endif
-        public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
-        public static List<IapData> SkusData => Instance.skusData;
-        public static List<IapDataProduct> Products => Instance.products;
+        //public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
+
+        // public static List<IapData> SkusData => Instance.skusData;
+        // public static List<IapDataProduct> Products => Instance.products;
         public static bool IsValidatePurchase => Instance.isValidatePurchase;
         public static bool IsCustomValidatePurchase => Instance.isCustomValidatePurchase;
         public static ValidatePurchase ValidatePurchase => Instance.validatePurchase;
 
-        public static IapDataProduct GetIapProduct(string id)
-        {
-            foreach (var product in Products)
-            {
-                if (product.Id == id) return product;
-            }
-
-            return null;
-        }
+        // public static IapDataProduct GetIapProduct(string id)
+        // {
+        //     foreach (var product in Products)
+        //     {
+        //         if (product.Id == id) return product;
+        //     }
+        //
+        //     return null;
+        // }
     }
 
     [Serializable]
@@ -43,7 +45,6 @@ namespace VirtueSky.Iap
     {
         public string androidId;
         public string iosId;
-        public string customProductName;
 
         public string Id
         {
@@ -60,5 +61,6 @@ namespace VirtueSky.Iap
         }
 
         public IapProductType productType;
+        public float priceConfig;
     }
 }

@@ -11,9 +11,11 @@ namespace VirtueSky.Iap
     public class IapSettingsEditor : Editor
     {
         private IapSettings _iapSettings;
-        private SerializedProperty _runtimeInitType;
-        private SerializedProperty _skusData;
-        private SerializedProperty _products;
+
+        //private SerializedProperty _runtimeInitType;
+
+        // private SerializedProperty _skusData;
+        // private SerializedProperty _products;
         private SerializedProperty _isValidatePurchase;
         private SerializedProperty _isCustomValidatePurchase;
         private SerializedProperty _validatePurchase;
@@ -22,9 +24,9 @@ namespace VirtueSky.Iap
         void Init()
         {
             _iapSettings = target as IapSettings;
-            _runtimeInitType = serializedObject.FindProperty("runtimeInitType");
-            _skusData = serializedObject.FindProperty("skusData");
-            _products = serializedObject.FindProperty("products");
+            //_runtimeInitType = serializedObject.FindProperty("runtimeInitType");
+            // _skusData = serializedObject.FindProperty("skusData");
+            // _products = serializedObject.FindProperty("products");
             _isValidatePurchase = serializedObject.FindProperty("isValidatePurchase");
             _isCustomValidatePurchase = serializedObject.FindProperty("isCustomValidatePurchase");
             _validatePurchase = serializedObject.FindProperty("validatePurchase");
@@ -37,16 +39,16 @@ namespace VirtueSky.Iap
             Init();
             GUILayout.Space(10);
 
-            EditorGUILayout.PropertyField(_runtimeInitType);
+            //EditorGUILayout.PropertyField(_runtimeInitType);
 
-            GUILayout.Space(10);
-            EditorGUILayout.PropertyField(_skusData);
-            EditorGUILayout.PropertyField(_products);
-            GUILayout.Space(10);
-            if (GUILayout.Button("Generate Product From SkusData"))
-            {
-                GenerateProductImpl();
-            }
+            //GUILayout.Space(10);
+            // EditorGUILayout.PropertyField(_skusData);
+            // EditorGUILayout.PropertyField(_products);
+            // GUILayout.Space(10);
+            // if (GUILayout.Button("Generate Product From SkusData"))
+            // {
+            //     GenerateProductImpl();
+            // }
 
             GUILayout.Space(10);
             GuiLine(2);
@@ -73,34 +75,34 @@ namespace VirtueSky.Iap
         }
 
 
-        void GenerateProductImpl()
-        {
-            IapSettings.Products.Clear();
-            var products = IapSettings.Products;
-            var skusData = IapSettings.SkusData;
-            foreach (var data in skusData)
-            {
-                Debug.Log($"{data.androidId}");
-                bool isCustomName = false;
-                string itemName = data.Id.Split('.').Last();
-                if (!string.IsNullOrEmpty(data.customProductName))
-                {
-                    isCustomName = true;
-                    itemName = data.customProductName;
-                }
-
-                var product = CreateAsset.CreateAndGetScriptableAssetByName<IapDataProduct>($"{FileExtension.DefaultRootPath}/Iap/Products",
-                    isCustomName ? $"{itemName.ToLower()}" : $"iap_{itemName.ToLower()}");
-                product.Init(data.androidId, data.iosId, data.productType);
-                Debug.Log($"{product.androidId}");
-                products.Add(product);
-            }
-
-            serializedObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(target);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
+        // void GenerateProductImpl()
+        // {
+        //     IapSettings.Products.Clear();
+        //     var products = IapSettings.Products;
+        //     var skusData = IapSettings.SkusData;
+        //     foreach (var data in skusData)
+        //     {
+        //         Debug.Log($"{data.androidId}");
+        //         bool isCustomName = false;
+        //         string itemName = data.Id.Split('.').Last();
+        //         if (!string.IsNullOrEmpty(data.customProductName))
+        //         {
+        //             isCustomName = true;
+        //             itemName = data.customProductName;
+        //         }
+        //
+        //         var product = CreateAsset.CreateAndGetScriptableAssetByName<IapDataProduct>($"{FileExtension.DefaultRootPath}/Iap/Products",
+        //             isCustomName ? $"{itemName.ToLower()}" : $"iap_{itemName.ToLower()}");
+        //         product.Init(data.androidId, data.iosId, data.productType);
+        //         Debug.Log($"{product.androidId}");
+        //         products.Add(product);
+        //     }
+        //
+        //     serializedObject.ApplyModifiedProperties();
+        //     EditorUtility.SetDirty(target);
+        //     AssetDatabase.SaveAssets();
+        //     AssetDatabase.Refresh();
+        // }
 
         void ObfuscatorKeyImpl()
         {

@@ -10,50 +10,40 @@ using VirtueSky.Inspector;
 namespace VirtueSky.Iap
 {
     [Serializable]
-    [EditorIcon("scriptable_iap")]
-    public class IapDataProduct : ScriptableObject
+    public class IapDataProduct
     {
         [ReadOnly] public string androidId;
         [ReadOnly] public string iOSId;
         [ReadOnly] public IapProductType iapProductType;
 
-        [Tooltip("Config price for UI setup or tracking")]
+        [Tooltip("Config price for UI setup or tracking")] [ReadOnly]
         public float priceConfig;
 
         [NonSerialized] public Action purchaseSuccessCallback;
         [NonSerialized] public Action<string> purchaseFailedCallback;
-        [NonSerialized] private string remoteConfigId;
 
-        public void Init(string androidId, string iosId, IapProductType iapProductType)
+        public IapDataProduct(string androidId, string iosId, IapProductType iapProductType, float priceConfig)
         {
             this.androidId = androidId;
             this.iOSId = iosId;
             this.iapProductType = iapProductType;
+            this.priceConfig = priceConfig;
         }
 
         public string Id
         {
             get
             {
-                if (string.IsNullOrEmpty(remoteConfigId))
-                {
 #if UNITY_ANDROID
-                    return androidId;
+                return androidId;
 #elif UNITY_IOS
                 return iOSId;
 #else
                 return string.Empty;
 #endif
-                }
-
-                return remoteConfigId;
             }
         }
 
-        public void SetRemoteConfigId(string id)
-        {
-            remoteConfigId = id;
-        }
 #if VIRTUESKY_IAP
         public Product GetProduct()
         {

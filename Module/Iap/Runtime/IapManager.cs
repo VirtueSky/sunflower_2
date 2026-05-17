@@ -1,5 +1,6 @@
 #if VIRTUESKY_IAP
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -14,15 +15,28 @@ namespace VirtueSky.Iap
     [EditorIcon("icon_manager"), HideMonoScript]
     public class IapManager : MonoBehaviour, IDetailedStoreListener
     {
+        public enum InitType
+        {
+            InitOnAwake,
+            InitOnEnable,
+            InitOnStart,
+            InitManually
+        }
+
         [SerializeField] private bool isPersistent;
+        [Space] [SerializeField] InitType initType = InitType.InitManually;
+        [Space] [SerializeField] private List<IapData> skusData = new List<IapData>();
+        [ReadOnly, SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         public static event Action<string> OnPurchaseSucceedEvent;
         public static event Action<string, string> OnPurchaseFailedEvent;
 
         private IStoreController _controller;
         private IExtensionProvider _extensionProvider;
+        private bool isRequestBuilder = false;
         public static bool IsInitialized { get; private set; }
 
         private static IapManager instance;
+        public static List<IapDataProduct> Products => instance.products;
 
         private void Awake()
         {
@@ -38,9 +52,8 @@ namespace VirtueSky.Iap
             }
 
             instance = this;
-
-            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
-                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
+            CreateIapProducts();
+            if (initType == InitType.InitOnAwake)
             {
                 InternalInitialization();
             }
@@ -48,18 +61,15 @@ namespace VirtueSky.Iap
 
         private void OnEnable()
         {
-            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable ||
-                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable)
+            if (initType == InitType.InitOnEnable)
             {
                 InternalInitialization();
             }
         }
 
-
         private void Start()
         {
-            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
-                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
+            if (initType == InitType.InitOnStart)
             {
                 InternalInitialization();
             }
@@ -73,8 +83,34 @@ namespace VirtueSky.Iap
             RequestProductData(builder);
             builder.Configure<IGooglePlayConfiguration>();
             UnityPurchasing.Initialize(this, builder);
+            Debug.Log("IapManager initialized!".SetColor(Color.cyan));
         }
 
+        private void CreateIapProducts()
+        {
+            foreach (var iapData in skusData)
+            {
+                if (IsDuplicateProduct(iapData.Id))
+                {
+                    Debug.LogWarning($"[IapManager] Duplicate product id '{iapData.Id}' in skusData. Skipping.");
+                    continue;
+                }
+
+                var product = new IapDataProduct(iapData.androidId, iapData.iosId, iapData.productType, iapData.priceConfig);
+                products.Add(product);
+            }
+        }
+
+        private bool IsDuplicateProduct(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return false;
+            foreach (var p in products)
+            {
+                if (p.Id == id) return true;
+            }
+
+            return false;
+        }
 
         #region Implement
 
@@ -172,7 +208,9 @@ namespace VirtueSky.Iap
 
         private void RequestProductData(ConfigurationBuilder builder)
         {
-            foreach (var p in IapSettings.Products)
+            if (isRequestBuilder) return;
+            isRequestBuilder = true;
+            foreach (var p in Products)
             {
                 builder.AddProduct(p.Id, ConvertProductType(p.iapProductType));
             }
@@ -181,7 +219,7 @@ namespace VirtueSky.Iap
         private void InternalPurchaseFailed(string id, PurchaseFailureReason failureReason)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
-            foreach (var product in IapSettings.Products)
+            foreach (var product in Products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseFailedEvent?.Invoke(product.Id, failureReason.ToString());
@@ -197,7 +235,7 @@ namespace VirtueSky.Iap
 
         void InternalPurchaseSuccess(string id)
         {
-            foreach (var product in IapSettings.Products)
+            foreach (var product in Products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseSucceedEvent?.Invoke(product.Id);
@@ -255,7 +293,7 @@ namespace VirtueSky.Iap
         private IapDataProduct InternalPurchaseProductById(string id)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(true);
-            var product = IapSettings.GetIapProduct(id);
+            var product = GetIapProduct(id);
             PurchaseProductInternal(product);
             return product;
         }
@@ -277,7 +315,7 @@ namespace VirtueSky.Iap
         private bool InternalIsPurchasedProductById(string id)
         {
             if (_controller == null) return false;
-            return ConvertProductType(IapSettings.GetIapProduct(id).iapProductType) is ProductType.NonConsumable or ProductType.Subscription &&
+            return ConvertProductType(GetIapProduct(id).iapProductType) is ProductType.NonConsumable or ProductType.Subscription &&
                    _controller.products.WithID(id)
                        .hasReceipt;
         }
@@ -305,6 +343,43 @@ namespace VirtueSky.Iap
         #endregion
 
         #region Public API
+
+        public static IapDataProduct GetIapProduct(string id)
+        {
+            foreach (var product in Products)
+            {
+                if (product.Id == id) return product;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Add product to IapManager. You can use this API to add product at runtime, but you need to make sure called before IapManager intialization.
+        /// </summary>
+        /// <param name="product"></param>
+        public static void AddProduct(IapDataProduct product)
+        {
+            if (instance == null)
+            {
+                Debug.LogWarning("[IapManager] AddProduct called before IapManager instance is ready.");
+                return;
+            }
+
+            if (instance.isRequestBuilder)
+            {
+                Debug.LogWarning("[IapManager] AddProduct called after IapManager has requested product data. The new product will not be included in the initialization.");
+                return;
+            }
+
+            if (instance.IsDuplicateProduct(product.Id))
+            {
+                Debug.LogWarning($"[IapManager] Duplicate product id '{product.Id}'. Skipping.");
+                return;
+            }
+
+            Products.Add(product);
+        }
 
         public static IapDataProduct PurchaseProduct(string id) => instance != null ? instance.InternalPurchaseProductById(id) : null;
 
