@@ -7,7 +7,6 @@ namespace VirtueSky.Ads
 {
     public static class AdStatic
     {
-#if VIRTUESKY_ADS
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeBeforeSceneLoad()
         {
@@ -34,8 +33,6 @@ namespace VirtueSky.Ads
             ads.AddComponent<Advertising>();
             UnityEngine.Object.DontDestroyOnLoad(ads);
         }
-
-#endif
 
 
         public static Action<bool> OnChangePreventDisplayAppOpenEvent;
