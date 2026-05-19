@@ -10,9 +10,10 @@ namespace VirtueSky.Iap
     [EditorIcon("icon_scriptable")]
     public class IapSettings : ScriptableSettings<IapSettings>
     {
-        //[SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
+        [SerializeField] private CoreEnum.RuntimeInitType runtimeInitType;
 
-        // [SerializeField] private List<IapData> skusData = new List<IapData>();
+        [SerializeField] private List<IapData> skusData = new List<IapData>();
+
         // [SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         [SerializeField] private bool isValidatePurchase = true;
         [SerializeField] private bool isCustomValidatePurchase;
@@ -21,9 +22,10 @@ namespace VirtueSky.Iap
         [SerializeField, TextArea] private string googlePlayStoreKey;
         public string GooglePlayStoreKey => googlePlayStoreKey;
 #endif
-        //public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
+        public static CoreEnum.RuntimeInitType RuntimeInitType => Instance.runtimeInitType;
 
-        // public static List<IapData> SkusData => Instance.skusData;
+        public static List<IapData> SkusData => Instance.skusData;
+
         // public static List<IapDataProduct> Products => Instance.products;
         public static bool IsValidatePurchase => Instance.isValidatePurchase;
         public static bool IsCustomValidatePurchase => Instance.isCustomValidatePurchase;

@@ -12,9 +12,10 @@ namespace VirtueSky.Iap
     {
         private IapSettings _iapSettings;
 
-        //private SerializedProperty _runtimeInitType;
+        private SerializedProperty _runtimeInitType;
 
-        // private SerializedProperty _skusData;
+        private SerializedProperty _skusData;
+
         // private SerializedProperty _products;
         private SerializedProperty _isValidatePurchase;
         private SerializedProperty _isCustomValidatePurchase;
@@ -24,8 +25,8 @@ namespace VirtueSky.Iap
         void Init()
         {
             _iapSettings = target as IapSettings;
-            //_runtimeInitType = serializedObject.FindProperty("runtimeInitType");
-            // _skusData = serializedObject.FindProperty("skusData");
+            _runtimeInitType = serializedObject.FindProperty("runtimeInitType");
+            _skusData = serializedObject.FindProperty("skusData");
             // _products = serializedObject.FindProperty("products");
             _isValidatePurchase = serializedObject.FindProperty("isValidatePurchase");
             _isCustomValidatePurchase = serializedObject.FindProperty("isCustomValidatePurchase");
@@ -39,10 +40,10 @@ namespace VirtueSky.Iap
             Init();
             GUILayout.Space(10);
 
-            //EditorGUILayout.PropertyField(_runtimeInitType);
+            EditorGUILayout.PropertyField(_runtimeInitType);
 
-            //GUILayout.Space(10);
-            // EditorGUILayout.PropertyField(_skusData);
+            GUILayout.Space(10);
+            EditorGUILayout.PropertyField(_skusData);
             // EditorGUILayout.PropertyField(_products);
             // GUILayout.Space(10);
             // if (GUILayout.Button("Generate Product From SkusData"))

@@ -15,18 +15,9 @@ namespace VirtueSky.Iap
     [EditorIcon("icon_manager"), HideMonoScript]
     public class IapManager : MonoBehaviour, IDetailedStoreListener
     {
-        public enum InitType
-        {
-            InitOnAwake,
-            InitOnEnable,
-            InitOnStart,
-            InitManually
-        }
-
         [SerializeField] private bool isPersistent;
-        [Space] [SerializeField] InitType initType = InitType.InitManually;
-        [Space] [SerializeField] private List<IapData> skusData = new List<IapData>();
-        [ReadOnly, SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
+
+        [Space] [ReadOnly, SerializeField] private List<IapDataProduct> products = new List<IapDataProduct>();
         public static event Action<string> OnPurchaseSucceedEvent;
         public static event Action<string, string> OnPurchaseFailedEvent;
 
@@ -53,7 +44,8 @@ namespace VirtueSky.Iap
 
             instance = this;
             CreateIapProducts();
-            if (initType == InitType.InitOnAwake)
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
             {
                 InternalInitialization();
             }
@@ -61,7 +53,8 @@ namespace VirtueSky.Iap
 
         private void OnEnable()
         {
-            if (initType == InitType.InitOnEnable)
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable)
             {
                 InternalInitialization();
             }
@@ -69,7 +62,8 @@ namespace VirtueSky.Iap
 
         private void Start()
         {
-            if (initType == InitType.InitOnStart)
+            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
+                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
             {
                 InternalInitialization();
             }
@@ -88,7 +82,7 @@ namespace VirtueSky.Iap
 
         private void CreateIapProducts()
         {
-            foreach (var iapData in skusData)
+            foreach (var iapData in IapSettings.SkusData)
             {
                 if (IsDuplicateProduct(iapData.Id))
                 {
@@ -368,7 +362,8 @@ namespace VirtueSky.Iap
 
             if (instance.isRequestBuilder)
             {
-                Debug.LogWarning("[IapManager] AddProduct called after IapManager has requested product data. The new product will not be included in the initialization.");
+                Debug.LogWarning(
+                    "[IapManager] AddProduct called after IapManager has requested product data. The new product will not be included in the initialization.");
                 return;
             }
 
