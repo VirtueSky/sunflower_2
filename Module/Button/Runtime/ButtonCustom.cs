@@ -24,6 +24,9 @@ namespace VirtueSky.UIButton
         [SerializeField] private Ease easingTypes = Ease.OutQuint;
 
         [SerializeField] private float scale = 0.9f;
+        [SerializeField] private bool isShrugOver;
+        [SerializeField] private float timeShrug = .2f;
+        [SerializeField] private float strength = .2f;
 
         [HeaderLine("Sound FX", false, CustomColor.Aquamarine, CustomColor.Bright)] [SerializeField]
         private bool useSoundFx;
@@ -72,6 +75,7 @@ namespace VirtueSky.UIButton
         public override void OnPointerExit(PointerEventData eventData)
         {
             base.OnPointerExit(eventData);
+            Shrug();
         }
 
         void DoScale()
@@ -79,6 +83,18 @@ namespace VirtueSky.UIButton
             if (isMotion)
             {
                 _tweenHandle = Tween.Create(originScale, originScale * scale, 0.15f).WithEase(easingTypes).BindToLocalScale(transform);
+            }
+        }
+
+        void Shrug()
+        {
+            if (isMotion && isShrugOver && canShrug)
+            {
+                canShrug = false;
+                if (isMotion && isShrugOver)
+                {
+                    transform.Shrug(timeShrug, strength, Ease.OutQuad, () => { canShrug = true; });
+                }
             }
         }
 

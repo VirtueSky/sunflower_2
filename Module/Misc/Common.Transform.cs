@@ -42,9 +42,9 @@ namespace VirtueSky.Misc
                                     {
                                         tween.Complete();
                                     }
-                                }).BindToPosition(transformObj);
-                        }).BindToPosition(transformObj);
-                }).BindToPosition(transformObj);
+                                }).BindToLocalScale(transformObj);
+                        }).BindToLocalScale(transformObj);
+                }).BindToLocalScale(transformObj);
         }
 
         /// <summary>

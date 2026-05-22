@@ -14,6 +14,9 @@ public class ButtomCustomEditor : UnityEditor.UI.ButtonEditor
     private SerializedProperty _ease;
     private SerializedProperty _scale;
     private SerializedProperty _easingTypes;
+    private SerializedProperty _isShrugOver;
+    private SerializedProperty _timeShrug;
+    private SerializedProperty _strength;
     private SerializedProperty _useSoundFx;
     private SerializedProperty _soundClickButton;
 
@@ -25,6 +28,9 @@ public class ButtomCustomEditor : UnityEditor.UI.ButtonEditor
         _isMotion = serializedObject.FindProperty("isMotion");
         _easingTypes = serializedObject.FindProperty("easingTypes");
         _scale = serializedObject.FindProperty("scale");
+        _isShrugOver = serializedObject.FindProperty("isShrugOver");
+        _timeShrug = serializedObject.FindProperty("timeShrug");
+        _strength = serializedObject.FindProperty("strength");
         _useSoundFx = serializedObject.FindProperty("useSoundFx");
         _soundClickButton = serializedObject.FindProperty("soundClickButton");
     }
@@ -47,6 +53,12 @@ public class ButtomCustomEditor : UnityEditor.UI.ButtonEditor
         {
             EditorGUILayout.PropertyField(_easingTypes);
             EditorGUILayout.PropertyField(_scale);
+            EditorGUILayout.PropertyField(_isShrugOver);
+            if (_isShrugOver.boolValue)
+            {
+                EditorGUILayout.PropertyField(_timeShrug);
+                EditorGUILayout.PropertyField(_strength);
+            }
         }
 
         EditorGUILayout.PropertyField(_useSoundFx);
