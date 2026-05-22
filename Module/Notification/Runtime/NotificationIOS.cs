@@ -1,9 +1,9 @@
 #if UNITY_IOS && VIRTUESKY_NOTIFICATION
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Notifications.iOS;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
 
 namespace VirtueSky.Notifications
 {
@@ -11,19 +11,19 @@ namespace VirtueSky.Notifications
     {
         private static Dictionary<string, bool> channelRegistered = new Dictionary<string, bool>();
 
-        internal static async UniTask RequestAuthorization()
+        internal static async Task RequestAuthorization()
         {
             var authorizationOption = AuthorizationOption.Alert | AuthorizationOption.Badge | AuthorizationOption.Sound;
             using (var req = new AuthorizationRequest(authorizationOption, true))
             {
                 while (!req.IsFinished)
                 {
-                    await UniTask.Yield();
+                    await Task.Yield();
                 }
             }
         }
 
-        private static async UniTask RegisterNotificationChannel(string identifier, string title, string subtitle,
+        private static async Task RegisterNotificationChannel(string identifier, string title, string subtitle,
             string body, iOSNotificationTrigger trigger)
         {
             await RequestAuthorization();
@@ -74,7 +74,7 @@ namespace VirtueSky.Notifications
                 title,
                 subtitle,
                 text,
-                timeTrigger).Forget();
+                timeTrigger);
         }
 
         internal static void ScheduleAtSpecificTime(string identifier, string title, string subtitle, string text,
@@ -105,7 +105,7 @@ namespace VirtueSky.Notifications
                 title,
                 subtitle,
                 text,
-                timeTrigger).Forget();
+                timeTrigger);
         }
 
         internal static void CancelAllScheduled()
@@ -119,4 +119,5 @@ namespace VirtueSky.Notifications
         }
     }
 }
+
 #endif

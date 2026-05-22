@@ -1,7 +1,7 @@
 #if VIRTUESKY_IAP
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
@@ -47,7 +47,7 @@ namespace VirtueSky.Iap
             if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
                 AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
             {
-                InternalInitialization();
+                StartCoroutine(InternalInitialization());
             }
         }
 
@@ -56,7 +56,7 @@ namespace VirtueSky.Iap
             if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable ||
                 AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable)
             {
-                InternalInitialization();
+                StartCoroutine(InternalInitialization());
             }
         }
 
@@ -65,14 +65,20 @@ namespace VirtueSky.Iap
             if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
                 AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
             {
-                InternalInitialization();
+                StartCoroutine(InternalInitialization());
             }
         }
 
-        private async void InternalInitialization()
+        private IEnumerator InternalInitialization()
         {
-            if (IsInitialized) return;
-            await UniTask.WaitUntil(() => UnityServiceInitialization.IsUnityServiceReady);
+            if (IsInitialized)
+                yield break;
+
+            while (!UnityServiceInitialization.IsUnityServiceReady)
+            {
+                yield return null;
+            }
+
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             RequestProductData(builder);
             builder.Configure<IGooglePlayConfiguration>();
@@ -406,7 +412,7 @@ namespace VirtueSky.Iap
         {
             if (instance != null)
             {
-                instance.InternalInitialization();
+                instance.StartCoroutine(instance.InternalInitialization());
             }
         }
 
