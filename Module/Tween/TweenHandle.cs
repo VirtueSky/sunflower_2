@@ -25,15 +25,11 @@ namespace VirtueSky.Tweening
         }
 
         public bool IsActive => TweenRuntime.IsActive(kind, index, version);
+        public bool IsPaused => TweenRuntime.IsPaused(kind, index, version);
 
-        public void Cancel()
-        {
-            TweenRuntime.Cancel(kind, index, version);
-        }
-
-        public void Complete()
-        {
-            TweenRuntime.Complete(kind, index, version);
-        }
+        public void Cancel() => TweenRuntime.Cancel(kind, index, version);
+        public void Complete() => TweenRuntime.Complete(kind, index, version);
+        public void Pause() => TweenRuntime.Pause(kind, index, version);
+        public void Resume() => TweenRuntime.Resume(kind, index, version);
     }
 }
