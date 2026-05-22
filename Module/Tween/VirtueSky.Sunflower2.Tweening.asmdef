@@ -1,10 +1,8 @@
 {
-    "name": "Wolf.UnityCommon.Utils",
+    "name": "VirtueSky.Sunflower2.Tweening",
     "rootNamespace": "",
     "references": [
-        "GUID:80ecb87cae9c44d19824e70ea7229748",
-        "GUID:3b570a5146f9d4f0fa107ed4559471a3",
-        "GUID:3aa1866a824b5472da50fe142777d95f"
+        "GUID:ba00a69c89ab3a94d84d27e0051afcfd"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

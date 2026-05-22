@@ -1,7 +1,7 @@
-﻿using PrimeTween;
-using UnityEngine;
+﻿using UnityEngine;
 using VirtueSky.Core;
 using VirtueSky.Inspector;
+using VirtueSky.Tweening;
 
 
 namespace VirtueSky.Component
@@ -15,7 +15,7 @@ namespace VirtueSky.Component
         [Range(0, 2f)] public float timeScale = .7f;
         public Ease ease = Ease.Linear;
         private Vector3 currentScale;
-        private Tween tween;
+        private TweenHandle tween;
         private bool isBreak = false;
 
         public void Awake()
@@ -35,13 +35,19 @@ namespace VirtueSky.Component
         public override void OnDisable()
         {
             base.OnDisable();
-            tween.Stop();
+            if (tween.IsActive)
+            {
+                tween.Cancel();
+            }
         }
 
         public void Stop()
         {
             isBreak = true;
-            tween.Stop();
+            if (tween.IsActive)
+            {
+                tween.Complete();
+            }
         }
 
         public void Play()
@@ -57,10 +63,19 @@ namespace VirtueSky.Component
             App.Delay(this, timeDelay * (delay ? 1 : 0),
                 () =>
                 {
-                    tween = transform.Scale(
-                            new Vector3(currentScale.x + offsetScale, currentScale.y + offsetScale,
-                                currentScale.z + offsetScale), timeScale, ease)
-                        .OnComplete(() => { DoEffect(-offsetScale, !delay); }, false);
+                    Vector3 targetScale = new Vector3(currentScale.x + offsetScale, currentScale.y + offsetScale,
+                        currentScale.z + offsetScale);
+                    Vector3 fromScale = transform.localScale;
+                    tween = Tween.Create(fromScale, targetScale, timeScale).WithEase(ease).WithOnComplete(() =>
+                        {
+                            if (tween.IsActive)
+                            {
+                                tween.Complete();
+                            }
+
+                            DoEffect(-offsetScale, !delay);
+                        })
+                        .Bind(scale => transform.localScale = scale);
                 });
         }
     }

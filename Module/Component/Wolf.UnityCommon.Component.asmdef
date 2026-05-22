@@ -2,7 +2,6 @@
     "name": "Wolf.UnityCommon.Component",
     "rootNamespace": "",
     "references": [
-        "GUID:80ecb87cae9c44d19824e70ea7229748",
         "GUID:72d1fea872bd7a449bf3818f2b0a6708",
         "GUID:68765d262e2128e4ab49c983f3411946",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
@@ -10,7 +9,8 @@
         "GUID:324caed91501a9c47a04ebfd87b68794",
         "GUID:ba00a69c89ab3a94d84d27e0051afcfd",
         "GUID:fca7ec166e04dc948b624a983315e2c9",
-        "GUID:d25c81a6e03d11c4fb58d263c8aaea84"
+        "GUID:d25c81a6e03d11c4fb58d263c8aaea84",
+        "GUID:3762a614d6685ee4aa2c2edc0d4cebcf"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

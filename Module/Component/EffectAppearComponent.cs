@@ -1,7 +1,7 @@
 using UnityEngine;
-using PrimeTween;
 using VirtueSky.Core;
 using VirtueSky.Inspector;
+using VirtueSky.Tweening;
 
 namespace VirtueSky.Component
 {
@@ -13,7 +13,7 @@ namespace VirtueSky.Component
         public Ease ease = Ease.OutBack;
         public Vector3 fromScale = new Vector3(.5f, .5f, .5f);
         private Vector3 CurrentScale;
-        private Tween _tween;
+        private TweenHandle _tween;
 
         public void Awake()
         {
@@ -29,13 +29,23 @@ namespace VirtueSky.Component
         public void DoEffect()
         {
             if (!gameObject.activeInHierarchy) return;
-            _tween = Tween.Scale(transform, CurrentScale, TimeScale, ease).OnComplete(() => { _tween.Stop(); }, false);
+            _tween = Tween.Create(fromScale, CurrentScale, TimeScale).WithEase(ease).WithOnComplete(() =>
+                {
+                    if (_tween.IsActive)
+                    {
+                        _tween.Complete();
+                    }
+                })
+                .BindToLocalScale(transform);
         }
 
         public override void OnDisable()
         {
             base.OnDisable();
-            _tween.Stop();
+            if (_tween.IsActive)
+            {
+                _tween.Cancel();
+            }
         }
     }
 }

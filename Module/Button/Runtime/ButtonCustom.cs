@@ -1,4 +1,3 @@
-using PrimeTween;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -6,6 +5,7 @@ using VirtueSky.Audio;
 using VirtueSky.Core;
 using VirtueSky.Inspector;
 using VirtueSky.Misc;
+using VirtueSky.Tweening;
 using VirtueSky.Utils;
 using Button = UnityEngine.UI.Button;
 
@@ -24,9 +24,6 @@ namespace VirtueSky.UIButton
         [SerializeField] private Ease easingTypes = Ease.OutQuint;
 
         [SerializeField] private float scale = 0.9f;
-        [SerializeField] private bool isShrugOver;
-        [SerializeField] private float timeShrug = .2f;
-        [SerializeField] private float strength = .2f;
 
         [HeaderLine("Sound FX", false, CustomColor.Aquamarine, CustomColor.Bright)] [SerializeField]
         private bool useSoundFx;
@@ -35,7 +32,7 @@ namespace VirtueSky.UIButton
 
         Vector3 originScale = Vector3.one;
         private bool canShrug = true;
-        private Tween _tween;
+        private TweenHandle _tweenHandle;
 
         protected override void OnEnable()
         {
@@ -75,26 +72,13 @@ namespace VirtueSky.UIButton
         public override void OnPointerExit(PointerEventData eventData)
         {
             base.OnPointerExit(eventData);
-            Shrug();
         }
 
         void DoScale()
         {
             if (isMotion)
             {
-                _tween = Tween.Scale(transform, originScale * scale, .15f, easingTypes);
-            }
-        }
-
-        void Shrug()
-        {
-            if (isMotion && isShrugOver && canShrug)
-            {
-                canShrug = false;
-                if (isMotion && isShrugOver)
-                {
-                    transform.Shrug(timeShrug, strength, Ease.OutQuad, () => { canShrug = true; });
-                }
+                _tweenHandle = Tween.Create(originScale, originScale * scale, 0.15f).WithEase(easingTypes).BindToLocalScale(transform);
             }
         }
 
@@ -102,7 +86,11 @@ namespace VirtueSky.UIButton
         {
             if (isMotion)
             {
-                _tween.Stop();
+                if (_tweenHandle.IsActive)
+                {
+                    _tweenHandle.Complete();
+                }
+
                 transform.localScale = originScale;
             }
         }

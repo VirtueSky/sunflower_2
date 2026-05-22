@@ -1,6 +1,6 @@
 ﻿using System;
-using PrimeTween;
 using UnityEngine;
+using VirtueSky.Tweening;
 
 namespace VirtueSky.Misc
 {
@@ -21,28 +21,30 @@ namespace VirtueSky.Misc
             Ease easingTypes = Ease.OutQuad,
             Action completed = null)
         {
-            Tween tween = default;
+            TweenHandle tween = default;
             Vector3 baseScale = transformObj.localScale;
             Vector3 targetBounceX = new Vector3(1 + strength, 1 - strength) * baseScale.x;
             Vector3 targetBounceY = new Vector3(1 - strength, 1 + strength) * baseScale.y;
-            tween = Tween.Scale(transformObj, targetBounceX, time / 3, easingTypes).OnComplete(() =>
-            {
-                Tween.Scale(transformObj, targetBounceY, time / 3, easingTypes).OnComplete(() =>
+            tween = Tween.Create(baseScale, targetBounceX, time / 3)
+                .WithEase(easingTypes)
+                .WithOnComplete(() =>
                 {
-                    Tween.Scale(transformObj, baseScale, time / 3, easingTypes).OnComplete(() =>
-                    {
-                        tween.Stop();
-                        completed?.Invoke();
-                    });
-                });
-            });
-        }
-
-        public static Camera CameraShake(this Camera camera, float strengthFactor = 1.0f, float duration = 0.5f,
-            int frequency = 10)
-        {
-            Tween.ShakeCamera(camera, strengthFactor, duration, frequency);
-            return camera;
+                    Tween.Create(baseScale, targetBounceY, time / 3)
+                        .WithEase(easingTypes)
+                        .WithOnComplete(() =>
+                        {
+                            Tween.Create(transformObj.localScale, baseScale, time / 3)
+                                .WithEase(easingTypes)
+                                .WithOnComplete(() =>
+                                {
+                                    completed?.Invoke();
+                                    if (tween.IsActive)
+                                    {
+                                        tween.Complete();
+                                    }
+                                }).BindToPosition(transformObj);
+                        }).BindToPosition(transformObj);
+                }).BindToPosition(transformObj);
         }
 
         /// <summary>
