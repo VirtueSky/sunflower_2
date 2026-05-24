@@ -499,6 +499,11 @@ namespace VirtueSky.Ads
 
         // General
         /// <summary>
+        /// Return true if the Advertising instance exists in scene, otherwise return false. Check this before calling any Advertising API to avoid NullReferenceException.
+        /// </summary>
+        public static bool IsExist => instance != null;
+
+        /// <summary>
         /// Return true if the ad client is initialized, otherwise return false. The ad client will be initialized after the GDPR flow if GDPR is enabled, or initialized directly in Start() if GDPR is not enabled. You can check this property to make sure the ad client is ready before calling any method of ad unit to avoid potential error.
         /// </summary>
         public static bool IsInitAdClient => instance.isInitAdClient;
