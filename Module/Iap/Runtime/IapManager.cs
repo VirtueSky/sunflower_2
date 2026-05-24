@@ -24,6 +24,7 @@ namespace VirtueSky.Iap
         private IStoreController _controller;
         private IExtensionProvider _extensionProvider;
         private bool isRequestBuilder = false;
+        public static bool IsExist => instance != null;
         public static bool IsInitialized { get; private set; }
 
         private static IapManager instance;
