@@ -314,62 +314,188 @@ namespace VirtueSky.Ads
 
         private AdUnit GetBannerAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.BannerAdUnit(),
-                AdMediation.Admob => admobAdClient.BannerAdUnit(),
-                _ => levelPlayAdClient.BannerAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max banner ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.BannerAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob banner ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.BannerAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay banner ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.BannerAdUnit();
+            }
         }
 
         private AdUnit GetInterAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.InterstitialAdUnit(),
-                AdMediation.Admob => admobAdClient.InterstitialAdUnit(),
-                _ => levelPlayAdClient.InterstitialAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max interstitial ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.InterstitialAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob interstitial ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.InterstitialAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay interstitial ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.InterstitialAdUnit();
+            }
         }
 
         private AdUnit GetRewardAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.RewardAdUnit(),
-                AdMediation.Admob => admobAdClient.RewardAdUnit(),
-                _ => levelPlayAdClient.RewardAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max reward ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.RewardAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob reward ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.RewardAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay reward ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.RewardAdUnit();
+            }
         }
 
         private AdUnit GetRewardInterAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.RewardedInterstitialAdUnit(),
-                AdMediation.Admob => admobAdClient.RewardedInterstitialAdUnit(),
-                _ => levelPlayAdClient.RewardedInterstitialAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max rewarded interstitial ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.RewardedInterstitialAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob rewarded interstitial ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.RewardedInterstitialAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay rewarded interstitial ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.RewardedInterstitialAdUnit();
+            }
         }
 
         private AdUnit GetAppOpenAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.AppOpenAdUnit(),
-                AdMediation.Admob => admobAdClient.AppOpenAdUnit(),
-                _ => levelPlayAdClient.AppOpenAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max app open ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.AppOpenAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob app open ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.AppOpenAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay app open ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.AppOpenAdUnit();
+            }
         }
 
         private AdUnit GetNativeOverlayAdUnit(AdMediation adMediation)
         {
-            return adMediation switch
+            switch (adMediation)
             {
-                AdMediation.AppLovin => maxAdClient.NativeOverlayAdUnit(),
-                AdMediation.Admob => admobAdClient.NativeOverlayAdUnit(),
-                _ => levelPlayAdClient.NativeOverlayAdUnit()
-            };
+                case AdMediation.AppLovin:
+                    if (maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max native overlay ad unit.");
+                        return null;
+                    }
+
+                    return maxAdClient.NativeOverlayAdUnit();
+                case AdMediation.Admob:
+                    if (admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob native overlay ad unit.");
+                        return null;
+                    }
+
+                    return admobAdClient.NativeOverlayAdUnit();
+                default:
+                    if (levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay native overlay ad unit.");
+                        return null;
+                    }
+
+                    return levelPlayAdClient.NativeOverlayAdUnit();
+            }
         }
 
         #endregion
@@ -485,12 +611,30 @@ namespace VirtueSky.Ads
             switch (adMediation)
             {
                 case AdMediation.AppLovin:
+                    if (instance.maxAdClient == null)
+                    {
+                        Debug.LogWarning("MaxAdClient is not initialized, can't show Max ad mediation debugger.");
+                        return;
+                    }
+
                     instance.maxAdClient.ShowAdMediationDebugger();
                     break;
                 case AdMediation.Admob:
+                    if (instance.admobAdClient == null)
+                    {
+                        Debug.LogWarning("AdmobAdClient is not initialized, can't show Admob ad mediation debugger.");
+                        return;
+                    }
+
                     instance.admobAdClient.ShowAdMediationDebugger();
                     break;
                 case AdMediation.LevelPlay:
+                    if (instance.levelPlayAdClient == null)
+                    {
+                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't show LevelPlay ad mediation debugger.");
+                        return;
+                    }
+
                     instance.levelPlayAdClient.ShowAdMediationDebugger();
                     break;
             }
