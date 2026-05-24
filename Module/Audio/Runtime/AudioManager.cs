@@ -261,21 +261,23 @@ namespace VirtueSky.Audio
 
         public static float SfxVolume
         {
-            get => GameData.Get(KEY_SFX_VOLUME, 1);
+            get => GameData.Get(KEY_SFX_VOLUME, 1f);
             set
             {
-                GameData.Set(KEY_SFX_VOLUME, value);
-                OnVolumeSfxChangedEvent?.Invoke(value);
+                float v = Mathf.Clamp01(value);
+                GameData.Set(KEY_SFX_VOLUME, v);
+                OnVolumeSfxChangedEvent?.Invoke(v);
             }
         }
 
         public static float MusicVolume
         {
-            get => GameData.Get(KEY_MUSIC_VOLUME, 1);
+            get => GameData.Get(KEY_MUSIC_VOLUME, 1f);
             set
             {
-                GameData.Set(KEY_MUSIC_VOLUME, value);
-                OnVolumeMusicChangedEvent?.Invoke(value);
+                float v = Mathf.Clamp01(value);
+                GameData.Set(KEY_MUSIC_VOLUME, v);
+                OnVolumeMusicChangedEvent?.Invoke(v);
             }
         }
 
