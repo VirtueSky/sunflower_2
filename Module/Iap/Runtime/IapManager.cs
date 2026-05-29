@@ -24,11 +24,11 @@ namespace VirtueSky.Iap
         private IStoreController _controller;
         private IExtensionProvider _extensionProvider;
         private bool isRequestBuilder = false;
+        private bool flag = false;
         public static bool IsExist => instance != null;
         public static bool IsInitialized { get; private set; }
 
         private static IapManager instance;
-        public static List<IapDataProduct> Products => instance.products;
 
         private void Awake()
         {
@@ -72,14 +72,9 @@ namespace VirtueSky.Iap
 
         private IEnumerator InternalInitialization()
         {
-            if (IsInitialized)
-                yield break;
-
-            while (!UnityServiceInitialization.IsUnityServiceReady)
-            {
-                yield return null;
-            }
-
+            if (IsInitialized || flag) yield break;
+            flag = true;
+            yield return new WaitUntil(() => UnityServiceInitialization.IsUnityServiceReady);
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             RequestProductData(builder);
             builder.Configure<IGooglePlayConfiguration>();
@@ -211,7 +206,7 @@ namespace VirtueSky.Iap
         {
             if (isRequestBuilder) return;
             isRequestBuilder = true;
-            foreach (var p in Products)
+            foreach (var p in products)
             {
                 builder.AddProduct(p.Id, ConvertProductType(p.iapProductType));
             }
@@ -220,7 +215,7 @@ namespace VirtueSky.Iap
         private void InternalPurchaseFailed(string id, PurchaseFailureReason failureReason)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
-            foreach (var product in Products)
+            foreach (var product in products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseFailedEvent?.Invoke(product.Id, failureReason.ToString());
@@ -236,7 +231,7 @@ namespace VirtueSky.Iap
 
         void InternalPurchaseSuccess(string id)
         {
-            foreach (var product in Products)
+            foreach (var product in products)
             {
                 if (product.Id != id) continue;
                 OnPurchaseSucceedEvent?.Invoke(product.Id);
@@ -345,9 +340,11 @@ namespace VirtueSky.Iap
 
         #region Public API
 
+        public static List<IapDataProduct> Products() => instance != null ? new List<IapDataProduct>().Adds(instance.products) : new List<IapDataProduct>();
+
         public static IapDataProduct GetIapProduct(string id)
         {
-            foreach (var product in Products)
+            foreach (var product in instance.products)
             {
                 if (product.Id == id) return product;
             }
@@ -367,6 +364,12 @@ namespace VirtueSky.Iap
                 return;
             }
 
+            if (instance.IsDuplicateProduct(product.Id))
+            {
+                Debug.LogWarning($"[IapManager] Duplicate product id '{product.Id}'. Skipping.");
+                return;
+            }
+
             if (instance.isRequestBuilder)
             {
                 Debug.LogWarning(
@@ -374,13 +377,7 @@ namespace VirtueSky.Iap
                 return;
             }
 
-            if (instance.IsDuplicateProduct(product.Id))
-            {
-                Debug.LogWarning($"[IapManager] Duplicate product id '{product.Id}'. Skipping.");
-                return;
-            }
-
-            Products.Add(product);
+            instance.products.Add(product);
         }
 
         public static IapDataProduct PurchaseProduct(string id) => instance != null ? instance.InternalPurchaseProductById(id) : null;
