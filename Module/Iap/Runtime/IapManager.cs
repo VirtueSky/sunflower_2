@@ -45,8 +45,8 @@ namespace VirtueSky.Iap
 
             instance = this;
             CreateIapProducts();
-            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
-                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Awake ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Awake)
             {
                 StartCoroutine(InternalInitialization());
             }
@@ -54,8 +54,8 @@ namespace VirtueSky.Iap
 
         private void OnEnable()
         {
-            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable ||
-                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable)
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_OnEnable ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_OnEnable)
             {
                 StartCoroutine(InternalInitialization());
             }
@@ -63,8 +63,8 @@ namespace VirtueSky.Iap
 
         private void Start()
         {
-            if (AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
-                AdSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
+            if (IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.AfterSceneLoad_Start ||
+                IapSettings.RuntimeInitType == CoreEnum.RuntimeInitType.BeforeSceneLoad_Start)
             {
                 StartCoroutine(InternalInitialization());
             }
