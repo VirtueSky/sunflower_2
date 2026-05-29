@@ -75,7 +75,7 @@ namespace VirtueSky.Component
 
                             DoEffect(-offsetScale, !delay);
                         })
-                        .Bind(scale => transform.localScale = scale);
+                        .BindToLocalScale(transform);
                 });
         }
     }
