@@ -4,10 +4,17 @@ namespace VirtueSky.Utils
 {
     public struct VLog
     {
+        public static bool EnableLog = true;
+
         public static void Log(object message)
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.Log(message);
+#else
+            if (EnableLog)
+            {
+                UnityEngine.Debug.Log(message);
+            }
 #endif
         }
 
@@ -15,6 +22,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.Log(message, context);
+#else
+            if (EnableLog) 
+            {
+                UnityEngine.Debug.Log(message, context);
+            }
 #endif
         }
 
@@ -22,6 +34,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogWarning(message);
+#else
+            if (EnableLog)
+            {
+                UnityEngine.Debug.LogWarning(message);
+            }
 #endif
         }
 
@@ -29,6 +46,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogWarning(message, context);
+#else
+            if (EnableLog)
+            {
+                UnityEngine.Debug.LogWarning(message, context);
+            }
 #endif
         }
 
@@ -36,6 +58,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogError(message);
+#else
+            if (EnableLog)            
+            {
+                UnityEngine.Debug.LogError(message);
+            }
 #endif
         }
 
@@ -43,6 +70,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogError(message, context);
+#else
+            if (EnableLog)
+            {
+                UnityEngine.Debug.LogError(message, context);
+            }
 #endif
         }
 
@@ -50,6 +82,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogException(exception);
+#else
+            if (EnableLog)
+            {
+                UnityEngine.Debug.LogException(exception);
+            }
 #endif
         }
 
@@ -57,6 +94,11 @@ namespace VirtueSky.Utils
         {
 #if UNITY_EDITOR || VIRTUESKU_DEBUG_LOG
             UnityEngine.Debug.LogException(exception, context);
+#else
+            if (EnableLog)            
+            {
+                UnityEngine.Debug.LogException(exception, context);
+            }
 #endif
         }
     }
