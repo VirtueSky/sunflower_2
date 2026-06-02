@@ -14,11 +14,13 @@ namespace VirtueSky.Audio
         public enum GetType
         {
             Random,
-            Sequence
+            Sequence,
+            Index
         }
-        
+
         [GUIColor(0.8f, 1.0f, 0.6f), Space(10), SerializeField, TextArea(2, 5)]
         private string description;
+
         [Space] public bool loop = false;
         [Range(0f, 1f)] public float volume = 1;
 
@@ -32,14 +34,19 @@ namespace VirtueSky.Audio
 
         [ShowIf(nameof(ConditionFadeMusic), true)]
         public float fadeOutDuration = .5f;
-        
+
         [Space] [SerializeField] private GetType getType = GetType.Random;
+
+        [Tooltip("Use Index Clip for GetType Index"), SerializeField]
+        private int indexClip = 0;
+
         [Space, SerializeField] private List<AudioClip> audioClips = new List<AudioClip>();
         public bool ConditionFadeMusic => isMusicFadeVolume && soundType == SoundType.Music;
         private int sequenceIndex = 0;
         public int NumberOfAudioClips => audioClips?.Count ?? 0;
         public List<AudioClip> AudioClips() => audioClips ?? new List<AudioClip>();
-        public AudioClip GetAudioClip()
+
+        public AudioClip GetAudioClip(int index = -1)
         {
             if (audioClips.Count > 0)
             {
@@ -59,11 +66,20 @@ namespace VirtueSky.Audio
                         }
 
                         return clip;
+                    case GetType.Index:
+                        if (index >= 0)
+                        {
+                            indexClip = index;
+                        }
+
+                        indexClip = Mathf.Clamp(index, 0, audioClips.Count - 1);
+                        return audioClips[indexClip];
                 }
             }
 
             return null;
         }
+
         public void AddAudioClip(AudioClip audioClip)
         {
             audioClips.Add(audioClip);

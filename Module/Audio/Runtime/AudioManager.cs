@@ -23,14 +23,14 @@ namespace VirtueSky.Audio
         private const string KEY_MUSIC_VOLUME = "KEY_MUSIC_VOLUME";
         private const string KEY_SFX_VOLUME = "KEY_SFX_VOLUME";
 
-        private static event Func<SoundData, SoundCache> OnPlaySfxEvent;
+        private static event Func<SoundData, int, SoundCache> OnPlaySfxEvent;
         private static event Action<SoundCache> OnStopSfxEvent;
         private static event Action<SoundCache> OnPauseSfxEvent;
         private static event Action<SoundCache> OnResumeSfxEvent;
         private static event Action<SoundCache> OnFinishSfxEvent;
         private static event Action OnStopAllSfxEvent;
 
-        private static event Action<SoundData> OnPlayMusicEvent;
+        private static event Action<SoundData, int> OnPlayMusicEvent;
         private static event Action OnStopMusicEvent;
         private static event Action OnPauseMusicEvent;
         private static event Action OnResumeMusicEvent;
@@ -85,10 +85,10 @@ namespace VirtueSky.Audio
 
         #region Sfx Method
 
-        private SoundCache InternalPlaySfx(SoundData soundData)
+        private SoundCache InternalPlaySfx(SoundData soundData, int indexClip = -1)
         {
             SoundComponent sfxComponent = soundComponentPrefab.Spawn(audioHolder);
-            sfxComponent.PlayAudioClip(soundData.GetAudioClip(), soundData.loop, soundData.volume * SfxVolume);
+            sfxComponent.PlayAudioClip(soundData.GetAudioClip(indexClip), soundData.loop, soundData.volume * SfxVolume);
             if (!soundData.loop) sfxComponent.OnCompleted += OnFinishPlayingAudio;
             SoundCache soundCache = GetSoundCache(soundData);
             sfxComponent.Key = key;
@@ -145,14 +145,14 @@ namespace VirtueSky.Audio
 
         #region Music Method
 
-        private void InternalPlayMusic(SoundData soundData)
+        private void InternalPlayMusic(SoundData soundData, int indexClip = -1)
         {
             if (music == null || !music.IsPlaying)
             {
                 music = soundComponentPrefab.Spawn(audioHolder);
             }
 
-            music.FadePlayMusic(soundData.GetAudioClip(), soundData.loop, soundData.volume * MusicVolume,
+            music.FadePlayMusic(soundData.GetAudioClip(indexClip), soundData.loop, soundData.volume * MusicVolume,
                 soundData.isMusicFadeVolume, soundData.fadeOutDuration, soundData.fadeInDuration);
             music.OnCompleted += StopAudioMusic;
         }
@@ -248,13 +248,13 @@ namespace VirtueSky.Audio
 
         #region Public APi
 
-        public static SoundCache PlaySfx(SoundData soundData) => OnPlaySfxEvent?.Invoke(soundData);
+        public static SoundCache PlaySfx(SoundData soundData, int indexClip = -1) => OnPlaySfxEvent?.Invoke(soundData, indexClip);
         public static void StopSfx(SoundCache soundCache) => OnStopSfxEvent?.Invoke(soundCache);
         public static void PauseSfx(SoundCache soundCache) => OnPauseSfxEvent?.Invoke(soundCache);
         public static void ResumeSfx(SoundCache soundCache) => OnResumeSfxEvent?.Invoke(soundCache);
         public static void FinishSfx(SoundCache soundCache) => OnFinishSfxEvent?.Invoke(soundCache);
         public static void StopAllSfx() => OnStopAllSfxEvent?.Invoke();
-        public static void PlayMusic(SoundData soundData) => OnPlayMusicEvent?.Invoke(soundData);
+        public static void PlayMusic(SoundData soundData, int indexClip = -1) => OnPlayMusicEvent?.Invoke(soundData, indexClip);
         public static void StopMusic() => OnStopMusicEvent?.Invoke();
         public static void PauseMusic() => OnPauseMusicEvent?.Invoke();
         public static void ResumeMusic() => OnResumeMusicEvent?.Invoke();
