@@ -340,7 +340,8 @@ namespace VirtueSky.Iap
 
         #region Public API
 
-        public static List<IapDataProduct> Products() => instance != null ? new List<IapDataProduct>().Adds(instance.products) : new List<IapDataProduct>();
+        public static List<IapDataProduct> Products() =>
+            instance != null ? new List<IapDataProduct>().Adds(instance.products) : new List<IapDataProduct>();
 
         public static IapDataProduct GetIapProduct(string id)
         {
@@ -403,7 +404,6 @@ namespace VirtueSky.Iap
                 instance.InternalRestorePurchase();
             }
         }
-    }
 #endif
 
         public static void Initialization()
