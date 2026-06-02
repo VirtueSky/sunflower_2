@@ -113,19 +113,19 @@
         public const string PackageNameSpineCsharp = "com.esotericsoftware.spine.spine-csharp";
 
         public const string MaxVersionSpineCsharp =
-            "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.2";
+            "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.3";
 
         public const string PackageNameSpineUnity = "com.esotericsoftware.spine.spine-unity";
 
         public const string MaxVersionSpineUnity =
-            "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.2";
+            "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.3";
 
         #endregion
 
         public const string PackageNameUniTask = "com.cysharp.unitask";
 
         public const string MaxVersionUniTask =
-            "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10";
+            "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.11";
 
         public const string PackageNameBakingSheet = "com.cathei.bakingsheet";
 
