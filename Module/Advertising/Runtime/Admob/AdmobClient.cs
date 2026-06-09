@@ -133,7 +133,7 @@ namespace VirtueSky.Ads
             LoadRewardedInterstitial();
             LoadAppOpen();
             LoadNativeOverlay();
-            LoadBanner();
+            //LoadBanner();
         }
 
         private void TestMode()

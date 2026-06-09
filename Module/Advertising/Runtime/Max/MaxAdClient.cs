@@ -104,7 +104,7 @@ namespace VirtueSky.Ads
             LoadRewarded();
             LoadRewardedInterstitial();
             LoadAppOpen();
-            LoadBanner();
+            //LoadBanner();
         }
 #endif
     }

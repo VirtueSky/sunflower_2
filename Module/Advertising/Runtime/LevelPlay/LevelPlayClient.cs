@@ -134,7 +134,7 @@ namespace VirtueSky.Ads
             {
                 LoadInterstitial();
                 LoadRewarded();
-                LoadBanner();
+                //LoadBanner();
             });
         }
 #endif
