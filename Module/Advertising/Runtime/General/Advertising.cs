@@ -111,7 +111,6 @@ namespace VirtueSky.Ads
 
         void InitAdClient()
         {
-            AppTracking.Init(AdSettings.EnableTrackAdRevenue);
             if (AdSettings.IsApplovin()) InitApplovinClient();
             if (AdSettings.IsAdmob()) InitAdmobClient();
             if (AdSettings.IsLevelPlay()) InitLevelPlayClient();

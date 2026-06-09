@@ -22,7 +22,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
-            paidedCallback += AppTracking.TrackRevenue;
+            paidedCallback += TrackRevenue;
             MaxSdkCallbacks.Banner.OnAdLoadedEvent += OnAdLoaded;
             MaxSdkCallbacks.Banner.OnAdExpandedEvent += OnAdExpanded;
             MaxSdkCallbacks.Banner.OnAdLoadFailedEvent += OnAdLoadFailed;
@@ -131,10 +131,7 @@ namespace VirtueSky.Ads
 
         private void OnAdRevenuePaid(string unit, MaxSdkBase.AdInfo info)
         {
-            paidedCallback?.Invoke(info.Revenue,
-                info.NetworkName,
-                unit,
-                info.AdFormat, AdMediation.AppLovin.ToString());
+            paidedCallback?.Invoke(new AdsInfo(info));
         }
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using VirtueSky.Core;
+using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
 {
@@ -18,7 +19,7 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action<AdsError> failedToDisplayCallback;
         [NonSerialized] internal Action<AdsInfo> closedCallback;
         [NonSerialized] internal Action<AdsInfo> clickedCallback;
-        [NonSerialized] public Action<double, string, string, string, string> paidedCallback;
+        [NonSerialized] public Action<AdsInfo> paidedCallback;
 
         public Action<AdsInfo> OnLoadAdEvent;
         public Action<AdsError> OnFailedToLoadAdEvent;
@@ -89,6 +90,14 @@ namespace VirtueSky.Ads
             if (action == null)
                 return;
             App.RunOnMainThread(action);
+        }
+
+        protected void TrackRevenue(AdsInfo info)
+        {
+            if (!AdSettings.EnableTrackAdRevenue) return;
+            FirebaseAnalyticTrackingRevenue.FirebaseAnalyticTrackRevenue(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
+            AdjustTrackingRevenue.AdjustTrackRevenue(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
+            AppsFlyerTrackingRevenue.AppsFlyerTrackRevenueAd(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
         }
     }
 }

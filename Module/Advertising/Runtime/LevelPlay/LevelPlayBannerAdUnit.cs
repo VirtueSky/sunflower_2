@@ -30,7 +30,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
             _isBannerDestroyed = true;
-            paidedCallback += AppTracking.TrackRevenue;
+            paidedCallback += TrackRevenue;
 #endif
         }
 
@@ -163,9 +163,7 @@ namespace VirtueSky.Ads
         {
             if (impressionData.MediationAdUnitId.Equals(Id))
             {
-                paidedCallback?.Invoke((double)impressionData.Revenue, impressionData.AdNetwork,
-                    impressionData.MediationAdUnitId,
-                    impressionData.AdFormat, AdMediation.LevelPlay.ToString());
+                paidedCallback?.Invoke(new AdsInfo(impressionData));
             }
         }
 

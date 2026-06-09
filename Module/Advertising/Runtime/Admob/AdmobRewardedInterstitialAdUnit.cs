@@ -35,7 +35,7 @@ namespace VirtueSky.Ads
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (string.IsNullOrEmpty(Id)) return;
-            paidedCallback += AppTracking.TrackRevenue;
+            paidedCallback += TrackRevenue;
 #endif
         }
 
@@ -164,11 +164,8 @@ namespace VirtueSky.Ads
         private void OnAdPaided(AdValue value)
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
-
-            paidedCallback?.Invoke(cacheAdInfo.Revenue,
-                cacheAdInfo.AdNetwork,
-                Id,
-                cacheAdInfo.AdFormat, AdMediation.Admob.ToString());
+            cacheAdInfo.Precision = value.Precision.ToString();
+            paidedCallback?.Invoke(cacheAdInfo);
         }
 
         private void CacheAdsInfo()
@@ -176,6 +173,7 @@ namespace VirtueSky.Ads
             if (cacheAdInfo != null) cacheAdInfo = null;
             cacheAdInfo = new AdsInfo(AdMediation.Admob);
             cacheAdInfo.AdFormat = "RewardedInterstitialAd";
+            cacheAdInfo.AdUnitId = Id;
             cacheAdInfo.AdNetwork = adsInfo?.GetLoadedAdapterResponseInfo()?.AdSourceName ?? "";
         }
 

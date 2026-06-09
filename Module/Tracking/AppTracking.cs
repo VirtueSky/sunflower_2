@@ -2,22 +2,22 @@
 {
     public struct AppTracking
     {
-        private static bool enableTrackAdRevenue;
-
-        public static void Init(bool _enableTrackAdRevenue)
-        {
-            enableTrackAdRevenue = _enableTrackAdRevenue;
-        }
-
-        public static void TrackRevenue(double value, string network, string unitId, string format,
-            string currentAdMediation)
-        {
-            if (!enableTrackAdRevenue) return;
-            AdjustTrackingRevenue.AdjustTrackRevenue(value, network, unitId, format, currentAdMediation);
-            FirebaseAnalyticTrackingRevenue.FirebaseAnalyticTrackRevenue(value, network, unitId,
-                format, currentAdMediation);
-            AppsFlyerTrackingRevenue.AppsFlyerTrackRevenueAd(value, network, unitId, format, currentAdMediation);
-        }
+        // private static bool enableTrackAdRevenue;
+        //
+        // public static void Init(bool _enableTrackAdRevenue)
+        // {
+        //     enableTrackAdRevenue = _enableTrackAdRevenue;
+        // }
+        //
+        // public static void TrackRevenue(double value, string network, string unitId, string format,
+        //     string currentAdMediation)
+        // {
+        //     if (!enableTrackAdRevenue) return;
+        //     AdjustTrackingRevenue.AdjustTrackRevenue(value, network, unitId, format, currentAdMediation);
+        //     FirebaseAnalyticTrackingRevenue.FirebaseAnalyticTrackRevenue(value, network, unitId,
+        //         format, currentAdMediation);
+        //     AppsFlyerTrackingRevenue.AppsFlyerTrackRevenueAd(value, network, unitId, format, currentAdMediation);
+        // }
 
         public static void TrackEventATTResult(int status)
         {
