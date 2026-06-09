@@ -9,6 +9,8 @@ namespace VirtueSky.Tracking
 {
     public class AppsFlyerObject : MonoBehaviour
     {
+        public static event Action OnAfterInitEvent;
+
         private void Awake()
         {
 #if !UNITY_EDITOR
@@ -33,6 +35,7 @@ namespace VirtueSky.Tracking
             AppsFlyer.initSDK(AppsFlyerConfig.DevKey, AppsFlyerConfig.AppID,
                 AppsFlyerConfig.GetConversionData ? this : null);
 #endif
+            OnAfterInitEvent?.Invoke();
             //******************************/
 
             AppsFlyer.startSDK();
