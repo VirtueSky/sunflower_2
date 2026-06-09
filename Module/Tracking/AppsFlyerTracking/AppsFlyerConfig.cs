@@ -14,6 +14,7 @@ namespace VirtueSky.Tracking
         [SerializeField] private bool getConversionData;
         [SerializeField] private bool isDebug;
         [SerializeField] private bool isDebugAdRevenue;
+        [SerializeField] private bool autoStartSDK = true;
 
 
         public static string DevKey => Instance.devKey;
@@ -23,5 +24,6 @@ namespace VirtueSky.Tracking
         public static bool IsDebug => Instance.isDebug;
         public static bool IsDebugAdRevenue => Instance.isDebugAdRevenue;
         public static bool GetConversionData => Instance.getConversionData;
+        public static bool AutoStartSDK => Instance.autoStartSDK;
     }
 }

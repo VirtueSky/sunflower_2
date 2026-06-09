@@ -38,6 +38,17 @@ namespace VirtueSky.Tracking
             OnAfterInitEvent?.Invoke();
             //******************************/
 
+            if (AppsFlyerConfig.AutoStartSDK)
+            {
+                AppsFlyer.startSDK();
+            }
+
+#endif
+        }
+
+        public static void StartSDK()
+        {
+#if VIRTUESKY_APPSFLYER
             AppsFlyer.startSDK();
 #endif
         }
