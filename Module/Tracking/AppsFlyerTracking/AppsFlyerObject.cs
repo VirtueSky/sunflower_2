@@ -7,9 +7,14 @@ using UnityEngine;
 
 namespace VirtueSky.Tracking
 {
-    public class AppsFlyerObject : MonoBehaviour
+    public class AppsFlyerObject : MonoBehaviour, IAppsFlyerConversionData
     {
         public static event Action OnAfterInitEvent;
+        public static event Action<string> OnConversionDataSuccessEvent;
+        public static event Action<string> OnConversionDataFailEvent;
+        public static event Action<string> OnAppOpenAttributionEvent;
+        public static event Action<string> OnAppOpenAttributionFailureEvent;
+
 
         private void Awake()
         {
@@ -51,6 +56,26 @@ namespace VirtueSky.Tracking
 #if VIRTUESKY_APPSFLYER
             AppsFlyer.startSDK();
 #endif
+        }
+
+        public void onConversionDataSuccess(string conversionData)
+        {
+            OnConversionDataSuccessEvent?.Invoke(conversionData);
+        }
+
+        public void onConversionDataFail(string error)
+        {
+            OnConversionDataFailEvent?.Invoke(error);
+        }
+
+        public void onAppOpenAttribution(string attributionData)
+        {
+            OnAppOpenAttributionEvent?.Invoke(attributionData);
+        }
+
+        public void onAppOpenAttributionFailure(string error)
+        {
+            OnAppOpenAttributionFailureEvent?.Invoke(error);
         }
     }
 }
