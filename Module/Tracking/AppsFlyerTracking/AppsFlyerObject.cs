@@ -7,7 +7,11 @@ using UnityEngine;
 
 namespace VirtueSky.Tracking
 {
+#if VIRTUESKY_APPSFLYER
     public class AppsFlyerObject : MonoBehaviour, IAppsFlyerConversionData
+#else
+    public class AppsFlyerObject : MonoBehaviour
+#endif
     {
         public static event Action OnAfterInitEvent;
         public static event Action<string> OnConversionDataSuccessEvent;
