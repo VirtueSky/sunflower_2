@@ -22,8 +22,10 @@ namespace VirtueSky.Ads
         private ResponseInfo adsInfo = null;
 #endif
         private AdsInfo cacheAdInfo;
-        private readonly WaitForSeconds _waitBannerReload = new WaitForSeconds(5f);
+        private const float BannerReloadInitialDelay = 5f;
+        private const float BannerReloadMaxDelay = 60f;
         private IEnumerator _reload;
+        private int _bannerReloadAttempt;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
         private string placement = "";
@@ -47,7 +49,8 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
-            Destroy();
+            CancelBannerReload();
+            DestroyBannerView();
             IsLoading = true;
             _bannerView = new BannerView(Id, ConvertSize(), ConvertPosition());
             _bannerView.OnAdFullScreenContentClosed += OnAdClosed;
@@ -125,15 +128,25 @@ namespace VirtueSky.Ads
         public override void Destroy()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (_bannerView == null) return;
+            ResetBannerReload();
+            DestroyBannerView();
+#endif
+        }
+
+
+        private void DestroyBannerView()
+        {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _isBannerShowing = false;
             IsShowing = false;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
+            if (_bannerView == null) return;
             _bannerView.Destroy();
             _bannerView = null;
 #endif
         }
+
 
         public override void HideBanner()
         {
@@ -222,6 +235,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
+            ResetBannerReload();
             adsInfo = _bannerView?.GetResponseInfo();
             CacheAdsInfo();
             Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
@@ -238,8 +252,14 @@ namespace VirtueSky.Ads
                 OnFailedToLoadAdEvent?.Invoke(errorInfo);
             });
 
-            if (_reload != null) App.StopCoroutine(_reload);
-            _reload = DelayBannerReload();
+            ScheduleBannerReload();
+        }
+
+        private void ScheduleBannerReload()
+        {
+            CancelBannerReload();
+            var delay = GetNextBannerReloadDelay();
+            _reload = DelayBannerReload(delay);
             App.StartCoroutine(_reload);
         }
 
@@ -252,9 +272,30 @@ namespace VirtueSky.Ads
             });
         }
 
-        private IEnumerator DelayBannerReload()
+        private float GetNextBannerReloadDelay()
         {
-            yield return _waitBannerReload;
+            var delay = BannerReloadInitialDelay * Mathf.Pow(2f, _bannerReloadAttempt);
+            _bannerReloadAttempt++;
+            return Mathf.Min(delay, BannerReloadMaxDelay);
+        }
+
+        private void ResetBannerReload()
+        {
+            CancelBannerReload();
+            _bannerReloadAttempt = 0;
+        }
+
+        private void CancelBannerReload()
+        {
+            if (_reload == null) return;
+            App.StopCoroutine(_reload);
+            _reload = null;
+        }
+
+        private IEnumerator DelayBannerReload(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            _reload = null;
             Load();
         }
 #endif
