@@ -29,10 +29,10 @@ namespace VirtueSky.Ads
             MaxSdkCallbacks.Banner.OnAdCollapsedEvent += OnAdCollapsed;
             MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnAdRevenuePaid;
             MaxSdkCallbacks.Banner.OnAdClickedEvent += OnAdClicked;
-            if (size != AdsSize.Adaptive)
-            {
-                MaxSdk.SetBannerExtraParameter(Id, "adaptive_banner", "false");
-            }
+            // if (size != AdsSize.Adaptive)
+            // {
+            //     MaxSdk.SetBannerExtraParameter(Id, "adaptive_banner", "false");
+            // }
 #endif
         }
 
@@ -48,7 +48,11 @@ namespace VirtueSky.Ads
                 }
 
                 IsLoading = true;
-                MaxSdk.CreateBanner(Id, ConvertPosition());
+                var config = new MaxSdkBase.AdViewConfiguration(ConvertPosition())
+                {
+                    IsAdaptive = size == AdsSize.Adaptive
+                };
+                MaxSdk.CreateBanner(Id, config);
                 _isBannerDestroyed = false;
             }
 #endif
@@ -114,18 +118,18 @@ namespace VirtueSky.Ads
         #region Fun Callback
 
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-        public MaxSdkBase.BannerPosition ConvertPosition()
+        public MaxSdkBase.AdViewPosition ConvertPosition()
         {
             switch (position)
             {
-                case AdsPosition.Top: return MaxSdkBase.BannerPosition.TopCenter;
-                case AdsPosition.Bottom: return MaxSdkBase.BannerPosition.BottomCenter;
-                case AdsPosition.TopLeft: return MaxSdkBase.BannerPosition.TopLeft;
-                case AdsPosition.TopRight: return MaxSdkBase.BannerPosition.TopRight;
-                case AdsPosition.BottomLeft: return MaxSdkBase.BannerPosition.BottomLeft;
-                case AdsPosition.BottomRight: return MaxSdkBase.BannerPosition.BottomRight;
+                case AdsPosition.Top: return MaxSdkBase.AdViewPosition.TopCenter;
+                case AdsPosition.Bottom: return MaxSdkBase.AdViewPosition.BottomCenter;
+                case AdsPosition.TopLeft: return MaxSdkBase.AdViewPosition.TopLeft;
+                case AdsPosition.TopRight: return MaxSdkBase.AdViewPosition.TopRight;
+                case AdsPosition.BottomLeft: return MaxSdkBase.AdViewPosition.BottomLeft;
+                case AdsPosition.BottomRight: return MaxSdkBase.AdViewPosition.BottomRight;
                 default:
-                    return MaxSdkBase.BannerPosition.BottomCenter;
+                    return MaxSdkBase.AdViewPosition.BottomCenter;
             }
         }
 
