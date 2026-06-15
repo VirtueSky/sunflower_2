@@ -133,6 +133,15 @@ namespace VirtueSky.Ads
             LoadRewardedInterstitial();
             LoadAppOpen();
             LoadNativeOverlay();
+
+            if (AdSettings.AdmobEnableTestMode)
+            {
+                foreach (var keyValuePair in initStatus.getAdapterStatusMap())
+                {
+                    Debug.Log(
+                        $"Adapter: {keyValuePair.Key}, Description: {keyValuePair.Value.Description}, Latency: {keyValuePair.Value.Latency}, State: {keyValuePair.Value.InitializationState}");
+                }
+            }
             //LoadBanner();
         }
 
