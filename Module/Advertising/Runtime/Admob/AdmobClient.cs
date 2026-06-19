@@ -128,20 +128,21 @@ namespace VirtueSky.Ads
         private void OnInitializeComplete(InitializationStatus initStatus)
         {
             SdkInitializationCompleted = true;
-            LoadInterstitial();
-            LoadRewarded();
-            LoadRewardedInterstitial();
-            LoadAppOpen();
-            LoadNativeOverlay();
-
             if (AdSettings.AdmobEnableTestMode)
             {
+                Debug.Log("AdMob SDK Initialization Complete");
                 foreach (var keyValuePair in initStatus.getAdapterStatusMap())
                 {
                     Debug.Log(
                         $"Adapter: {keyValuePair.Key}, Description: {keyValuePair.Value.Description}, Latency: {keyValuePair.Value.Latency}, State: {keyValuePair.Value.InitializationState}");
                 }
             }
+
+            LoadInterstitial();
+            LoadRewarded();
+            LoadRewardedInterstitial();
+            LoadAppOpen();
+            LoadNativeOverlay();
             //LoadBanner();
         }
 
