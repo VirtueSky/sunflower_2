@@ -17,6 +17,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _useAdmob;
         private SerializedProperty _useLevelPlay;
         private SerializedProperty _enableTrackAdRevenue;
+        private SerializedProperty _excuteCallbackOnMainThread;
 
         private SerializedProperty _sdkKey;
         private SerializedProperty _maxBannerAdUnit;
@@ -60,6 +61,7 @@ namespace VirtueSky.Ads
             _useAdmob = serializedObject.FindProperty("useAdmob");
             _useLevelPlay = serializedObject.FindProperty("useLevelPlay");
             _enableTrackAdRevenue = serializedObject.FindProperty("enableTrackAdRevenue");
+            _excuteCallbackOnMainThread = serializedObject.FindProperty("excuteCallbackOnMainThread");
 
             _sdkKey = serializedObject.FindProperty("sdkKey");
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
@@ -118,6 +120,7 @@ namespace VirtueSky.Ads
             }
 
             EditorGUILayout.PropertyField(_enableTrackAdRevenue);
+            EditorGUILayout.PropertyField(_excuteCallbackOnMainThread);
             EditorGUILayout.PropertyField(_enableGDPR);
             if (_enableGDPR.boolValue)
             {

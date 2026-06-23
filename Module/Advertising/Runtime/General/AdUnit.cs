@@ -89,7 +89,12 @@ namespace VirtueSky.Ads
         {
             if (action == null)
                 return;
-            App.RunOnMainThread(action);
+            if (AdSettings.ExcuteCallbackOnMainThread)
+            {
+                App.RunOnMainThread(action);
+                return;
+            }
+            action.Invoke();
         }
 
         protected void TrackRevenue(AdsInfo info)
