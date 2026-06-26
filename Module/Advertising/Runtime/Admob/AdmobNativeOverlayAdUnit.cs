@@ -8,6 +8,7 @@ using VirtueSky.Misc;
 using UnityEngine;
 using VirtueSky.Tracking;
 using VirtueSky.Inspector;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -65,6 +66,7 @@ namespace VirtueSky.Ads
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
             if (_nativeOverlayAd != null) Destroy();
             IsLoading = true;
+            VLog.Log($"Advertising: Load NativeOverlayAd: {Id}");
             var adRequest = new AdRequest();
             var option = new NativeAdOptions
             {
@@ -322,6 +324,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
+            VLog.Log($"Advertising: NativeOverlayAd Loaded: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
@@ -331,6 +334,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
+            VLog.Log($"Advertising: NativeOverlayAd Closed: {Id}");
             IsShowing = false;
             ExcuteCallbackOnMainThread(() =>
             {
@@ -341,6 +345,7 @@ namespace VirtueSky.Ads
 
         private void OnAdOpening()
         {
+            VLog.Log($"Advertising: NativeOverlayAd Displayed: {Id}");
             IsShowing = true;
             ExcuteCallbackOnMainThread(() =>
             {
@@ -351,6 +356,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
+            VLog.Log($"Advertising: NativeOverlayAd Clicked: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
@@ -362,6 +368,7 @@ namespace VirtueSky.Ads
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
+            VLog.Log($"Advertising: NativeOverlayAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
             paidedCallback?.Invoke(cacheAdInfo);
         }
 
@@ -378,6 +385,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var info = new AdsError(error);
+            VLog.LogWarning($"Advertising: NativeOverlayAd FailedToLoad: {Id}, errorCode: {info.ErrorCode}, errorMessage: {info.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, info);

@@ -7,6 +7,7 @@ using GoogleMobileAds.Api;
 using System.Collections;
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -52,6 +53,7 @@ namespace VirtueSky.Ads
             CancelBannerReload();
             DestroyBannerView();
             IsLoading = true;
+            VLog.Log($"Advertising: Load BannerAd: {Id}");
             _bannerView = new BannerView(Id, ConvertSize(), ConvertPosition());
             _bannerView.OnAdFullScreenContentClosed += OnAdClosed;
             _bannerView.OnBannerAdLoadFailed += OnAdFailedToLoad;
@@ -178,6 +180,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
+            VLog.Log($"Advertising: BannerAd Clicked: {Id}");
             Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
             OnClickedAdEvent?.Invoke(cacheAdInfo);
         }
@@ -214,6 +217,7 @@ namespace VirtueSky.Ads
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
+            VLog.Log($"Advertising: BannerAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
             paidedCallback?.Invoke(cacheAdInfo);
         }
 
@@ -228,6 +232,7 @@ namespace VirtueSky.Ads
 
         private void OnAdOpening()
         {
+            VLog.Log($"Advertising: BannerAd Displayed: {Id}");
             Common.CallActionAndClean(ref displayedCallback, cacheAdInfo);
             OnDisplayedAdEvent?.Invoke(cacheAdInfo);
         }
@@ -238,6 +243,7 @@ namespace VirtueSky.Ads
             ResetBannerReload();
             adsInfo = _bannerView?.GetResponseInfo();
             CacheAdsInfo();
+            VLog.Log($"Advertising: BannerAd Loaded: {Id}");
             Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
             OnLoadAdEvent?.Invoke(cacheAdInfo);
         }
@@ -246,6 +252,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
+            VLog.LogWarning($"Advertising: BannerAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -265,6 +272,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
+            VLog.Log($"Advertising: BannerAd Closed: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref closedCallback, cacheAdInfo);

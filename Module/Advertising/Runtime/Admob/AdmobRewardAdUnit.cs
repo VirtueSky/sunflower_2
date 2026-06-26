@@ -5,6 +5,7 @@ using GoogleMobileAds.Api;
 #endif
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
+using VirtueSky.Utils;
 
 
 namespace VirtueSky.Ads
@@ -49,6 +50,7 @@ namespace VirtueSky.Ads
             if (string.IsNullOrEmpty(Id)) return;
             Destroy();
             IsLoading = true;
+            VLog.Log($"Advertising: Load RewardedAd: {Id}");
             RewardedAd.Load(Id, new AdRequest(), AdLoadCallback);
 #endif
         }
@@ -70,6 +72,7 @@ namespace VirtueSky.Ads
                 cacheAdInfo.Placement = placement;
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            VLog.Log($"Advertising: RewardedAd show: {Id}");
             _rewardedAd.Show(UserRewardEarnedCallback);
 #endif
         }
@@ -144,6 +147,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
+            VLog.Log($"Advertising: RewardedAd Clicked: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
@@ -155,11 +159,13 @@ namespace VirtueSky.Ads
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
+            VLog.Log($"Advertising: RewardedAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
             paidedCallback?.Invoke(cacheAdInfo);
         }
 
         private void OnAdOpening()
         {
+            VLog.Log($"Advertising: RewardedAd Displayed: {Id}");
             AdStatic.IsShowingAd = true;
             IsShowing = true;
             ExcuteCallbackOnMainThread(() =>
@@ -172,6 +178,7 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError obj)
         {
             var errorInfo = new AdsError(obj);
+            VLog.LogWarning($"Advertising: RewardedAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
@@ -184,6 +191,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
+            VLog.Log($"Advertising: RewardedAd Closed: {Id}");
             AdStatic.IsShowingAd = false;
             ExcuteCallbackOnMainThread(() =>
             {
@@ -197,6 +205,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
+            VLog.Log($"Advertising: RewardedAd Loaded: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
@@ -208,6 +217,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
+            VLog.LogWarning($"Advertising: RewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);

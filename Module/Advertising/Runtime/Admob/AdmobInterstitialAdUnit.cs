@@ -5,6 +5,7 @@ using GoogleMobileAds.Api;
 using VirtueSky.Tracking;
 #endif
 using VirtueSky.Misc;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -41,6 +42,7 @@ namespace VirtueSky.Ads
 
             Destroy();
             IsLoading = true;
+            VLog.Log($"Advertising: Load InterstitialAd: {Id}");
             InterstitialAd.Load(Id, new AdRequest(), AdLoadCallback);
 
 #endif
@@ -63,6 +65,7 @@ namespace VirtueSky.Ads
                 cacheAdInfo.Placement = placement;
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            VLog.Log($"Advertising: InterstitialAd show: {Id}");
             _interstitialAd.Show();
 #endif
         }
@@ -108,6 +111,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
+            VLog.Log($"Advertising: InterstitialAd Clicked: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
@@ -117,6 +121,7 @@ namespace VirtueSky.Ads
 
         private void OnAdOpening()
         {
+            VLog.Log($"Advertising: InterstitialAd Displayed: {Id}");
             AdStatic.IsShowingAd = true;
             IsShowing = true;
             ExcuteCallbackOnMainThread(() =>
@@ -129,6 +134,7 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError error)
         {
             var errorInfo = new AdsError(error);
+            VLog.LogWarning($"Advertising: InterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
@@ -142,6 +148,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
+            VLog.Log($"Advertising: InterstitialAd Closed: {Id}");
             AdStatic.IsShowingAd = false;
             ExcuteCallbackOnMainThread(() =>
             {
@@ -158,6 +165,7 @@ namespace VirtueSky.Ads
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
+            VLog.Log($"Advertising: InterstitialAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
             paidedCallback?.Invoke(cacheAdInfo);
         }
 
@@ -173,6 +181,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded()
         {
             IsLoading = false;
+            VLog.Log($"Advertising: InterstitialAd Loaded: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
@@ -184,6 +193,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
+            VLog.LogWarning($"Advertising: InterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);

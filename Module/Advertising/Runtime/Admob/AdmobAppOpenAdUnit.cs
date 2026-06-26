@@ -4,6 +4,7 @@ using UnityEngine;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
 using VirtueSky.Tracking;
+using VirtueSky.Utils;
 #endif
 using VirtueSky.Misc;
 
@@ -50,6 +51,7 @@ namespace VirtueSky.Ads
 
             Destroy();
             IsLoading = true;
+            VLog.Log($"Advertising: Load AppOpenAd: {Id}");
             AppOpenAd.Load(Id, new AdRequest(), OnAdLoadCallback);
 #endif
         }
@@ -72,6 +74,15 @@ namespace VirtueSky.Ads
                 cacheAdInfo.Placement = placement;
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (_appOpenAd == null)
+            {
+                VLog.LogWarning($"Advertising: AppOpenAd show failed, ad is not ready.");
+            }
+            else
+            {
+                VLog.Log($"Advertising: AppOpenAd show: {Id}");
+            }
+
             _appOpenAd.Show();
 #endif
         }
@@ -122,6 +133,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked()
         {
+            VLog.Log($"Advertising: AppOpenAd Clicked: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref clickedCallback, cacheAdInfo);
@@ -131,6 +143,7 @@ namespace VirtueSky.Ads
 
         private void OnAdOpening()
         {
+            VLog.Log($"Advertising: AppOpenAd Displayed: {Id}");
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
             AdStatic.IsShowingAd = true;
             IsShowing = true;
@@ -144,6 +157,8 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError obj)
         {
             var error = new AdsError(obj);
+            VLog.LogWarning(
+                $"Advertising: AppOpenAd FailedToDisplay: {Id}, errorCode: {error.ErrorCode}, errorMessage: {error.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, error);
@@ -153,6 +168,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClosed()
         {
+            VLog.Log($"Advertising: AppOpenAd Closed: {Id}");
             AdStatic.waitAppOpenClosedAction?.Invoke();
             AdStatic.IsShowingAd = false;
             IsShowing = false;
@@ -168,12 +184,15 @@ namespace VirtueSky.Ads
         {
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
+            VLog.Log(
+                $"Advertising: AppOpenAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
             paidedCallback?.Invoke(cacheAdInfo);
         }
 
         private void OnAdLoaded()
         {
             IsLoading = false;
+            VLog.Log($"Advertising: AppOpenAd Loaded: {Id}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
@@ -185,6 +204,8 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
+            VLog.LogWarning(
+                $"Advertising: AppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);

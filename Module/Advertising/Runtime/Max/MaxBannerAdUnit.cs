@@ -1,6 +1,7 @@
 using System;
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -48,6 +49,7 @@ namespace VirtueSky.Ads
                 }
 
                 IsLoading = true;
+                VLog.Log($"Advertising: Load MaxBannerAd: {Id}");
                 var config = new MaxSdkBase.AdViewConfiguration(ConvertPosition())
                 {
                     IsAdaptive = size == AdsSize.Adaptive
@@ -141,6 +143,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
             IsLoading = false;
+            VLog.Log($"Advertising: MaxBannerAd Loaded: {Id}");
             var adsInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -151,6 +154,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked(string arg1, MaxSdkBase.AdInfo arg2)
         {
+            VLog.Log($"Advertising: MaxBannerAd Clicked: {Id}");
             var info = new AdsInfo(arg2);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -161,6 +165,7 @@ namespace VirtueSky.Ads
 
         private void OnAdExpanded(string unit, MaxSdkBase.AdInfo info)
         {
+            VLog.Log($"Advertising: MaxBannerAd Displayed: {Id}");
             var adsInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -173,6 +178,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
+            VLog.LogWarning($"Advertising: MaxBannerAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -184,6 +190,7 @@ namespace VirtueSky.Ads
 
         private void OnAdCollapsed(string unit, MaxSdkBase.AdInfo info)
         {
+            VLog.Log($"Advertising: MaxBannerAd Closed: {Id}");
             var adsInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
             {

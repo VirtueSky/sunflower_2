@@ -5,6 +5,7 @@ using VirtueSky.Tracking;
 #endif
 using UnityEngine;
 using VirtueSky.Misc;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -57,6 +58,7 @@ namespace VirtueSky.Ads
             }
 
             IsLoading = true;
+            VLog.Log($"Advertising: Load LevelPlayBannerAd: {Id}");
             bannerAd.LoadAd();
 #endif
         }
@@ -170,6 +172,7 @@ namespace VirtueSky.Ads
         void BannerOnAdLoadedEvent(LevelPlayAdInfo adInfo)
         {
             IsLoading = false;
+            VLog.Log($"Advertising: LevelPlayBannerAd Loaded: {Id}");
             var info = new AdsInfo(adInfo);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -182,6 +185,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(ironSourceError);
+            VLog.LogWarning($"Advertising: LevelPlayBannerAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -193,6 +197,7 @@ namespace VirtueSky.Ads
 
         void BannerOnAdClickedEvent(LevelPlayAdInfo adInfo)
         {
+            VLog.Log($"Advertising: LevelPlayBannerAd Clicked: {Id}");
             var info = new AdsInfo(adInfo);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -203,6 +208,7 @@ namespace VirtueSky.Ads
 
         void BannerOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
         {
+            VLog.Log($"Advertising: LevelPlayBannerAd Displayed: {Id}");
             var info = new AdsInfo(adInfo);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -214,6 +220,7 @@ namespace VirtueSky.Ads
         void BannerOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError adError)
         {
             var errorInfo = new AdsError(adError);
+            VLog.LogWarning($"Advertising: LevelPlayBannerAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);

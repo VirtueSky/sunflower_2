@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using VirtueSky.Misc;
 using VirtueSky.Tracking;
+using VirtueSky.Utils;
 
 namespace VirtueSky.Ads
 {
@@ -37,6 +38,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
             IsLoading = true;
+            VLog.Log($"Advertising: Load MaxAppOpenAd: {Id}");
             MaxSdk.LoadAppOpenAd(Id);
 #endif
         }
@@ -54,6 +56,7 @@ namespace VirtueSky.Ads
         protected override void ShowImpl(string placement = "")
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
+            VLog.Log($"Advertising: MaxAppOpenAd show: {Id}");
             MaxSdk.ShowAppOpenAd(Id, placement: placement);
 #endif
         }
@@ -68,6 +71,7 @@ namespace VirtueSky.Ads
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
             IsLoading = false;
+            VLog.Log($"Advertising: MaxAppOpenAd Loaded: {Id}");
             var adsInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -85,6 +89,7 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
+            VLog.LogWarning($"Advertising: MaxAppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -94,6 +99,7 @@ namespace VirtueSky.Ads
 
         private void OnAdClicked(string arg1, MaxSdkBase.AdInfo info)
         {
+            VLog.Log($"Advertising: MaxAppOpenAd Clicked: {Id}");
             var adInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
             {
@@ -106,6 +112,7 @@ namespace VirtueSky.Ads
             MaxSdkBase.AdInfo info)
         {
             var error = new AdsError(errorInfo);
+            VLog.LogWarning($"Advertising: MaxAppOpenAd FailedToDisplay: {Id}, errorCode: {error.ErrorCode}, errorMessage: {error.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, error);
@@ -115,6 +122,7 @@ namespace VirtueSky.Ads
 
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
+            VLog.Log($"Advertising: MaxAppOpenAd Closed: {Id}");
             AdStatic.waitAppOpenClosedAction?.Invoke();
             AdStatic.IsShowingAd = false;
             IsShowing = false;
@@ -130,6 +138,7 @@ namespace VirtueSky.Ads
 
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
+            VLog.Log($"Advertising: MaxAppOpenAd Displayed: {Id}");
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
             AdStatic.IsShowingAd = true;
             IsShowing = true;
