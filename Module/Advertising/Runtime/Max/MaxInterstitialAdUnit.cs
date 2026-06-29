@@ -35,6 +35,7 @@ namespace VirtueSky.Ads
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
             IsLoading = true;
             VLog.Log($"Advertising: Load MaxInterstitialAd: {Id}");
+            OnRequestAdEvent?.Invoke();
             MaxSdk.LoadInterstitial(Id);
 #endif
         }
@@ -74,7 +75,8 @@ namespace VirtueSky.Ads
             MaxSdkBase.AdInfo info)
         {
             var errorInfo = new AdsError(error);
-            VLog.LogWarning($"Advertising: MaxInterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: MaxInterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
@@ -131,7 +133,8 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
-            VLog.LogWarning($"Advertising: MaxInterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: MaxInterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -147,7 +150,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, adsInfo);
-                OnLoadAdEvent?.Invoke(adsInfo);
+                OnLoadedAdEvent?.Invoke(adsInfo);
             });
         }
 #endif

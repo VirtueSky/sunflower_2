@@ -51,6 +51,7 @@ namespace VirtueSky.Ads
             Destroy();
             IsLoading = true;
             VLog.Log($"Advertising: Load RewardedAd: {Id}");
+            OnRequestAdEvent?.Invoke();
             RewardedAd.Load(Id, new AdRequest(), AdLoadCallback);
 #endif
         }
@@ -178,7 +179,8 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError obj)
         {
             var errorInfo = new AdsError(obj);
-            VLog.LogWarning($"Advertising: RewardedAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: RewardedAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
@@ -209,7 +211,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-                OnLoadAdEvent?.Invoke(cacheAdInfo);
+                OnLoadedAdEvent?.Invoke(cacheAdInfo);
             });
         }
 

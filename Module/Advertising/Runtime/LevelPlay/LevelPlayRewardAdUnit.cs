@@ -61,6 +61,7 @@ namespace VirtueSky.Ads
 
                 IsLoading = true;
                 VLog.Log($"Advertising: Load LevelPlayRewardedAd: {Id}");
+                OnRequestAdEvent?.Invoke();
                 rewardedAd.LoadAd();
             }
             catch (Exception e)
@@ -169,7 +170,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, info);
-                OnLoadAdEvent?.Invoke(info);
+                OnLoadedAdEvent?.Invoke(info);
             });
         }
 
@@ -177,7 +178,8 @@ namespace VirtueSky.Ads
         {
             IsShowing = false;
             var errorInfo = new AdsError(ironSourceError);
-            VLog.LogWarning($"Advertising: LevelPlayRewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: LevelPlayRewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -218,7 +220,8 @@ namespace VirtueSky.Ads
         void RewardedVideoOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError ironSourceError)
         {
             var errorInfo = new AdsError(ironSourceError);
-            VLog.LogWarning($"Advertising: LevelPlayRewardedAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: LevelPlayRewardedAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);

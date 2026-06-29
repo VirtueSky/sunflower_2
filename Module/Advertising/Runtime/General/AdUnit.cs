@@ -21,7 +21,8 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action<AdsInfo> clickedCallback;
         [NonSerialized] public Action<AdsInfo> paidedCallback;
 
-        public Action<AdsInfo> OnLoadAdEvent;
+        public Action OnRequestAdEvent;
+        public Action<AdsInfo> OnLoadedAdEvent;
         public Action<AdsError> OnFailedToLoadAdEvent;
         public Action<AdsInfo> OnDisplayedAdEvent;
         public Action<AdsError> OnFailedToDisplayAdEvent;
@@ -94,13 +95,15 @@ namespace VirtueSky.Ads
                 App.RunOnMainThread(action);
                 return;
             }
+
             action.Invoke();
         }
 
         protected void TrackRevenue(AdsInfo info)
         {
             if (!AdSettings.EnableTrackAdRevenue) return;
-            FirebaseAnalyticTrackingRevenue.FirebaseAnalyticTrackRevenue(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
+            FirebaseAnalyticTrackingRevenue.FirebaseAnalyticTrackRevenue(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat,
+                info.AdMediation);
             AdjustTrackingRevenue.AdjustTrackRevenue(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
             AppsFlyerTrackingRevenue.AppsFlyerTrackRevenueAd(info.Revenue, info.AdNetwork, info.AdUnitId, info.AdFormat, info.AdMediation);
         }

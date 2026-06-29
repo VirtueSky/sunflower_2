@@ -53,6 +53,7 @@ namespace VirtueSky.Ads
             CancelBannerReload();
             DestroyBannerView();
             IsLoading = true;
+            OnRequestAdEvent?.Invoke();
             VLog.Log($"Advertising: Load BannerAd: {Id}");
             _bannerView = new BannerView(Id, ConvertSize(), ConvertPosition());
             _bannerView.OnAdFullScreenContentClosed += OnAdClosed;
@@ -245,7 +246,7 @@ namespace VirtueSky.Ads
             CacheAdsInfo();
             VLog.Log($"Advertising: BannerAd Loaded: {Id}");
             Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-            OnLoadAdEvent?.Invoke(cacheAdInfo);
+            OnLoadedAdEvent?.Invoke(cacheAdInfo);
         }
 
         private void OnAdFailedToLoad(LoadAdError error)

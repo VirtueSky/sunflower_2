@@ -43,6 +43,7 @@ namespace VirtueSky.Ads
             Destroy();
             IsLoading = true;
             VLog.Log($"Advertising: Load InterstitialAd: {Id}");
+            OnRequestAdEvent?.Invoke();
             InterstitialAd.Load(Id, new AdRequest(), AdLoadCallback);
 
 #endif
@@ -134,7 +135,8 @@ namespace VirtueSky.Ads
         private void OnAdFailedToShow(AdError error)
         {
             var errorInfo = new AdsError(error);
-            VLog.LogWarning($"Advertising: InterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: InterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToDisplayCallback, errorInfo);
@@ -185,7 +187,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
-                OnLoadAdEvent?.Invoke(cacheAdInfo);
+                OnLoadedAdEvent?.Invoke(cacheAdInfo);
             });
         }
 
@@ -193,7 +195,8 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
-            VLog.LogWarning($"Advertising: InterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: InterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);

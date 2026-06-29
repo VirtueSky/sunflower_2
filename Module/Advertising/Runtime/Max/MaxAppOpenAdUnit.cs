@@ -39,6 +39,7 @@ namespace VirtueSky.Ads
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
             IsLoading = true;
             VLog.Log($"Advertising: Load MaxAppOpenAd: {Id}");
+            OnRequestAdEvent?.Invoke();
             MaxSdk.LoadAppOpenAd(Id);
 #endif
         }
@@ -76,7 +77,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, adsInfo);
-                OnLoadAdEvent?.Invoke(adsInfo);
+                OnLoadedAdEvent?.Invoke(adsInfo);
             });
         }
 
@@ -89,7 +90,8 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
-            VLog.LogWarning($"Advertising: MaxAppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: MaxAppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);

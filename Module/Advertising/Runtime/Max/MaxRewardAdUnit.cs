@@ -41,6 +41,7 @@ namespace VirtueSky.Ads
             if (string.IsNullOrEmpty(Id)) return;
             IsLoading = true;
             VLog.Log($"Advertising: Load MaxRewardedAd: {Id}");
+            OnRequestAdEvent?.Invoke();
             MaxSdk.LoadRewardedAd(Id);
 #endif
         }
@@ -109,7 +110,8 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             var errorInfo = new AdsError(info);
-            VLog.LogWarning($"Advertising: MaxRewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
+            VLog.LogWarning(
+                $"Advertising: MaxRewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref failedToLoadCallback, errorInfo);
@@ -148,7 +150,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref loadedCallback, adsInfo);
-                OnLoadAdEvent?.Invoke(adsInfo);
+                OnLoadedAdEvent?.Invoke(adsInfo);
             });
         }
 
