@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using VirtueSky.Core;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
+#endif
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+using GoogleMobileAds.BannerRefresh;
 #endif
 using System.Collections;
 using VirtueSky.Misc;
@@ -18,9 +22,16 @@ namespace VirtueSky.Ads
         public AdsPosition position = AdsPosition.Bottom;
         public bool useCollapsible;
         public bool useTestId;
+        public bool useAutoRefresh;
+        public int autoRefreshBufferSize = 2;
+        public int autoRefreshRateInSeconds = 60;
+        public List<AdmobBannerRefreshRateByAdSource> autoRefreshRateByAdSource = new();
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private BannerView _bannerView;
         private ResponseInfo adsInfo = null;
+#endif
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+        private BannerRefreshView _bannerRefreshView;
 #endif
         private AdsInfo cacheAdInfo;
         private const float BannerReloadInitialDelay = 5f;
@@ -55,6 +66,19 @@ namespace VirtueSky.Ads
             IsLoading = true;
             OnRequestAdEvent?.Invoke();
             VLog.Log($"Advertising: Load BannerAd: {Id}");
+
+            if (UseBannerRefreshView())
+            {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+                LoadBannerRefreshView();
+                return;
+#endif
+            }
+            else if (useAutoRefresh)
+            {
+                VLog.LogWarning("Advertising: AdMob banner auto refresh requested but VIRTUESKY_ADMOB_BANNER_REFRESH is not defined. Fallback to normal BannerView.");
+            }
+
             _bannerView = new BannerView(Id, ConvertSize(), ConvertPosition());
             _bannerView.OnAdFullScreenContentClosed += OnAdClosed;
             _bannerView.OnBannerAdLoadFailed += OnAdFailedToLoad;
@@ -62,13 +86,7 @@ namespace VirtueSky.Ads
             _bannerView.OnAdFullScreenContentOpened += OnAdOpening;
             _bannerView.OnAdPaid += OnAdPaided;
             _bannerView.OnAdClicked += OnAdClicked;
-            var adRequest = new AdRequest();
-            if (useCollapsible)
-            {
-                adRequest.Extras.Add("collapsible", ConvertPlacementCollapsible());
-            }
-
-            _bannerView.LoadAd(adRequest);
+            _bannerView.LoadAd(CreateAdRequest());
 
 #endif
         }
@@ -76,6 +94,7 @@ namespace VirtueSky.Ads
         public bool IsCollapsible()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (UseBannerRefreshView()) return false;
             if (_bannerView == null) return false;
             return _bannerView.IsCollapsible();
 #else
@@ -101,6 +120,13 @@ namespace VirtueSky.Ads
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (UseBannerRefreshView())
+            {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+                return _bannerRefreshView != null;
+#endif
+            }
+
             return _bannerView != null;
 #else
             return false;
@@ -119,12 +145,25 @@ namespace VirtueSky.Ads
             IsShowing = true;
             AdStatic.waitAppOpenClosedAction = OnWaitAppOpenClosed;
             AdStatic.waitAppOpenDisplayedAction = OnWaitAppOpenDisplayed;
+            if (UseBannerRefreshView())
+            {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+                if (_bannerRefreshView == null)
+                {
+                    Load();
+                }
+
+                _bannerRefreshView?.Show();
+#endif
+                return;
+            }
+
             if (_bannerView == null)
             {
                 Load();
             }
 
-            _bannerView.Show();
+            _bannerView?.Show();
 #endif
         }
 
@@ -144,9 +183,21 @@ namespace VirtueSky.Ads
             IsShowing = false;
             AdStatic.waitAppOpenClosedAction = null;
             AdStatic.waitAppOpenDisplayedAction = null;
-            if (_bannerView == null) return;
-            _bannerView.Destroy();
-            _bannerView = null;
+            if (_bannerView != null)
+            {
+                _bannerView.Destroy();
+                _bannerView = null;
+            }
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+            if (_bannerRefreshView != null)
+            {
+                if (!_bannerRefreshView.IsDestroyed)
+                {
+                    _bannerRefreshView.Destroy();
+                }
+                _bannerRefreshView = null;
+            }
+#endif
 #endif
         }
 
@@ -157,6 +208,14 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             _isBannerShowing = false;
             IsShowing = false;
+            if (UseBannerRefreshView())
+            {
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB && VIRTUESKY_ADMOB_BANNER_REFRESH
+                _bannerRefreshView?.Hide();
+#endif
+                return;
+            }
+
             if (_bannerView != null) _bannerView.Hide();
 #endif
         }
@@ -164,6 +223,62 @@ namespace VirtueSky.Ads
         #region Fun Callback
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+        private bool UseBannerRefreshView()
+        {
+#if VIRTUESKY_ADMOB_BANNER_REFRESH
+            return useAutoRefresh;
+#else
+            return false;
+#endif
+        }
+
+        private AdRequest CreateAdRequest()
+        {
+            var adRequest = new AdRequest();
+            if (useCollapsible)
+            {
+                adRequest.Extras.Add("collapsible", ConvertPlacementCollapsible());
+            }
+
+            return adRequest;
+        }
+
+#if VIRTUESKY_ADMOB_BANNER_REFRESH
+        private void LoadBannerRefreshView()
+        {
+            var configuration = new BannerRefreshConfiguration
+            {
+                AdsBufferSize = autoRefreshBufferSize,
+                DefaultRefreshRateInSeconds = autoRefreshRateInSeconds,
+                AdSourceRefreshRatesInSeconds = ConvertAdSourceRefreshRates()
+            };
+
+            _bannerRefreshView = new BannerRefreshView(Id, ConvertSize(), ConvertPosition(), configuration);
+            _bannerRefreshView.OnAdFullScreenContentClosed += OnAdClosed;
+            _bannerRefreshView.OnBannerAdLoadFailed += OnAdFailedToLoad;
+            _bannerRefreshView.OnBannerAdLoaded += OnAdLoaded;
+            _bannerRefreshView.OnAdFullScreenContentOpened += OnAdOpening;
+            _bannerRefreshView.OnAdPaid += OnAdPaided;
+            _bannerRefreshView.OnAdClicked += OnAdClicked;
+            _bannerRefreshView.Hide();
+            _bannerRefreshView.LoadAd(CreateAdRequest());
+        }
+
+        private Dictionary<string, int> ConvertAdSourceRefreshRates()
+        {
+            var adSourceRefreshRates = new Dictionary<string, int>();
+            if (autoRefreshRateByAdSource == null) return adSourceRefreshRates;
+
+            foreach (var item in autoRefreshRateByAdSource)
+            {
+                if (item == null || string.IsNullOrEmpty(item.adSourceId)) continue;
+                adSourceRefreshRates[item.adSourceId] = item.refreshRateInSeconds;
+            }
+
+            return adSourceRefreshRates;
+        }
+#endif
+
         public AdSize ConvertSize()
         {
             switch (size)
@@ -216,6 +331,11 @@ namespace VirtueSky.Ads
 
         private void OnAdPaided(AdValue value)
         {
+            if (cacheAdInfo == null)
+            {
+                CacheAdsInfo();
+            }
+
             cacheAdInfo.Revenue = value.Value / 1000000f;
             cacheAdInfo.Precision = value.Precision.ToString();
             VLog.Log($"Advertising: BannerAd Paid: {Id}, revenue: {cacheAdInfo.Revenue}, precision: {cacheAdInfo.Precision}");
@@ -225,6 +345,7 @@ namespace VirtueSky.Ads
         private void CacheAdsInfo()
         {
             if (cacheAdInfo != null) cacheAdInfo = null;
+            adsInfo = GetResponseInfo();
             cacheAdInfo = new AdsInfo(AdMediation.Admob);
             cacheAdInfo.AdFormat = "BannerAd";
             cacheAdInfo.AdUnitId = Id;
@@ -242,11 +363,23 @@ namespace VirtueSky.Ads
         {
             IsLoading = false;
             ResetBannerReload();
-            adsInfo = _bannerView?.GetResponseInfo();
+            adsInfo = GetResponseInfo();
             CacheAdsInfo();
             VLog.Log($"Advertising: BannerAd Loaded: {Id}");
             Common.CallActionAndClean(ref loadedCallback, cacheAdInfo);
             OnLoadedAdEvent?.Invoke(cacheAdInfo);
+        }
+
+        private ResponseInfo GetResponseInfo()
+        {
+            if (UseBannerRefreshView())
+            {
+#if VIRTUESKY_ADMOB_BANNER_REFRESH
+                return _bannerRefreshView?.GetResponseInfo();
+#endif
+            }
+
+            return _bannerView?.GetResponseInfo();
         }
 
         private void OnAdFailedToLoad(LoadAdError error)
@@ -260,7 +393,10 @@ namespace VirtueSky.Ads
                 OnFailedToLoadAdEvent?.Invoke(errorInfo);
             });
 
-            ScheduleBannerReload();
+            if (!UseBannerRefreshView())
+            {
+                ScheduleBannerReload();
+            }
         }
 
         private void ScheduleBannerReload()
@@ -319,5 +455,12 @@ namespace VirtueSky.Ads
             iOSId = "ca-app-pub-3940256099942544/2934735716";
 #endif
         }
+    }
+
+    [Serializable]
+    public class AdmobBannerRefreshRateByAdSource
+    {
+        public string adSourceId;
+        public int refreshRateInSeconds = 60;
     }
 }

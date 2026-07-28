@@ -37,7 +37,8 @@ namespace VirtueSky.ControlPanel.Editor
             CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.UNITASK_TEXTMESHPRO_SUPPORT);
             CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_BAKINGSHEET);
             CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_UNITY_SERVICES);
-            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKU_DEBUG_LOG);
+            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_DEBUG_LOG);
+            CPUtility.DrawButtonAddDefineSymbols(ConstantDefineSymbols.VIRTUESKY_ADMOB_BANNER_REFRESH);
             EditorGUILayout.EndScrollView();
             GUILayout.Space(10);
             GUILayout.EndVertical();

@@ -24,6 +24,7 @@ namespace VirtueSky.UtilsEditor
         public const string UNITASK_TEXTMESHPRO_SUPPORT = "UNITASK_TEXTMESHPRO_SUPPORT";
         public const string VIRTUESKY_BAKINGSHEET = "VIRTUESKY_BAKINGSHEET";
         public const string VIRTUESKY_UNITY_SERVICES = "VIRTUESKY_UNITY_SERVICES";
-        public const string VIRTUESKU_DEBUG_LOG = "VIRTUESKU_DEBUG_LOG";
+        public const string VIRTUESKY_DEBUG_LOG = "VIRTUESKY_DEBUG_LOG";
+        public const string VIRTUESKY_ADMOB_BANNER_REFRESH = "VIRTUESKY_ADMOB_BANNER_REFRESH";
     }
 }
