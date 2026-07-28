@@ -13,10 +13,14 @@ namespace VirtueSky.Ads
     public class AdmobInterstitialAdUnit : AdUnit
     {
         public bool useTestId;
+        public bool usePreload;
+        [Min(0)] public int preloadBufferSize = 2;
         [NonSerialized] internal Action completedCallback;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
         private InterstitialAd _interstitialAd;
+        private InterstitialAd _preloadedInterstitialAd;
         private ResponseInfo adsInfo = null;
+        private bool isPreloadStarted;
 #endif
         private AdsInfo cacheAdInfo;
         private string placement = "";
@@ -40,7 +44,13 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
             if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
 
-            Destroy();
+            if (usePreload)
+            {
+                StartPreload();
+                return;
+            }
+
+            DestroyLoadedAd();
             IsLoading = true;
             VLog.Log($"Advertising: Load InterstitialAd: {Id}");
             OnRequestAdEvent?.Invoke();
@@ -52,6 +62,11 @@ namespace VirtueSky.Ads
         public override bool IsReady()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (usePreload)
+            {
+                return InterstitialAdPreloader.IsAdAvailable(Id);
+            }
+
             return _interstitialAd != null && _interstitialAd.CanShowAd();
 #else
             return false;
@@ -66,6 +81,28 @@ namespace VirtueSky.Ads
                 cacheAdInfo.Placement = placement;
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+            if (usePreload)
+            {
+                _preloadedInterstitialAd = InterstitialAdPreloader.DequeueAd(Id);
+                if (_preloadedInterstitialAd == null)
+                {
+                    VLog.LogWarning($"Advertising: InterstitialAd preload dequeue failed, ad is not ready: {Id}");
+                    return;
+                }
+
+                adsInfo = _preloadedInterstitialAd.GetResponseInfo();
+                BindAdEvents(_preloadedInterstitialAd);
+                CacheAdsInfo();
+                if (cacheAdInfo != null)
+                {
+                    cacheAdInfo.Placement = placement;
+                }
+
+                VLog.Log($"Advertising: InterstitialAd show: {Id}");
+                _preloadedInterstitialAd.Show();
+                return;
+            }
+
             VLog.Log($"Advertising: InterstitialAd show: {Id}");
             _interstitialAd.Show();
 #endif
@@ -80,16 +117,74 @@ namespace VirtueSky.Ads
         public override void Destroy()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (_interstitialAd == null) return;
-            _interstitialAd.Destroy();
-            _interstitialAd = null;
+            if (usePreload)
+            {
+                DestroyPreloadedAd();
+                return;
+            }
+
+            DestroyLoadedAd();
 #endif
             IsLoading = false;
         }
 
+#if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+        private void DestroyLoadedAd()
+        {
+            if (_interstitialAd == null) return;
+            _interstitialAd.Destroy();
+            _interstitialAd = null;
+        }
+
+        private void DestroyPreloadedAd()
+        {
+            IsLoading = false;
+            IsShowing = false;
+            if (_preloadedInterstitialAd == null) return;
+            _preloadedInterstitialAd.Destroy();
+            _preloadedInterstitialAd = null;
+        }
+#endif
+
         #region Fun Callback
 
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
+        private void StartPreload()
+        {
+            if (isPreloadStarted) return;
+
+            isPreloadStarted = true;
+            IsLoading = true;
+            VLog.Log($"Advertising: Preload InterstitialAd: {Id}");
+            OnRequestAdEvent?.Invoke();
+
+            var config = new PreloadConfiguration
+            {
+                AdUnitId = Id,
+                Request = new AdRequest(),
+                BufferSize = (uint)Math.Max(1, preloadBufferSize)
+            };
+
+            InterstitialAdPreloader.Preload(
+                Id,
+                config,
+                onAdPreloaded: (adUnitId, responseInfo) =>
+                {
+                    adsInfo = responseInfo;
+                    CacheAdsInfo();
+                    OnAdLoaded();
+                },
+                onAdFailedToPreload: (adUnitId, error) =>
+                {
+                    OnAdFailedToLoad(error);
+                },
+                onAdsExhausted: adUnitId =>
+                {
+                    VLog.LogWarning($"Advertising: InterstitialAd preload exhausted: {adUnitId}");
+                }
+            );
+        }
+
         private void AdLoadCallback(InterstitialAd ad, LoadAdError error)
         {
             // if error is not null, the load request failed.
@@ -101,13 +196,18 @@ namespace VirtueSky.Ads
 
             _interstitialAd = ad;
             adsInfo = ad.GetResponseInfo();
-            _interstitialAd.OnAdPaid += OnAdPaided;
-            _interstitialAd.OnAdFullScreenContentClosed += OnAdClosed;
-            _interstitialAd.OnAdFullScreenContentFailed += OnAdFailedToShow;
-            _interstitialAd.OnAdFullScreenContentOpened += OnAdOpening;
-            _interstitialAd.OnAdClicked += OnAdClicked;
+            BindAdEvents(_interstitialAd);
             CacheAdsInfo();
             OnAdLoaded();
+        }
+
+        private void BindAdEvents(InterstitialAd ad)
+        {
+            ad.OnAdPaid += OnAdPaided;
+            ad.OnAdFullScreenContentClosed += OnAdClosed;
+            ad.OnAdFullScreenContentFailed += OnAdFailedToShow;
+            ad.OnAdFullScreenContentOpened += OnAdOpening;
+            ad.OnAdClicked += OnAdClicked;
         }
 
         private void OnAdClicked()
@@ -145,7 +245,7 @@ namespace VirtueSky.Ads
 
             IsShowing = false;
             Destroy();
-            Load();
+            if (!usePreload) Load();
         }
 
         private void OnAdClosed()
@@ -160,7 +260,7 @@ namespace VirtueSky.Ads
             });
             Destroy();
             IsShowing = false;
-            Load();
+            if (!usePreload) Load();
         }
 
         private void OnAdPaided(AdValue value)
@@ -191,7 +291,7 @@ namespace VirtueSky.Ads
             });
         }
 
-        private void OnAdFailedToLoad(LoadAdError error)
+        private void OnAdFailedToLoad(AdError error)
         {
             IsLoading = false;
             var errorInfo = new AdsError(error);
