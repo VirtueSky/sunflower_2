@@ -194,24 +194,42 @@ namespace VirtueSky.Ads
                 BufferSize = (uint)Math.Max(1, preloadBufferSize)
             };
 
-            RewardedAdPreloader.Preload(
-                Id,
-                config,
-                onAdPreloaded: (adUnitId, responseInfo) =>
+            try
+            {
+                bool preloadStarted = RewardedAdPreloader.Preload(
+                    Id,
+                    config,
+                    onAdPreloaded: (adUnitId, responseInfo) =>
+                    {
+                        VLog.Log($"Advertising: RewardedAd Preload callback loaded: {adUnitId}");
+                        adsInfo = responseInfo;
+                        CacheAdsInfo();
+                        OnAdLoaded();
+                    },
+                    onAdFailedToPreload: (adUnitId, error) =>
+                    {
+                        VLog.LogWarning($"Advertising: RewardedAd Preload callback failed: {adUnitId}");
+                        OnAdFailedToLoad(error);
+                    },
+                    onAdsExhausted: adUnitId =>
+                    {
+                        VLog.LogWarning($"Advertising: RewardedAd preload exhausted: {adUnitId}");
+                    }
+                );
+
+                VLog.Log($"Advertising: RewardedAd Preload started: {preloadStarted}, adUnitId: {Id}, bufferSize: {config.BufferSize}");
+                if (!preloadStarted)
                 {
-                    adsInfo = responseInfo;
-                    CacheAdsInfo();
-                    OnAdLoaded();
-                },
-                onAdFailedToPreload: (adUnitId, error) =>
-                {
-                    OnAdFailedToLoad(error);
-                },
-                onAdsExhausted: adUnitId =>
-                {
-                    VLog.LogWarning($"Advertising: RewardedAd preload exhausted: {adUnitId}");
+                    isPreloadStarted = false;
+                    IsLoading = false;
                 }
-            );
+            }
+            catch (Exception e)
+            {
+                isPreloadStarted = false;
+                IsLoading = false;
+                VLog.LogWarning($"Advertising: RewardedAd Preload exception: {Id}, {e}");
+            }
         }
 
         private void AdLoadCallback(RewardedAd ad, LoadAdError error)
@@ -320,6 +338,12 @@ namespace VirtueSky.Ads
         private void OnAdFailedToLoad(AdError error)
         {
             IsLoading = false;
+            if (error == null)
+            {
+                VLog.LogWarning($"Advertising: RewardedAd FailedToLoad: {Id}, error is null");
+                return;
+            }
+
             var errorInfo = new AdsError(error);
             VLog.LogWarning($"Advertising: RewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
