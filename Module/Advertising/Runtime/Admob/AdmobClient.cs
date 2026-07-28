@@ -1,5 +1,6 @@
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
+using GoogleMobileAds.Common;
 using VirtueSky.Tracking;
 #endif
 using UnityEngine;
@@ -127,23 +128,26 @@ namespace VirtueSky.Ads
 
         private void OnInitializeComplete(InitializationStatus initStatus)
         {
-            SdkInitializationCompleted = true;
-            if (AdSettings.AdmobEnableTestMode)
+            App.RunOnMainThread(() =>
             {
-                Debug.Log("AdMob SDK Initialization Complete");
-                foreach (var keyValuePair in initStatus.getAdapterStatusMap())
+                SdkInitializationCompleted = true;
+                if (AdSettings.AdmobEnableTestMode)
                 {
-                    Debug.Log(
-                        $"Adapter: {keyValuePair.Key}, Description: {keyValuePair.Value.Description}, Latency: {keyValuePair.Value.Latency}, State: {keyValuePair.Value.InitializationState}");
+                    Debug.Log("AdMob SDK Initialization Complete");
+                    foreach (var keyValuePair in initStatus.getAdapterStatusMap())
+                    {
+                        Debug.Log(
+                            $"Adapter: {keyValuePair.Key}, Description: {keyValuePair.Value.Description}, Latency: {keyValuePair.Value.Latency}, State: {keyValuePair.Value.InitializationState}");
+                    }
                 }
-            }
 
-            LoadInterstitial();
-            LoadRewarded();
-            LoadRewardedInterstitial();
-            LoadAppOpen();
-            LoadNativeOverlay();
-            //LoadBanner();
+                LoadInterstitial();
+                LoadRewarded();
+                LoadRewardedInterstitial();
+                LoadAppOpen();
+                LoadNativeOverlay();
+                //LoadBanner();
+            });
         }
 
         private void TestMode()
