@@ -15,6 +15,8 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
         [NonSerialized] internal Action receivedRewardCallback;
+        [UnityEngine.Tooltip("Destroy and recreate the LevelPlay ad object when reloading ads.")]
+        public bool isDestroyAdOnReload = true;
         public bool IsEarnRewarded { get; private set; }
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
@@ -37,6 +39,7 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
+            if (IsLoading) return;
             if (string.IsNullOrEmpty(Id))
             {
                 UnityEngine.Debug.LogWarning("LevelPlay rewarded load skipped because ad unit id is empty.");
@@ -115,6 +118,7 @@ namespace VirtueSky.Ads
         public override void Destroy()
         {
             IsShowing = false;
+            ResetFinalizeCloseHandle();
             ResetRewardedAd(true);
         }
 
@@ -133,10 +137,12 @@ namespace VirtueSky.Ads
             IsEarnRewarded = false;
         }
 
-        private void ResetRewardedAd(bool isDestroy = false)
+        private void ResetRewardedAd(bool isDestroy = false, bool keepObject = false)
         {
+            IsLoading = false;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (rewardedAd == null) return;
+            if (keepObject) return;
             rewardedAd.OnAdLoaded -= OnAdLoaded;
             rewardedAd.OnAdDisplayed -= RewardedVideoOnAdDisplayedEvent;
             rewardedAd.OnAdClosed -= RewardedVideoOnAdClosedEvent;
@@ -147,7 +153,11 @@ namespace VirtueSky.Ads
             if (isDestroy) rewardedAd.DestroyAd();
             rewardedAd = null;
 #endif
-            IsLoading = false;
+        }
+
+        private void ResetRewardedAdForReload()
+        {
+            ResetRewardedAd(isDestroyAdOnReload, !isDestroyAdOnReload);
         }
 
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -186,7 +196,7 @@ namespace VirtueSky.Ads
                 OnFailedToLoadAdEvent?.Invoke(errorInfo);
             });
 
-            ResetRewardedAd(true);
+            ResetRewardedAdForReload();
         }
 
         void RewardedVideoOnAdDisplayedEvent(LevelPlayAdInfo adInfo)
@@ -229,7 +239,7 @@ namespace VirtueSky.Ads
             });
 
             IsShowing = false;
-            ResetRewardedAd(true);
+            ResetRewardedAdForReload();
         }
 
         void RewardedVideoOnAdRewardedEvent(LevelPlayAdInfo info, LevelPlayReward reward)
@@ -258,7 +268,7 @@ namespace VirtueSky.Ads
                 ExcuteCallbackOnMainThread(() => { Common.CallActionAndClean(ref completedCallback); });
                 ResetFinalizeCloseHandle();
                 IsShowing = false;
-                ResetRewardedAd(true);
+                ResetRewardedAdForReload();
                 Load();
                 return;
             }
@@ -266,7 +276,7 @@ namespace VirtueSky.Ads
             ExcuteCallbackOnMainThread(() => { Common.CallActionAndClean(ref skippedCallback); });
             ResetFinalizeCloseHandle();
             IsShowing = false;
-            ResetRewardedAd(true);
+            ResetRewardedAdForReload();
             Load();
         }
 
