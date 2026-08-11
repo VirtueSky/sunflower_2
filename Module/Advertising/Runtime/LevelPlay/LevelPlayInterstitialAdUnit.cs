@@ -33,12 +33,12 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            if (IsLoading) return;
             if (string.IsNullOrEmpty(Id))
             {
                 Debug.LogWarning("LevelPlay interstitial load skipped because ad unit id is empty.");
                 return;
             }
+            if (IsShowing || IsLoading || IsReady()) return;
 
             try
             {

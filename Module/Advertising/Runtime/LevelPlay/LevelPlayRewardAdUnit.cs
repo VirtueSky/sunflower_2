@@ -39,12 +39,12 @@ namespace VirtueSky.Ads
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (AdStatic.IsRemoveAd) return;
-            if (IsLoading) return;
             if (string.IsNullOrEmpty(Id))
             {
                 UnityEngine.Debug.LogWarning("LevelPlay rewarded load skipped because ad unit id is empty.");
                 return;
             }
+            if (IsShowing || IsLoading || IsReady()) return;
 
             try
             {
@@ -137,12 +137,11 @@ namespace VirtueSky.Ads
             IsEarnRewarded = false;
         }
 
-        private void ResetRewardedAd(bool isDestroy = false, bool keepObject = false)
+        private void ResetRewardedAd(bool isDestroy = false)
         {
             IsLoading = false;
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
             if (rewardedAd == null) return;
-            if (keepObject) return;
             rewardedAd.OnAdLoaded -= OnAdLoaded;
             rewardedAd.OnAdDisplayed -= RewardedVideoOnAdDisplayedEvent;
             rewardedAd.OnAdClosed -= RewardedVideoOnAdClosedEvent;
@@ -157,7 +156,7 @@ namespace VirtueSky.Ads
 
         private void ResetRewardedAdForReload()
         {
-            ResetRewardedAd(isDestroyAdOnReload, !isDestroyAdOnReload);
+            if (isDestroyAdOnReload) ResetRewardedAd(true);
         }
 
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
@@ -186,8 +185,9 @@ namespace VirtueSky.Ads
 
         private void RewardedVideoOnAdLoadFailedEvent(LevelPlayAdError ironSourceError)
         {
-            IsShowing = false;
             var errorInfo = new AdsError(ironSourceError);
+            IsShowing = false;
+            IsLoading = false;
             VLog.LogWarning(
                 $"Advertising: LevelPlayRewardedAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -224,7 +224,7 @@ namespace VirtueSky.Ads
             });
 
             App.CancelDelay(_finalizeCloseHandle);
-            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose);
+            _finalizeCloseHandle = App.Delay(FinalizeCloseDelay, FinalizeClose, useRealTime: true);
         }
 
         void RewardedVideoOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError ironSourceError)
