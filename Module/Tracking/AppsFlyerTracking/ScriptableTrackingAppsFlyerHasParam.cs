@@ -9,7 +9,7 @@ namespace VirtueSky.Tracking
     [CreateAssetMenu(menuName = "Sunflower2/Tracking Event/AppsFlyer/Tracking Has Param",
         fileName = "tracking_appsflyer_has_param")]
     [EditorIcon("scriptable_af")]
-    public class ScriptableTrackingAppsFlyerHasParam : TrackingFirebase
+    public class ScriptableTrackingAppsFlyerHasParam : TrackingAppsFlyer
     {
         public void TrackEvent(Dictionary<string, string> eventValues)
         {
