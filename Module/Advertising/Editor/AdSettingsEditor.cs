@@ -19,12 +19,14 @@ namespace VirtueSky.Ads
         private SerializedProperty _enableTrackAdRevenue;
         private SerializedProperty _excuteCallbackOnMainThread;
 
+        private SerializedProperty _appLovinInitDelay;
         private SerializedProperty _sdkKey;
         private SerializedProperty _maxBannerAdUnit;
         private SerializedProperty _maxInterstitialAdUnit;
         private SerializedProperty _maxRewardAdUnit;
         private SerializedProperty _maxAppOpenAdUnit;
 
+        private SerializedProperty _admobInitDelay;
         private SerializedProperty _admobBannerAdUnit;
         private SerializedProperty _admobInterstitialAdUnit;
         private SerializedProperty _admobRewardAdUnit;
@@ -37,6 +39,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _enableGDPRTestMode;
         private SerializedProperty _admobDevicesTest;
 
+        private SerializedProperty _levelPlayInitDelay;
         private SerializedProperty _androidAppKey;
         private SerializedProperty _iOSAppKey;
 
@@ -63,11 +66,13 @@ namespace VirtueSky.Ads
             _enableTrackAdRevenue = serializedObject.FindProperty("enableTrackAdRevenue");
             _excuteCallbackOnMainThread = serializedObject.FindProperty("excuteCallbackOnMainThread");
 
+            _appLovinInitDelay = serializedObject.FindProperty("appLovinInitDelay");
             _sdkKey = serializedObject.FindProperty("sdkKey");
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
             _maxInterstitialAdUnit = serializedObject.FindProperty("maxInterstitialAdUnit");
             _maxRewardAdUnit = serializedObject.FindProperty("maxRewardAdUnit");
             _maxAppOpenAdUnit = serializedObject.FindProperty("maxAppOpenAdUnit");
+            _admobInitDelay = serializedObject.FindProperty("admobInitDelay");
             _admobBannerAdUnit = serializedObject.FindProperty("admobBannerAdUnit");
             _admobInterstitialAdUnit = serializedObject.FindProperty("admobInterstitialAdUnit");
             _admobRewardAdUnit = serializedObject.FindProperty("admobRewardAdUnit");
@@ -79,6 +84,7 @@ namespace VirtueSky.Ads
             _enableGDPR = serializedObject.FindProperty("enableGDPR");
             _enableGDPRTestMode = serializedObject.FindProperty("enableGDPRTestMode");
             _admobDevicesTest = serializedObject.FindProperty("admobDevicesTest");
+            _levelPlayInitDelay = serializedObject.FindProperty("levelPlayInitDelay");
             _androidAppKey = serializedObject.FindProperty("androidAppKey");
             _iOSAppKey = serializedObject.FindProperty("iOSAppKey");
             _useTestAppKey = serializedObject.FindProperty("useTestAppKey");
@@ -162,6 +168,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.LabelField("Applovin - Max", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
+            EditorGUILayout.PropertyField(_appLovinInitDelay);
             EditorGUILayout.PropertyField(_sdkKey);
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_maxBannerAdUnit);
@@ -178,6 +185,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.LabelField("Google - Admob", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
+            EditorGUILayout.PropertyField(_admobInitDelay);
             EditorGUILayout.PropertyField(_admobBannerAdUnit);
             EditorGUILayout.PropertyField(_admobInterstitialAdUnit);
             EditorGUILayout.PropertyField(_admobRewardAdUnit);
@@ -206,6 +214,7 @@ namespace VirtueSky.Ads
             EditorGUILayout.LabelField("LevelPlay - IronSource", StyleLabel());
             GuiLine();
             GUILayout.Space(5);
+            EditorGUILayout.PropertyField(_levelPlayInitDelay);
             EditorGUILayout.PropertyField(_androidAppKey);
             EditorGUILayout.PropertyField(_iOSAppKey);
             EditorGUILayout.PropertyField(_useTestAppKey);

@@ -36,12 +36,16 @@ namespace VirtueSky.Ads
 
         #region Max
 
+        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing AppLovin. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        private float appLovinInitDelay;
+
         [TextArea, SerializeField] private string sdkKey;
         [SerializeField] private MaxBannerAdUnit maxBannerAdUnit;
         [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnit;
         [SerializeField] private MaxRewardAdUnit maxRewardAdUnit;
         [SerializeField] private MaxAppOpenAdUnit maxAppOpenAdUnit;
 
+        public static float AppLovinInitDelay => Instance.appLovinInitDelay;
         public static string SdkKey => Instance.sdkKey;
 
         public static MaxBannerAdUnit MaxBannerAdUnit => Instance.maxBannerAdUnit;
@@ -52,6 +56,9 @@ namespace VirtueSky.Ads
         #endregion
 
         #region Admob
+
+        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing AdMob. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        private float admobInitDelay;
 
         [SerializeField] private AdmobBannerAdUnit admobBannerAdUnit;
         [SerializeField] private AdmobInterstitialAdUnit admobInterstitialAdUnit;
@@ -69,6 +76,7 @@ namespace VirtueSky.Ads
         [SerializeField] private List<string> admobDevicesTest;
 
 
+        public static float AdmobInitDelay => Instance.admobInitDelay;
         public static AdmobBannerAdUnit AdmobBannerAdUnit => Instance.admobBannerAdUnit;
         public static AdmobInterstitialAdUnit AdmobInterstitialAdUnit => Instance.admobInterstitialAdUnit;
         public static AdmobRewardAdUnit AdmobRewardAdUnit => Instance.admobRewardAdUnit;
@@ -86,6 +94,9 @@ namespace VirtueSky.Ads
 
         #region LevelPlay
 
+        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing LevelPlay. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        private float levelPlayInitDelay;
+
         [SerializeField] private string androidAppKey;
         [SerializeField] private string iOSAppKey;
 
@@ -94,6 +105,8 @@ namespace VirtueSky.Ads
         [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
         [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnit;
+
+        public static float LevelPlayInitDelay => Instance.levelPlayInitDelay;
 
         public static string AndroidAppKey
         {
