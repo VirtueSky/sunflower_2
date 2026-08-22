@@ -35,7 +35,7 @@ namespace VirtueSky.Ads
 
         private static Advertising instance;
 
-        private bool isInitAdClient = false;
+        private bool isInitAllAdClient = false;
         private bool isInititalization = false;
         private int pendingAdClientInitializations;
 
@@ -83,7 +83,7 @@ namespace VirtueSky.Ads
         {
             if (isInititalization) return;
             isInititalization = true;
-            isInitAdClient = false;
+            isInitAllAdClient = false;
             AdStatic.OnChangePreventDisplayAppOpenEvent += OnChangePreventDisplayOpenAd;
             if (AdSettings.EnableGDPR)
             {
@@ -161,7 +161,7 @@ namespace VirtueSky.Ads
 
         private void CompleteAdClientInitialization()
         {
-            isInitAdClient = true;
+            isInitAllAdClient = true;
         }
 
         void InitApplovinClient()
@@ -218,7 +218,8 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadInterstitial();
             if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadInterstitial();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted) levelPlayAdClient.LoadInterstitial();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
+                levelPlayAdClient.LoadInterstitial();
             _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -228,7 +229,8 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadRewarded();
             if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadRewarded();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted) levelPlayAdClient.LoadRewarded();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
+                levelPlayAdClient.LoadRewarded();
             _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -238,7 +240,8 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadRewardedInterstitial();
             if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadRewardedInterstitial();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted) levelPlayAdClient.LoadRewardedInterstitial();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
+                levelPlayAdClient.LoadRewardedInterstitial();
             _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -248,7 +251,8 @@ namespace VirtueSky.Ads
                 AdSettings.AdLoadingInterval) return;
             if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadAppOpen();
             if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadAppOpen();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted) levelPlayAdClient.LoadAppOpen();
+            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
+                levelPlayAdClient.LoadAppOpen();
             _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
         }
 
@@ -695,7 +699,7 @@ namespace VirtueSky.Ads
         /// <summary>
         /// Return true after all enabled ad clients have started initialization, including their configured delays. You can check this property before accessing an ad client to avoid potential errors.
         /// </summary>
-        public static bool IsInitAdClient => instance.isInitAdClient;
+        public static bool IsInitAllAdClient => instance.isInitAllAdClient;
 
         public static void Initialization() => instance.InternalInitialization();
 
