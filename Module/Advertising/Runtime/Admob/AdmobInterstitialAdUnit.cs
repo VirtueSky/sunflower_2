@@ -34,7 +34,7 @@ namespace VirtueSky.Ads
                 GetUnitTest();
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             paidedCallback += TrackRevenue;
 #endif
         }
@@ -42,7 +42,7 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
 
             if (usePreload)
             {
@@ -182,10 +182,7 @@ namespace VirtueSky.Ads
                         VLog.LogWarning($"Advertising: InterstitialAd Preload callback failed: {adUnitId}");
                         OnAdFailedToLoad(error);
                     },
-                    onAdsExhausted: adUnitId =>
-                    {
-                        VLog.LogWarning($"Advertising: InterstitialAd preload exhausted: {adUnitId}");
-                    }
+                    onAdsExhausted: adUnitId => { VLog.LogWarning($"Advertising: InterstitialAd preload exhausted: {adUnitId}"); }
                 );
 
                 VLog.Log($"Advertising: InterstitialAd Preload started: {preloadStarted}, adUnitId: {Id}, bufferSize: {config.BufferSize}");

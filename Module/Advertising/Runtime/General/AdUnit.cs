@@ -12,6 +12,7 @@ namespace VirtueSky.Ads
 
         [SerializeField] protected string iOSId;
 
+        public bool isBlockAdRequest = false;
 
         [NonSerialized] internal Action<AdsInfo> loadedCallback;
         [NonSerialized] internal Action<AdsError> failedToLoadCallback;

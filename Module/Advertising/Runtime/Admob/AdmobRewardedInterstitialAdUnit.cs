@@ -35,7 +35,7 @@ namespace VirtueSky.Ads
                 GetUnitTest();
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (string.IsNullOrEmpty(Id)) return;
+            if (string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             paidedCallback += TrackRevenue;
 #endif
         }
@@ -45,7 +45,7 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (string.IsNullOrEmpty(Id)) return;
+            if (string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             Destroy();
             IsLoading = true;
             VLog.Log($"Advertising: Load RewardedInterstitialAd: {Id}");

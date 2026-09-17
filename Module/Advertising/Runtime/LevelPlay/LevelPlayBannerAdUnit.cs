@@ -15,8 +15,10 @@ namespace VirtueSky.Ads
         public AdsSize size;
         public AdsPosition position;
         public bool isShowOnLoad = false;
+
         [Tooltip("Destroy and recreate the LevelPlay ad object when reloading ads.")]
         public bool isDestroyAdOnReload = true;
+
         private bool _isBannerDestroyed = true;
         private bool _isBannerShowing;
         private bool _previousBannerShowStatus;
@@ -36,7 +38,7 @@ namespace VirtueSky.Ads
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (AdStatic.IsRemoveAd) return;
+            if (AdStatic.IsRemoveAd || isBlockAdRequest) return;
             _isBannerDestroyed = true;
             paidedCallback += TrackRevenue;
 #endif
@@ -45,7 +47,7 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (AdStatic.IsRemoveAd) return;
+            if (AdStatic.IsRemoveAd || isBlockAdRequest) return;
             if (IsLoading) return;
             if (bannerAd != null && IsBannerConfigChanged())
             {

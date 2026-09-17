@@ -52,7 +52,7 @@ namespace VirtueSky.Ads
                 GetUnitTest();
             }
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             paidedCallback += TrackRevenue;
 #endif
         }
@@ -60,7 +60,7 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             CancelBannerReload();
             DestroyBannerView();
             IsLoading = true;
@@ -76,7 +76,8 @@ namespace VirtueSky.Ads
             }
             else if (useAutoRefresh)
             {
-                VLog.LogWarning("Advertising: AdMob banner auto refresh requested but VIRTUESKY_ADMOB_BANNER_REFRESH is not defined. Fallback to normal BannerView.");
+                VLog.LogWarning(
+                    "Advertising: AdMob banner auto refresh requested but VIRTUESKY_ADMOB_BANNER_REFRESH is not defined. Fallback to normal BannerView.");
             }
 
             _bannerView = new BannerView(Id, ConvertSize(), ConvertPosition());

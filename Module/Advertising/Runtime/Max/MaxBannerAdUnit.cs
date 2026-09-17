@@ -22,7 +22,7 @@ namespace VirtueSky.Ads
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             paidedCallback += TrackRevenue;
             MaxSdkCallbacks.Banner.OnAdLoadedEvent += OnAdLoaded;
             MaxSdkCallbacks.Banner.OnAdExpandedEvent += OnAdExpanded;
@@ -40,7 +40,7 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
-            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id)) return;
+            if (AdStatic.IsRemoveAd || string.IsNullOrEmpty(Id) || isBlockAdRequest) return;
             if (_isBannerDestroyed)
             {
                 if (!string.IsNullOrEmpty(_placement))

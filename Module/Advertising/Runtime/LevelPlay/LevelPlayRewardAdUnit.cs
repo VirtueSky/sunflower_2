@@ -15,8 +15,10 @@ namespace VirtueSky.Ads
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
         [NonSerialized] internal Action receivedRewardCallback;
+
         [UnityEngine.Tooltip("Destroy and recreate the LevelPlay ad object when reloading ads.")]
         public bool isDestroyAdOnReload = true;
+
         public bool IsEarnRewarded { get; private set; }
         private const float FinalizeCloseDelay = 0.2f;
         private DelayHandle _finalizeCloseHandle;
@@ -30,7 +32,7 @@ namespace VirtueSky.Ads
         public override void Init()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (AdStatic.IsRemoveAd) return;
+            if (isBlockAdRequest) return;
             paidedCallback += TrackRevenue;
 #endif
         }
@@ -38,12 +40,13 @@ namespace VirtueSky.Ads
         public override void Load()
         {
 #if VIRTUESKY_ADS && VIRTUESKY_LEVELPLAY
-            if (AdStatic.IsRemoveAd) return;
+            if (isBlockAdRequest) return;
             if (string.IsNullOrEmpty(Id))
             {
                 UnityEngine.Debug.LogWarning("LevelPlay rewarded load skipped because ad unit id is empty.");
                 return;
             }
+
             if (IsShowing || IsLoading || IsReady()) return;
 
             try
