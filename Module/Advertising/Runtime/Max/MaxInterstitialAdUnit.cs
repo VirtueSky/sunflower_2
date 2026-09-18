@@ -74,6 +74,7 @@ namespace VirtueSky.Ads
         private void OnAdDisplayFailed(string unit, MaxSdkBase.ErrorInfo error,
             MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             var errorInfo = new AdsError(error);
             VLog.LogWarning(
                 $"Advertising: MaxInterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
@@ -86,6 +87,7 @@ namespace VirtueSky.Ads
 
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxInterstitialAd Closed: {Id}");
             AdStatic.IsShowingAd = false;
             var adsInfo = new AdsInfo(info);
@@ -102,6 +104,7 @@ namespace VirtueSky.Ads
 
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxInterstitialAd Displayed: {Id}");
             AdStatic.IsShowingAd = true;
             IsShowing = true;
@@ -113,10 +116,11 @@ namespace VirtueSky.Ads
             });
         }
 
-        private void OnAdClicked(string arg1, MaxSdkBase.AdInfo arg2)
+        private void OnAdClicked(string unit, MaxSdkBase.AdInfo adInfo)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxInterstitialAd Clicked: {Id}");
-            var info = new AdsInfo(arg2);
+            var info = new AdsInfo(adInfo);
             ExcuteCallbackOnMainThread(() =>
             {
                 Common.CallActionAndClean(ref clickedCallback, info);
@@ -126,11 +130,13 @@ namespace VirtueSky.Ads
 
         private void OnAdRevenuePaid(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             paidedCallback?.Invoke(new AdsInfo(info));
         }
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
+            if (unit != Id) return;
             IsLoading = false;
             var errorInfo = new AdsError(info);
             VLog.LogWarning(
@@ -144,6 +150,7 @@ namespace VirtueSky.Ads
 
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             IsLoading = false;
             VLog.Log($"Advertising: MaxInterstitialAd Loaded: {Id}");
             var adsInfo = new AdsInfo(info);

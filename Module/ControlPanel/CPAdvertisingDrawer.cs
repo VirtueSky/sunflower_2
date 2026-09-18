@@ -114,7 +114,7 @@ namespace VirtueSky.ControlPanel.Editor
 
             if (AdSettings.IsLevelPlay())
             {
-#if !VIRTUESKY_ADS || !VIRTUESKY_IRONSOURCE
+#if !VIRTUESKY_ADS || !VIRTUESKY_LEVELPLAY
             EditorGUILayout.HelpBox(
                 $"Add scripting define symbols \"{ConstantDefineSymbols.VIRTUESKY_ADS}\" and \"{ConstantDefineSymbols.VIRTUESKY_LEVELPLAY}\" to use IronSource Ads",
                 MessageType.Info);

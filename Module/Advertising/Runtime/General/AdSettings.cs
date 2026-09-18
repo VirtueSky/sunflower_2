@@ -44,6 +44,12 @@ namespace VirtueSky.Ads
         [TextArea, SerializeField] private string sdkKey;
         [SerializeField] private bool useMaxInterstitialBackup;
         [SerializeField] private bool useMaxRewardBackup;
+
+        [Min(60f), SerializeField,
+         Tooltip(
+             "Time in seconds a loaded backup ad unit is kept in cache. If it hasn't been shown within this time, it is discarded and loaded again. Default 3600s = 1 hour.")]
+        private float maxBackupAdUnitExpireTime = 3600f;
+
         [SerializeField] private MaxBannerAdUnit maxBannerAdUnit;
         [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnit;
         [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnitBackup;
@@ -55,6 +61,7 @@ namespace VirtueSky.Ads
         public static string SdkKey => Instance.sdkKey;
         public static bool UseMaxInterstitialBackup => Instance.useMaxInterstitialBackup;
         public static bool UseMaxRewardBackup => Instance.useMaxRewardBackup;
+        public static float MaxBackupAdUnitExpireTime => Instance.maxBackupAdUnitExpireTime;
         public static MaxBannerAdUnit MaxBannerAdUnit => Instance.maxBannerAdUnit;
         public static MaxInterstitialAdUnit MaxInterstitialAdUnit => Instance.maxInterstitialAdUnit;
         public static MaxInterstitialAdUnit MaxInterstitialAdUnitBackup => Instance.maxInterstitialAdUnitBackup;
@@ -73,6 +80,12 @@ namespace VirtueSky.Ads
 
         [SerializeField] private bool useAdmobInterstitialBackup;
         [SerializeField] private bool useAdmobRewardBackup;
+
+        [Min(60f), SerializeField,
+         Tooltip(
+             "Time in seconds a loaded backup ad unit is kept in cache. If it hasn't been shown within this time, it is discarded and loaded again. Default 3600s = 1 hour.")]
+        private float admobBackupAdUnitExpireTime = 3600f;
+
         [SerializeField] private AdmobBannerAdUnit admobBannerAdUnit;
         [SerializeField] private AdmobInterstitialAdUnit admobInterstitialAdUnit;
         [SerializeField] private AdmobInterstitialAdUnit admobInterstitialAdUnitBackup;
@@ -94,6 +107,7 @@ namespace VirtueSky.Ads
         public static float AdmobInitDelay => Instance.admobInitDelay;
         public static bool UseAdmobInterstitialBackup => Instance.useAdmobInterstitialBackup;
         public static bool UseAdmobRewardBackup => Instance.useAdmobRewardBackup;
+        public static float AdmobBackupAdUnitExpireTime => Instance.admobBackupAdUnitExpireTime;
         public static AdmobBannerAdUnit AdmobBannerAdUnit => Instance.admobBannerAdUnit;
         public static AdmobInterstitialAdUnit AdmobInterstitialAdUnit => Instance.admobInterstitialAdUnit;
         public static AdmobInterstitialAdUnit AdmobInterstitialAdUnitBackup => Instance.admobInterstitialAdUnitBackup;
@@ -125,6 +139,12 @@ namespace VirtueSky.Ads
         [SerializeField] private bool enableTestSuiteDefault;
         [SerializeField] private bool useLevelPlayInterstitialBackup;
         [SerializeField] private bool useLevelPlayRewardBackup;
+
+        [Min(60f), SerializeField,
+         Tooltip(
+             "Time in seconds a loaded backup ad unit is kept in cache. If it hasn't been shown within this time, it is discarded and loaded again. Default 3600s = 1 hour.")]
+        private float levelPlayBackupAdUnitExpireTime = 3600f;
+
         [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnitBackup;
@@ -177,6 +197,7 @@ namespace VirtueSky.Ads
 
         public static bool UseLevelPlayInterstitialBackup => Instance.useLevelPlayInterstitialBackup;
         public static bool UseLevelPlayRewardBackup => Instance.useLevelPlayRewardBackup;
+        public static float LevelPlayBackupAdUnitExpireTime => Instance.levelPlayBackupAdUnitExpireTime;
 
         public static LevelPlayBannerAdUnit LevelPlayBannerAdUnit => Instance.levelPlayBannerAdUnit;
 

@@ -23,6 +23,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _sdkKey;
         private SerializedProperty _useMaxInterstitialBackup;
         private SerializedProperty _useMaxRewardBackup;
+        private SerializedProperty _maxBackupAdUnitExpireTime;
         private SerializedProperty _maxBannerAdUnit;
         private SerializedProperty _maxInterstitialAdUnit;
         private SerializedProperty _maxInterstitialAdUnitBackup;
@@ -33,6 +34,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _admobInitDelay;
         private SerializedProperty _useAdmobInterstitialBackup;
         private SerializedProperty _useAdmobRewardBackup;
+        private SerializedProperty _admobBackupAdUnitExpireTime;
         private SerializedProperty _admobBannerAdUnit;
         private SerializedProperty _admobInterstitialAdUnit;
         private SerializedProperty _admobInterstitialAdUnitBackup;
@@ -55,6 +57,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _enableTestSuiteDefault;
         private SerializedProperty _useLevelPlayInterstitialBackup;
         private SerializedProperty _useLevelPlayRewardBackup;
+        private SerializedProperty _levelPlayBackupAdUnitExpireTime;
         private SerializedProperty _levelPlayBannerAdUnit;
         private SerializedProperty _levelPlayInterstitialAdUnit;
         private SerializedProperty _levelPlayInterstitialAdUnitBackup;
@@ -82,6 +85,7 @@ namespace VirtueSky.Ads
             _sdkKey = serializedObject.FindProperty("sdkKey");
             _useMaxInterstitialBackup = serializedObject.FindProperty("useMaxInterstitialBackup");
             _useMaxRewardBackup = serializedObject.FindProperty("useMaxRewardBackup");
+            _maxBackupAdUnitExpireTime = serializedObject.FindProperty("maxBackupAdUnitExpireTime");
             _maxBannerAdUnit = serializedObject.FindProperty("maxBannerAdUnit");
             _maxInterstitialAdUnit = serializedObject.FindProperty("maxInterstitialAdUnit");
             _maxInterstitialAdUnitBackup = serializedObject.FindProperty("maxInterstitialAdUnitBackup");
@@ -91,6 +95,7 @@ namespace VirtueSky.Ads
             _admobInitDelay = serializedObject.FindProperty("admobInitDelay");
             _useAdmobInterstitialBackup = serializedObject.FindProperty("useAdmobInterstitialBackup");
             _useAdmobRewardBackup = serializedObject.FindProperty("useAdmobRewardBackup");
+            _admobBackupAdUnitExpireTime = serializedObject.FindProperty("admobBackupAdUnitExpireTime");
             _admobBannerAdUnit = serializedObject.FindProperty("admobBannerAdUnit");
             _admobInterstitialAdUnit = serializedObject.FindProperty("admobInterstitialAdUnit");
             _admobInterstitialAdUnitBackup = serializedObject.FindProperty("admobInterstitialAdUnitBackup");
@@ -111,6 +116,7 @@ namespace VirtueSky.Ads
             _enableTestSuiteDefault = serializedObject.FindProperty("enableTestSuiteDefault");
             _useLevelPlayInterstitialBackup = serializedObject.FindProperty("useLevelPlayInterstitialBackup");
             _useLevelPlayRewardBackup = serializedObject.FindProperty("useLevelPlayRewardBackup");
+            _levelPlayBackupAdUnitExpireTime = serializedObject.FindProperty("levelPlayBackupAdUnitExpireTime");
             _levelPlayBannerAdUnit = serializedObject.FindProperty("levelPlayBannerAdUnit");
             _levelPlayInterstitialAdUnit = serializedObject.FindProperty("levelPlayInterstitialAdUnit");
             _levelPlayInterstitialAdUnitBackup = serializedObject.FindProperty("levelPlayInterstitialAdUnitBackup");
@@ -197,6 +203,11 @@ namespace VirtueSky.Ads
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_useMaxInterstitialBackup);
             EditorGUILayout.PropertyField(_useMaxRewardBackup);
+            if (_useMaxInterstitialBackup.boolValue || _useMaxRewardBackup.boolValue)
+            {
+                EditorGUILayout.PropertyField(_maxBackupAdUnitExpireTime);
+            }
+
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_maxBannerAdUnit);
             EditorGUILayout.PropertyField(_maxInterstitialAdUnit);
@@ -226,6 +237,11 @@ namespace VirtueSky.Ads
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_useAdmobInterstitialBackup);
             EditorGUILayout.PropertyField(_useAdmobRewardBackup);
+            if (_useAdmobInterstitialBackup.boolValue || _useAdmobRewardBackup.boolValue)
+            {
+                EditorGUILayout.PropertyField(_admobBackupAdUnitExpireTime);
+            }
+
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_admobBannerAdUnit);
             EditorGUILayout.PropertyField(_admobInterstitialAdUnit);
@@ -273,6 +289,11 @@ namespace VirtueSky.Ads
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_useLevelPlayInterstitialBackup);
             EditorGUILayout.PropertyField(_useLevelPlayRewardBackup);
+            if (_useLevelPlayInterstitialBackup.boolValue || _useLevelPlayRewardBackup.boolValue)
+            {
+                EditorGUILayout.PropertyField(_levelPlayBackupAdUnitExpireTime);
+            }
+
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_levelPlayBannerAdUnit);
             EditorGUILayout.PropertyField(_levelPlayInterstitialAdUnit);

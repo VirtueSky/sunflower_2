@@ -11,6 +11,17 @@ namespace VirtueSky.Ads
     {
         private const float InitialLoadDelay = 0.1f;
 
+        private BackupAdUnitGroup interstitialGroup;
+        private BackupAdUnitGroup rewardGroup;
+
+        private BackupAdUnitGroup InterstitialGroup => interstitialGroup ??= new BackupAdUnitGroup(
+            AdSettings.LevelPlayInterstitialAdUnit, AdSettings.LevelPlayInterstitialAdUnitBackup,
+            () => AdSettings.UseLevelPlayInterstitialBackup, () => AdSettings.LevelPlayBackupAdUnitExpireTime);
+
+        private BackupAdUnitGroup RewardGroup => rewardGroup ??= new BackupAdUnitGroup(
+            AdSettings.LevelPlayRewardAdUnit, AdSettings.LevelPlayRewardAdUnitBackup,
+            () => AdSettings.UseLevelPlayRewardBackup, () => AdSettings.LevelPlayBackupAdUnitExpireTime);
+
         public override void Initialize()
         {
             SdkInitializationCompleted = false;
@@ -29,29 +40,27 @@ namespace VirtueSky.Ads
             LevelPlay.OnInitSuccess += SdkInitializationCompletedEvent;
             LevelPlay.OnImpressionDataReady += ImpressionDataReadyEvent;
             AdSettings.LevelPlayBannerAdUnit.Init();
-            AdSettings.LevelPlayInterstitialAdUnit.Init();
-            AdSettings.LevelPlayRewardAdUnit.Init();
+            InterstitialGroup.Init();
+            RewardGroup.Init();
             LevelPlay.ValidateIntegration();
             LevelPlay.Init(AdSettings.AppKey);
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => AdSettings.LevelPlayInterstitialAdUnit;
+        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
         public override void LoadInterstitial()
         {
             if (!SdkInitializationCompleted) return;
-            if (AdSettings.LevelPlayInterstitialAdUnit == null || AdSettings.LevelPlayInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.LevelPlayInterstitialAdUnit.IsReady() && !AdSettings.LevelPlayInterstitialAdUnit.IsLoading) AdSettings.LevelPlayInterstitialAdUnit.Load();
+            InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => AdSettings.LevelPlayRewardAdUnit;
+        public override AdUnit RewardAdUnit() => RewardGroup.Select();
 
         public override void LoadRewarded()
         {
             if (!SdkInitializationCompleted) return;
-            if (AdSettings.LevelPlayRewardAdUnit == null || AdSettings.LevelPlayRewardAdUnit.IsShowing) return;
-            if (!AdSettings.LevelPlayRewardAdUnit.IsReady() && !AdSettings.LevelPlayRewardAdUnit.IsLoading) AdSettings.LevelPlayRewardAdUnit.Load();
+            RewardGroup.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit()
@@ -116,6 +125,9 @@ namespace VirtueSky.Ads
                 AdSettings.LevelPlayBannerAdUnit.OnAdPaidEvent(impressionData);
                 AdSettings.LevelPlayInterstitialAdUnit.OnAdPaidEvent(impressionData);
                 AdSettings.LevelPlayRewardAdUnit.OnAdPaidEvent(impressionData);
+                // Each ad unit filters by its own MediationAdUnitId, so the backups can safely listen too.
+                if (AdSettings.UseLevelPlayInterstitialBackup) AdSettings.LevelPlayInterstitialAdUnitBackup.OnAdPaidEvent(impressionData);
+                if (AdSettings.UseLevelPlayRewardBackup) AdSettings.LevelPlayRewardAdUnitBackup.OnAdPaidEvent(impressionData);
             }
         }
 

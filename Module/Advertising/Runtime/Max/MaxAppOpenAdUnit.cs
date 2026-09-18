@@ -71,6 +71,7 @@ namespace VirtueSky.Ads
 #if VIRTUESKY_ADS && VIRTUESKY_APPLOVIN
         private void OnAdLoaded(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             IsLoading = false;
             VLog.Log($"Advertising: MaxAppOpenAd Loaded: {Id}");
             var adsInfo = new AdsInfo(info);
@@ -83,11 +84,13 @@ namespace VirtueSky.Ads
 
         private void OnAdRevenuePaid(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             paidedCallback?.Invoke(new AdsInfo(info));
         }
 
         private void OnAdLoadFailed(string unit, MaxSdkBase.ErrorInfo info)
         {
+            if (unit != Id) return;
             IsLoading = false;
             var errorInfo = new AdsError(info);
             VLog.LogWarning(
@@ -99,8 +102,9 @@ namespace VirtueSky.Ads
             });
         }
 
-        private void OnAdClicked(string arg1, MaxSdkBase.AdInfo info)
+        private void OnAdClicked(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxAppOpenAd Clicked: {Id}");
             var adInfo = new AdsInfo(info);
             ExcuteCallbackOnMainThread(() =>
@@ -113,6 +117,7 @@ namespace VirtueSky.Ads
         private void OnAdDisplayFailed(string unit, MaxSdkBase.ErrorInfo errorInfo,
             MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             var error = new AdsError(errorInfo);
             VLog.LogWarning($"Advertising: MaxAppOpenAd FailedToDisplay: {Id}, errorCode: {error.ErrorCode}, errorMessage: {error.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -124,6 +129,7 @@ namespace VirtueSky.Ads
 
         private void OnAdHidden(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxAppOpenAd Closed: {Id}");
             AdStatic.waitAppOpenClosedAction?.Invoke();
             AdStatic.IsShowingAd = false;
@@ -140,6 +146,7 @@ namespace VirtueSky.Ads
 
         private void OnAdDisplayed(string unit, MaxSdkBase.AdInfo info)
         {
+            if (unit != Id) return;
             VLog.Log($"Advertising: MaxAppOpenAd Displayed: {Id}");
             AdStatic.waitAppOpenDisplayedAction?.Invoke();
             AdStatic.IsShowingAd = true;

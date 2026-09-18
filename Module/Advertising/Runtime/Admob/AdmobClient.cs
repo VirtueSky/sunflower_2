@@ -10,6 +10,17 @@ namespace VirtueSky.Ads
 {
     public class AdmobClient : AdClient
     {
+        private BackupAdUnitGroup interstitialGroup;
+        private BackupAdUnitGroup rewardGroup;
+
+        private BackupAdUnitGroup InterstitialGroup => interstitialGroup ??= new BackupAdUnitGroup(
+            AdSettings.AdmobInterstitialAdUnit, AdSettings.AdmobInterstitialAdUnitBackup,
+            () => AdSettings.UseAdmobInterstitialBackup, () => AdSettings.AdmobBackupAdUnitExpireTime);
+
+        private BackupAdUnitGroup RewardGroup => rewardGroup ??= new BackupAdUnitGroup(
+            AdSettings.AdmobRewardAdUnit, AdSettings.AdmobRewardAdUnitBackup,
+            () => AdSettings.UseAdmobRewardBackup, () => AdSettings.AdmobBackupAdUnitExpireTime);
+
         public override void Initialize()
         {
             SdkInitializationCompleted = false;
@@ -23,8 +34,8 @@ namespace VirtueSky.Ads
             MobileAds.Initialize(OnInitializeComplete);
             FirebaseAnalyticTrackingRevenue.autoTrackAdImpressionAdmob = AdSettings.AutoTrackingAdImpressionAdmob;
             AdSettings.AdmobBannerAdUnit.Init();
-            AdSettings.AdmobInterstitialAdUnit.Init();
-            AdSettings.AdmobRewardAdUnit.Init();
+            InterstitialGroup.Init();
+            RewardGroup.Init();
             AdSettings.AdmobRewardedInterstitialAdUnit.Init();
             AdSettings.AdmobAppOpenAdUnit.Init();
             AdSettings.AdmobNativeOverlayAdUnit.Init();
@@ -32,21 +43,18 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => AdSettings.AdmobInterstitialAdUnit;
+        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
         public override void LoadInterstitial()
         {
-            if (AdSettings.AdmobInterstitialAdUnit == null || AdSettings.AdmobInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobInterstitialAdUnit.IsReady() && !AdSettings.AdmobInterstitialAdUnit.IsLoading)
-                AdSettings.AdmobInterstitialAdUnit.Load();
+            InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => AdSettings.AdmobRewardAdUnit;
+        public override AdUnit RewardAdUnit() => RewardGroup.Select();
 
         public override void LoadRewarded()
         {
-            if (AdSettings.AdmobRewardAdUnit == null || AdSettings.AdmobRewardAdUnit.IsShowing) return;
-            if (!AdSettings.AdmobRewardAdUnit.IsReady() && !AdSettings.AdmobRewardAdUnit.IsLoading) AdSettings.AdmobRewardAdUnit.Load();
+            RewardGroup.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit() => AdSettings.AdmobRewardedInterstitialAdUnit;

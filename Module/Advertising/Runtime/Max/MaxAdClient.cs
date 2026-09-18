@@ -5,6 +5,17 @@ namespace VirtueSky.Ads
 {
     public class MaxAdClient : AdClient
     {
+        private BackupAdUnitGroup interstitialGroup;
+        private BackupAdUnitGroup rewardGroup;
+
+        private BackupAdUnitGroup InterstitialGroup => interstitialGroup ??= new BackupAdUnitGroup(
+            AdSettings.MaxInterstitialAdUnit, AdSettings.MaxInterstitialAdUnitBackup,
+            () => AdSettings.UseMaxInterstitialBackup, () => AdSettings.MaxBackupAdUnitExpireTime);
+
+        private BackupAdUnitGroup RewardGroup => rewardGroup ??= new BackupAdUnitGroup(
+            AdSettings.MaxRewardAdUnit, AdSettings.MaxRewardAdUnitBackup,
+            () => AdSettings.UseMaxRewardBackup, () => AdSettings.MaxBackupAdUnitExpireTime);
+
         public override void Initialize()
         {
             SdkInitializationCompleted = false;
@@ -13,27 +24,25 @@ namespace VirtueSky.Ads
             MaxSdkCallbacks.OnSdkInitializedEvent += OnSdkInitialized;
             MaxSdk.InitializeSdk();
             AdSettings.MaxBannerAdUnit.Init();
-            AdSettings.MaxInterstitialAdUnit.Init();
-            AdSettings.MaxRewardAdUnit.Init();
+            InterstitialGroup.Init();
+            RewardGroup.Init();
             AdSettings.MaxAppOpenAdUnit.Init();
             App.AddPauseCallback(OnAppStateChange);
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => AdSettings.MaxInterstitialAdUnit;
+        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
         public override void LoadInterstitial()
         {
-            if (AdSettings.MaxInterstitialAdUnit == null || AdSettings.MaxInterstitialAdUnit.IsShowing) return;
-            if (!AdSettings.MaxInterstitialAdUnit.IsReady() && !AdSettings.MaxInterstitialAdUnit.IsLoading) AdSettings.MaxInterstitialAdUnit.Load();
+            InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => AdSettings.MaxRewardAdUnit;
+        public override AdUnit RewardAdUnit() => RewardGroup.Select();
 
         public override void LoadRewarded()
         {
-            if (AdSettings.MaxRewardAdUnit == null || AdSettings.MaxRewardAdUnit.IsShowing) return;
-            if (!AdSettings.MaxRewardAdUnit.IsReady() && !AdSettings.MaxRewardAdUnit.IsLoading) AdSettings.MaxRewardAdUnit.Load();
+            RewardGroup.Load();
         }
 
         public override AdUnit RewardedInterstitialAdUnit() => null;
