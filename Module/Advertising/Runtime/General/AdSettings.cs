@@ -36,33 +36,48 @@ namespace VirtueSky.Ads
 
         #region Max
 
-        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing AppLovin. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        [Min(0f), SerializeField,
+         Tooltip(
+             "Delay in seconds before initializing AppLovin. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
         private float appLovinInitDelay;
 
         [TextArea, SerializeField] private string sdkKey;
+        [SerializeField] private bool useMaxInterstitialBackup;
+        [SerializeField] private bool useMaxRewardBackup;
         [SerializeField] private MaxBannerAdUnit maxBannerAdUnit;
         [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnit;
+        [SerializeField] private MaxInterstitialAdUnit maxInterstitialAdUnitBackup;
         [SerializeField] private MaxRewardAdUnit maxRewardAdUnit;
+        [SerializeField] private MaxRewardAdUnit maxRewardAdUnitBackup;
         [SerializeField] private MaxAppOpenAdUnit maxAppOpenAdUnit;
 
         public static float AppLovinInitDelay => Instance.appLovinInitDelay;
         public static string SdkKey => Instance.sdkKey;
-
+        public static bool UseMaxInterstitialBackup => Instance.useMaxInterstitialBackup;
+        public static bool UseMaxRewardBackup => Instance.useMaxRewardBackup;
         public static MaxBannerAdUnit MaxBannerAdUnit => Instance.maxBannerAdUnit;
         public static MaxInterstitialAdUnit MaxInterstitialAdUnit => Instance.maxInterstitialAdUnit;
+        public static MaxInterstitialAdUnit MaxInterstitialAdUnitBackup => Instance.maxInterstitialAdUnitBackup;
         public static MaxRewardAdUnit MaxRewardAdUnit => Instance.maxRewardAdUnit;
+        public static MaxRewardAdUnit MaxRewardAdUnitBackup => Instance.maxRewardAdUnitBackup;
         public static MaxAppOpenAdUnit MaxAppOpenAdUnit => Instance.maxAppOpenAdUnit;
 
         #endregion
 
         #region Admob
 
-        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing AdMob. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        [Min(0f), SerializeField,
+         Tooltip(
+             "Delay in seconds before initializing AdMob. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
         private float admobInitDelay;
 
+        [SerializeField] private bool useAdmobInterstitialBackup;
+        [SerializeField] private bool useAdmobRewardBackup;
         [SerializeField] private AdmobBannerAdUnit admobBannerAdUnit;
         [SerializeField] private AdmobInterstitialAdUnit admobInterstitialAdUnit;
+        [SerializeField] private AdmobInterstitialAdUnit admobInterstitialAdUnitBackup;
         [SerializeField] private AdmobRewardAdUnit admobRewardAdUnit;
+        [SerializeField] private AdmobRewardAdUnit admobRewardAdUnitBackup;
         [SerializeField] private AdmobRewardedInterstitialAdUnit admobRewardedInterstitialAdUnit;
         [SerializeField] private AdmobAppOpenAdUnit admobAppOpenAdUnit;
         [SerializeField] private AdmobNativeOverlayAdUnit admobNativeOverlayAdUnit;
@@ -77,9 +92,13 @@ namespace VirtueSky.Ads
 
 
         public static float AdmobInitDelay => Instance.admobInitDelay;
+        public static bool UseAdmobInterstitialBackup => Instance.useAdmobInterstitialBackup;
+        public static bool UseAdmobRewardBackup => Instance.useAdmobRewardBackup;
         public static AdmobBannerAdUnit AdmobBannerAdUnit => Instance.admobBannerAdUnit;
         public static AdmobInterstitialAdUnit AdmobInterstitialAdUnit => Instance.admobInterstitialAdUnit;
+        public static AdmobInterstitialAdUnit AdmobInterstitialAdUnitBackup => Instance.admobInterstitialAdUnitBackup;
         public static AdmobRewardAdUnit AdmobRewardAdUnit => Instance.admobRewardAdUnit;
+        public static AdmobRewardAdUnit AdmobRewardAdUnitBackup => Instance.admobRewardAdUnitBackup;
 
         public static AdmobRewardedInterstitialAdUnit AdmobRewardedInterstitialAdUnit =>
             Instance.admobRewardedInterstitialAdUnit;
@@ -94,7 +113,9 @@ namespace VirtueSky.Ads
 
         #region LevelPlay
 
-        [Min(0f), SerializeField, Tooltip("Delay in seconds before initializing LevelPlay. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
+        [Min(0f), SerializeField,
+         Tooltip(
+             "Delay in seconds before initializing LevelPlay. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
         private float levelPlayInitDelay;
 
         [SerializeField] private string androidAppKey;
@@ -102,9 +123,13 @@ namespace VirtueSky.Ads
 
         [SerializeField] private bool useTestAppKey;
         [SerializeField] private bool enableTestSuiteDefault;
+        [SerializeField] private bool useLevelPlayInterstitialBackup;
+        [SerializeField] private bool useLevelPlayRewardBackup;
         [SerializeField] private LevelPlayBannerAdUnit levelPlayBannerAdUnit;
         [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnit;
+        [SerializeField] private LevelPlayInterstitialAdUnit levelPlayInterstitialAdUnitBackup;
         [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnit;
+        [SerializeField] private LevelPlayRewardAdUnit levelPlayRewardAdUnitBackup;
 
         public static float LevelPlayInitDelay => Instance.levelPlayInitDelay;
 
@@ -150,12 +175,19 @@ namespace VirtueSky.Ads
             set => GameData.Set("LevelPlayEnableTestSuiteRuntime", value);
         }
 
+        public static bool UseLevelPlayInterstitialBackup => Instance.useLevelPlayInterstitialBackup;
+        public static bool UseLevelPlayRewardBackup => Instance.useLevelPlayRewardBackup;
+
         public static LevelPlayBannerAdUnit LevelPlayBannerAdUnit => Instance.levelPlayBannerAdUnit;
 
         public static LevelPlayInterstitialAdUnit LevelPlayInterstitialAdUnit =>
             Instance.levelPlayInterstitialAdUnit;
 
+        public static LevelPlayInterstitialAdUnit LevelPlayInterstitialAdUnitBackup =>
+            Instance.levelPlayInterstitialAdUnitBackup;
+
         public static LevelPlayRewardAdUnit LevelPlayRewardAdUnit => Instance.levelPlayRewardAdUnit;
+        public static LevelPlayRewardAdUnit LevelPlayRewardAdUnitBackup => Instance.levelPlayRewardAdUnitBackup;
 
         #endregion
 

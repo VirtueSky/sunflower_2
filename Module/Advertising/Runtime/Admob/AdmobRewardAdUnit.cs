@@ -1,5 +1,6 @@
 using System;
 using VirtueSky.Core;
+using VirtueSky.Inspector;
 #if VIRTUESKY_ADS && VIRTUESKY_ADMOB
 using GoogleMobileAds.Api;
 #endif
@@ -15,7 +16,9 @@ namespace VirtueSky.Ads
     {
         public bool useTestId;
         public bool usePreload;
+
         [UnityEngine.Min(0)] public int preloadBufferSize = 2;
+
         [NonSerialized] internal Action completedCallback;
         [NonSerialized] internal Action skippedCallback;
         [NonSerialized] internal Action receivedRewardCallback;
