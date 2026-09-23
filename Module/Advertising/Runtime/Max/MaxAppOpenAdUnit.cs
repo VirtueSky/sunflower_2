@@ -92,7 +92,7 @@ namespace VirtueSky.Ads
         {
             if (unit != Id) return;
             IsLoading = false;
-            var errorInfo = new AdsError(info);
+            var errorInfo = new AdsError(info, Id);
             VLog.LogWarning(
                 $"Advertising: MaxAppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -118,7 +118,7 @@ namespace VirtueSky.Ads
             MaxSdkBase.AdInfo info)
         {
             if (unit != Id) return;
-            var error = new AdsError(errorInfo);
+            var error = new AdsError(errorInfo, Id);
             VLog.LogWarning($"Advertising: MaxAppOpenAd FailedToDisplay: {Id}, errorCode: {error.ErrorCode}, errorMessage: {error.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {

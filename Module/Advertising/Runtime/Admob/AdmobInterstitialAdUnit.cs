@@ -249,7 +249,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToShow(AdError error)
         {
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: InterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -315,7 +315,7 @@ namespace VirtueSky.Ads
                 return;
             }
 
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: InterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>

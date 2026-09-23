@@ -75,7 +75,7 @@ namespace VirtueSky.Ads
             MaxSdkBase.AdInfo info)
         {
             if (unit != Id) return;
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: MaxInterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -138,7 +138,7 @@ namespace VirtueSky.Ads
         {
             if (unit != Id) return;
             IsLoading = false;
-            var errorInfo = new AdsError(info);
+            var errorInfo = new AdsError(info, Id);
             VLog.LogWarning(
                 $"Advertising: MaxInterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>

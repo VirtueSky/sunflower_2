@@ -157,7 +157,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToShow(AdError obj)
         {
-            var error = new AdsError(obj);
+            var error = new AdsError(obj, Id);
             VLog.LogWarning(
                 $"Advertising: AppOpenAd FailedToDisplay: {Id}, errorCode: {error.ErrorCode}, errorMessage: {error.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -204,7 +204,7 @@ namespace VirtueSky.Ads
         private void OnAdFailedToLoad(LoadAdError error)
         {
             IsLoading = false;
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: AppOpenAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>

@@ -183,7 +183,7 @@ namespace VirtueSky.Ads
         {
             if (unit != Id) return;
             IsLoading = false;
-            var errorInfo = new AdsError(info);
+            var errorInfo = new AdsError(info, Id);
             VLog.LogWarning($"Advertising: MaxBannerAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
             {

@@ -148,7 +148,7 @@ namespace VirtueSky.Ads
         private void OnAdFailedToLoad(LoadAdError error)
         {
             IsLoading = false;
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: RewardedInterstitialAd FailedToLoad: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
@@ -188,7 +188,7 @@ namespace VirtueSky.Ads
 
         private void OnAdFailedToShow(AdError error)
         {
-            var errorInfo = new AdsError(error);
+            var errorInfo = new AdsError(error, Id);
             VLog.LogWarning(
                 $"Advertising: RewardedInterstitialAd FailedToDisplay: {Id}, errorCode: {errorInfo.ErrorCode}, errorMessage: {errorInfo.ErrorMessage}");
             ExcuteCallbackOnMainThread(() =>
