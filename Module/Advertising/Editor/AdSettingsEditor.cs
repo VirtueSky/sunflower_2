@@ -32,6 +32,7 @@ namespace VirtueSky.Ads
         private SerializedProperty _maxAppOpenAdUnit;
 
         private SerializedProperty _admobInitDelay;
+        private SerializedProperty _admobInitTimeout;
         private SerializedProperty _useAdmobInterstitialBackup;
         private SerializedProperty _useAdmobRewardBackup;
         private SerializedProperty _admobBackupAdUnitExpireTime;
@@ -93,6 +94,7 @@ namespace VirtueSky.Ads
             _maxRewardAdUnitBackup = serializedObject.FindProperty("maxRewardAdUnitBackup");
             _maxAppOpenAdUnit = serializedObject.FindProperty("maxAppOpenAdUnit");
             _admobInitDelay = serializedObject.FindProperty("admobInitDelay");
+            _admobInitTimeout = serializedObject.FindProperty("admobInitTimeout");
             _useAdmobInterstitialBackup = serializedObject.FindProperty("useAdmobInterstitialBackup");
             _useAdmobRewardBackup = serializedObject.FindProperty("useAdmobRewardBackup");
             _admobBackupAdUnitExpireTime = serializedObject.FindProperty("admobBackupAdUnitExpireTime");
@@ -234,6 +236,7 @@ namespace VirtueSky.Ads
             GuiLine();
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_admobInitDelay);
+            EditorGUILayout.PropertyField(_admobInitTimeout);
             GUILayout.Space(5);
             EditorGUILayout.PropertyField(_useAdmobInterstitialBackup);
             EditorGUILayout.PropertyField(_useAdmobRewardBackup);

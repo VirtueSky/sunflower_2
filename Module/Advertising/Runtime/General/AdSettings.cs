@@ -78,6 +78,11 @@ namespace VirtueSky.Ads
              "Delay in seconds before initializing AdMob. Use different delays when multiple mediations are enabled to avoid initializing them in the same frame.")]
         private float admobInitDelay;
 
+        [Min(1f), SerializeField,
+         Tooltip(
+             "Max time in seconds to wait for the AdMob initialization callback. If it hasn't returned within this time, ads start loading anyway. Default 10s.")]
+        private float admobInitTimeout = 10f;
+
         [SerializeField] private bool useAdmobInterstitialBackup;
         [SerializeField] private bool useAdmobRewardBackup;
 
@@ -105,6 +110,7 @@ namespace VirtueSky.Ads
 
 
         public static float AdmobInitDelay => Instance.admobInitDelay;
+        public static float AdmobInitTimeout => Instance.admobInitTimeout;
         public static bool UseAdmobInterstitialBackup => Instance.useAdmobInterstitialBackup;
         public static bool UseAdmobRewardBackup => Instance.useAdmobRewardBackup;
         public static float AdmobBackupAdUnitExpireTime => Instance.admobBackupAdUnitExpireTime;
