@@ -14,7 +14,11 @@ namespace VirtueSky.InspectorUnityInternalBridge
 
         public static DecoratorDrawer CreateDecoratorDrawer(PropertyAttribute attribute)
         {
+#if UNITY_2023_3_OR_NEWER
+            var drawerType = ScriptAttributeUtility.GetDrawerTypeForType(attribute.GetType(), null);
+#else
             var drawerType = ScriptAttributeUtility.GetDrawerTypeForType(attribute.GetType());
+#endif
             if (drawerType == null || !typeof(DecoratorDrawer).IsAssignableFrom(drawerType))
             {
                 return null;
