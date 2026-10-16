@@ -11,10 +11,10 @@ namespace VirtueSky.Component
         [SerializeField] private bool isHorizontal;
 
         [ShowIf("isHorizontal"), SerializeField, Range(0, 2)]
-        private float aspectRatioH = (16 / 9);
+        private float aspectRatioH = 16f / 9f;
 
         [ShowIf("isHorizontal", false), SerializeField, Range(0, 1)]
-        private float aspectRatioV = (9 / 16);
+        private float aspectRatioV = 9f / 16f;
 
         [SerializeField] private Canvas canvas;
         [SerializeField, ReadOnly] private Camera camera;
