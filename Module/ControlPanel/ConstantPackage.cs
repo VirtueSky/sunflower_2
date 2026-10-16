@@ -14,11 +14,11 @@
         public const string PackageNameAddressables = "com.unity.addressables";
         public const string MaxVersionAddressables = "2.7.4";
         public const string PackageNameLevelPlay = "com.unity.services.levelplay";
-        public const string MaxVersionLevelPlay = "9.6.0";
+        public const string MaxVersionLevelPlay = "9.5.1";
         public const string PackageNameAdmob = "com.google.ads.mobile";
 
         public const string VersionAdmob =
-            "https://github.com/googleads/googleads-mobile-unity.git?path=packages/com.google.ads.mobile#v11.5.0";
+            "https://github.com/googleads/googleads-mobile-unity.git?path=packages/com.google.ads.mobile#v11.6.0";
 
         #region Google Unity
 
