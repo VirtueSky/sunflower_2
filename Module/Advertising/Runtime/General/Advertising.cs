@@ -38,9 +38,11 @@ namespace VirtueSky.Ads
         private bool isInitAllAdClient = false;
         private bool isInititalization = false;
         private int pendingAdClientInitializations;
+        private int mainThreadId;
 
         private void Awake()
         {
+            mainThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (isPersistent)
             {
                 DontDestroyOnLoad(gameObject);
@@ -112,6 +114,14 @@ namespace VirtueSky.Ads
 
         void InitAdClient()
         {
+            // Callers like UMP consent callbacks run on a native (Java) thread, but everything below touches Unity API
+            // (App.Delay -> Time.realtimeSinceStartup, StartCoroutine, SDK init), so always continue on main thread.
+            if (System.Threading.Thread.CurrentThread.ManagedThreadId != mainThreadId)
+            {
+                App.RunOnMainThread(InitAdClient);
+                return;
+            }
+
             bool initializeAppLovin = AdSettings.IsApplovin();
             bool initializeAdmob = AdSettings.IsAdmob();
             bool initializeLevelPlay = AdSettings.IsLevelPlay();
@@ -282,7 +292,8 @@ namespace VirtueSky.Ads
                 };
             }
 
-            ConsentInformation.Update(request, OnConsentInfoUpdated);
+            // UMP callbacks are invoked on a Java thread, marshal them back to Unity main thread
+            ConsentInformation.Update(request, App.ToMainThread<FormError>(OnConsentInfoUpdated));
 #endif
         }
 
@@ -301,11 +312,11 @@ namespace VirtueSky.Ads
                 return;
             }
 
-            ConsentForm.LoadAndShowConsentFormIfRequired((FormError formError) =>
+            ConsentForm.LoadAndShowConsentFormIfRequired(App.ToMainThread<FormError>(formError =>
                 {
                     if (formError != null)
                     {
-                        Debug.Log("error consentError = " + consentError);
+                        Debug.Log("error formError = " + formError);
                         InitAdClient();
                         return;
                     }
@@ -315,7 +326,7 @@ namespace VirtueSky.Ads
 
 
                     InitAdClient();
-                }
+                })
             );
         }
 
