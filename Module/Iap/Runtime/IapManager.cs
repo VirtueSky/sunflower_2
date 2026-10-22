@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing;
-using UnityEngine.Purchasing.Extension;
 using VirtueSky.Ads;
 using VirtueSky.Core;
 using VirtueSky.Inspector;
@@ -13,7 +12,7 @@ using VirtueSky.Misc;
 namespace VirtueSky.Iap
 {
     [EditorIcon("icon_manager"), HideMonoScript]
-    public class IapManager : MonoBehaviour, IDetailedStoreListener
+    public class IapManager : MonoBehaviour
     {
         [SerializeField] private bool isPersistent;
 
@@ -21,10 +20,26 @@ namespace VirtueSky.Iap
         public static event Action<string> OnPurchaseSucceedEvent;
         public static event Action<string, string> OnPurchaseFailedEvent;
 
-        private IStoreController _controller;
-        private IExtensionProvider _extensionProvider;
+        /// <summary>
+        /// Raised after purchases are fetched from the store (on init or after RestorePurchase), use it to refresh owned state.
+        /// </summary>
+        public static event Action OnPurchasesFetchedEvent;
+
+        private StoreController _store;
         private bool isRequestBuilder = false;
         private bool flag = false;
+
+        // NonConsumable / Subscription owned by the user, filled from confirmed orders
+        private readonly HashSet<string> _ownedProductIds = new HashSet<string>();
+        private readonly Dictionary<string, SubscriptionInfo> _subscriptionInfos = new Dictionary<string, SubscriptionInfo>();
+
+        // Avoid granting the same transaction twice in one session
+        private readonly HashSet<string> _processedTransactions = new HashSet<string>();
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private UnityEngine.Purchasing.Security.CrossPlatformValidator _validator;
+#endif
+
         public static bool IsExist => instance != null;
         public static bool IsInitialized { get; private set; }
 
@@ -70,16 +85,72 @@ namespace VirtueSky.Iap
             }
         }
 
+        private void OnDestroy()
+        {
+            if (instance != this) return;
+            UnregisterStoreEvents();
+            instance = null;
+            IsInitialized = false;
+        }
+
         private IEnumerator InternalInitialization()
         {
             if (IsInitialized || flag) yield break;
             flag = true;
             yield return new WaitUntil(() => UnityServiceInitialization.IsUnityServiceReady);
-            var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            RequestProductData(builder);
-            builder.Configure<IGooglePlayConfiguration>();
-            UnityPurchasing.Initialize(this, builder);
-            Debug.Log("IapManager initialized!".SetColor(Color.cyan));
+            ConnectAndFetchProducts();
+        }
+
+        private async void ConnectAndFetchProducts()
+        {
+            if (_store == null)
+            {
+                _store = UnityIAPServices.StoreController();
+                RegisterStoreEvents();
+            }
+
+            try
+            {
+                await _store.Connect();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[IapManager] Connect to store failed: {e}");
+                flag = false;
+                return;
+            }
+
+            isRequestBuilder = true;
+            _store.FetchProducts(BuildProductDefinitions());
+            Debug.Log("IapManager connected to store, fetching products...".SetColor(Color.cyan));
+        }
+
+        private void RegisterStoreEvents()
+        {
+            // OnPurchasePending must be registered before Connect to receive pending orders from previous sessions
+            _store.OnPurchasePending += OnPurchasePending;
+            _store.OnPurchaseConfirmed += OnPurchaseConfirmed;
+            _store.OnPurchaseFailed += OnPurchaseFailed;
+            _store.OnPurchaseDeferred += OnPurchaseDeferred;
+            _store.OnPurchasesFetched += OnPurchasesFetched;
+            _store.OnPurchasesFetchFailed += OnPurchasesFetchFailed;
+            _store.OnProductsFetched += OnProductsFetched;
+            _store.OnProductsFetchFailed += OnProductsFetchFailed;
+            _store.OnStoreDisconnected += OnStoreDisconnected;
+        }
+
+        private void UnregisterStoreEvents()
+        {
+            if (_store == null) return;
+            _store.OnPurchasePending -= OnPurchasePending;
+            _store.OnPurchaseConfirmed -= OnPurchaseConfirmed;
+            _store.OnPurchaseFailed -= OnPurchaseFailed;
+            _store.OnPurchaseDeferred -= OnPurchaseDeferred;
+            _store.OnPurchasesFetched -= OnPurchasesFetched;
+            _store.OnPurchasesFetchFailed -= OnPurchasesFetchFailed;
+            _store.OnProductsFetched -= OnProductsFetched;
+            _store.OnProductsFetchFailed -= OnProductsFetchFailed;
+            _store.OnStoreDisconnected -= OnStoreDisconnected;
         }
 
         private void CreateIapProducts()
@@ -108,87 +179,191 @@ namespace VirtueSky.Iap
             return false;
         }
 
-        #region Implement
+        #region Store Callbacks
 
-        public void OnInitializeFailed(InitializationFailureReason error)
+        private void OnStoreDisconnected(StoreConnectionFailureDescription description)
         {
-            switch (error)
-            {
-                case InitializationFailureReason.AppNotKnown:
-                    Debug.LogError("Is your App correctly uploaded on the relevant publisher console?");
-                    break;
-                case InitializationFailureReason.PurchasingUnavailable:
-                    Debug.LogWarning("In App Purchases disabled in device settings!");
-                    break;
-                case InitializationFailureReason.NoProductsAvailable:
-                    Debug.LogWarning("No products available for purchase!");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(error), error, null);
-            }
+            Debug.LogWarning($"[IapManager] Store disconnected: {description.Message} (retryable: {description.IsRetryable})");
         }
 
-        public void OnInitializeFailed(InitializationFailureReason error, string message)
+        private void OnProductsFetched(List<Product> fetchedProducts)
         {
-            OnInitializeFailed(error);
+            IsInitialized = true;
+            Debug.Log($"IapManager initialized! Fetched {fetchedProducts.Count} products.".SetColor(Color.cyan));
+            _store.FetchPurchases();
         }
 
-        public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
+        private void OnProductsFetchFailed(ProductFetchFailed failed)
         {
-            if (IapSettings.IsValidatePurchase)
-            {
-                if (IapSettings.IsCustomValidatePurchase && IapSettings.ValidatePurchase != null)
-                {
-                    if (IapSettings.ValidatePurchase.IsValidate()) PurchaseVerified(purchaseEvent);
-                }
-                else
-                {
-                    bool validatedPurchase = true;
-#if (UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
-            var validator =
-                new UnityEngine.Purchasing.Security.CrossPlatformValidator(UnityEngine.Purchasing.Security.GooglePlayTangle.Data(),
-                    UnityEngine.Purchasing.Security.AppleTangle.Data(), Application.identifier);
+            Debug.LogWarning($"[IapManager] Fetch products failed: {failed.FailureReason}. " +
+                             $"Failed products: {failed.FailedFetchProducts.Count}. Is your App correctly uploaded on the relevant publisher console?");
+            flag = false;
+        }
 
-            try
+        private void OnPurchasesFetched(Orders orders)
+        {
+            foreach (var order in orders.ConfirmedOrders)
             {
-                // On Google Play, result has a single product ID.
-                // On Apple stores, receipts contain multiple products.
-                var result = validator.Validate(purchaseEvent.purchasedProduct.receipt);
-                Debug.Log("Receipt is valid");
+                MarkTransactionProcessed(order);
+                CacheOwnedProducts(order);
             }
-            catch (UnityEngine.Purchasing.Security.IAPSecurityException)
+
+            // Pending orders are delivered through OnPurchasePending (Google: ProcessPendingOrdersOnPurchasesFetched is on by default,
+            // Apple: StoreKit pushes them at startup), so they are not granted here to avoid double grants.
+            OnPurchasesFetchedEvent?.Invoke();
+        }
+
+        private void OnPurchasesFetchFailed(PurchasesFetchFailureDescription description)
+        {
+            Debug.LogWarning($"[IapManager] Fetch purchases failed: {description.FailureReason} - {description.Message}");
+        }
+
+        private void OnPurchasePending(PendingOrder order)
+        {
+            if (IsTransactionProcessed(order))
             {
-                Debug.Log("Invalid receipt, not unlocking content");
-                validatedPurchase = false;
+                _store.ConfirmPurchase(order);
+                return;
             }
-#endif
-                    if (validatedPurchase) PurchaseVerified(purchaseEvent);
-                }
+
+            var productIds = GetProductIds(order);
+            if (IsOrderValid(order, productIds))
+            {
+                MarkTransactionProcessed(order);
+                CacheOwnedProducts(order);
+                foreach (var id in productIds) PurchaseVerified(id);
             }
             else
             {
-                PurchaseVerified(purchaseEvent);
+                Debug.Log("Invalid receipt, not unlocking content");
+                foreach (var id in productIds) InternalPurchaseFailed(id, "ValidationFailed");
             }
 
-            return PurchaseProcessingResult.Complete;
+            // Always confirm (same as returning PurchaseProcessingResult.Complete in v4) so the order is not stuck
+            _store.ConfirmPurchase(order);
         }
 
-        public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
+        private void OnPurchaseConfirmed(Order order)
         {
-            _controller = controller;
-            _extensionProvider = extensions;
-            IsInitialized = true;
+            switch (order)
+            {
+                case ConfirmedOrder confirmedOrder:
+                    MarkTransactionProcessed(confirmedOrder);
+                    CacheOwnedProducts(confirmedOrder);
+                    break;
+                case FailedOrder failedOrder:
+                    // Content was already granted in OnPurchasePending, the order will be re-delivered and deduplicated next time
+                    Debug.LogWarning($"[IapManager] Confirm purchase failed: {failedOrder.FailureReason} - {failedOrder.Details}");
+                    break;
+            }
         }
 
-        public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
+        private void OnPurchaseFailed(FailedOrder order)
         {
-            InternalPurchaseFailed(product.definition.id, failureReason);
+            foreach (var id in GetProductIds(order))
+            {
+                InternalPurchaseFailed(id, order.FailureReason.ToString());
+            }
         }
 
-
-        public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
+        private void OnPurchaseDeferred(DeferredOrder order)
         {
-            InternalPurchaseFailed(product.definition.id, failureDescription.reason);
+            // Ask to Buy / slow payment: content is granted later through OnPurchasePending
+            Debug.Log("[IapManager] Purchase deferred, waiting for approval.");
+            AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
+        }
+
+        #endregion
+
+        #region Order Helpers
+
+        private static List<string> GetProductIds(Order order)
+        {
+            var ids = new List<string>();
+            var items = order.CartOrdered?.Items();
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    var id = item.Product?.definition?.id;
+                    if (!string.IsNullOrEmpty(id) && !ids.Contains(id)) ids.Add(id);
+                }
+            }
+
+            if (ids.Count == 0 && order.Info?.PurchasedProductInfo != null)
+            {
+                foreach (var info in order.Info.PurchasedProductInfo)
+                {
+                    if (!string.IsNullOrEmpty(info.productId) && !ids.Contains(info.productId)) ids.Add(info.productId);
+                }
+            }
+
+            return ids;
+        }
+
+        private bool IsTransactionProcessed(Order order)
+        {
+            var transactionId = order.Info?.TransactionID;
+            return !string.IsNullOrEmpty(transactionId) && _processedTransactions.Contains(transactionId);
+        }
+
+        private void MarkTransactionProcessed(Order order)
+        {
+            var transactionId = order.Info?.TransactionID;
+            if (!string.IsNullOrEmpty(transactionId)) _processedTransactions.Add(transactionId);
+        }
+
+        private void CacheOwnedProducts(Order order)
+        {
+            foreach (var id in GetProductIds(order))
+            {
+                var iapProduct = GetIapProduct(id);
+                if (iapProduct == null) continue;
+                var productType = ConvertProductType(iapProduct.iapProductType);
+                if (productType is ProductType.NonConsumable or ProductType.Subscription) _ownedProductIds.Add(id);
+            }
+
+            if (order.Info?.PurchasedProductInfo == null) return;
+            foreach (var info in order.Info.PurchasedProductInfo)
+            {
+                try
+                {
+                    if (info.subscriptionInfo != null) _subscriptionInfos[info.productId] = info.subscriptionInfo;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[IapManager] Can not read subscription info of '{info.productId}': {e.Message}");
+                }
+            }
+        }
+
+        private bool IsOrderValid(Order order, List<string> productIds)
+        {
+            if (!IapSettings.IsValidatePurchase) return true;
+
+            if (IapSettings.IsCustomValidatePurchase && IapSettings.ValidatePurchase != null)
+            {
+                var productId = productIds.Count > 0 ? productIds[0] : string.Empty;
+                return IapSettings.ValidatePurchase.IsValidate(productId, order.Info?.Receipt, order.Info?.TransactionID);
+            }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                _validator ??= new UnityEngine.Purchasing.Security.CrossPlatformValidator(
+                    UnityEngine.Purchasing.Security.GooglePlayTangle.Data(), Application.identifier);
+                _validator.Validate(order.Info.Receipt);
+                Debug.Log("Receipt is valid");
+                return true;
+            }
+            catch (UnityEngine.Purchasing.Security.IAPSecurityException)
+            {
+                return false;
+            }
+#else
+            // iOS: StoreKit 2 already verifies the transaction. Use order.Info.Apple.jwsRepresentation for server-side validation.
+            return true;
+#endif
         }
 
         #endregion
@@ -196,37 +371,45 @@ namespace VirtueSky.Iap
         private void PurchaseProductInternal(IapDataProduct product)
         {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            _controller?.InitiatePurchase(product.Id);
+            if (_store == null || !IsInitialized)
+            {
+                InternalPurchaseFailed(product.Id, "NotInitialized");
+                return;
+            }
+
+            _store.PurchaseProduct(product.Id);
 #elif UNITY_EDITOR
             InternalPurchaseSuccess(product.Id);
 #endif
         }
 
-        private void RequestProductData(ConfigurationBuilder builder)
+        private List<ProductDefinition> BuildProductDefinitions()
         {
-            if (isRequestBuilder) return;
-            isRequestBuilder = true;
+            var definitions = new List<ProductDefinition>();
             foreach (var p in products)
             {
-                builder.AddProduct(p.Id, ConvertProductType(p.iapProductType));
+                if (string.IsNullOrEmpty(p.Id)) continue;
+                definitions.Add(new ProductDefinition(p.Id, ConvertProductType(p.iapProductType)));
             }
+
+            return definitions;
         }
 
-        private void InternalPurchaseFailed(string id, PurchaseFailureReason failureReason)
+        private void InternalPurchaseFailed(string id, string failureReason)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
             foreach (var product in products)
             {
                 if (product.Id != id) continue;
-                OnPurchaseFailedEvent?.Invoke(product.Id, failureReason.ToString());
-                Common.CallActionAndClean<string>(ref product.purchaseFailedCallback, failureReason.ToString());
+                OnPurchaseFailedEvent?.Invoke(product.Id, failureReason);
+                Common.CallActionAndClean<string>(ref product.purchaseFailedCallback, failureReason);
             }
         }
 
-        void PurchaseVerified(PurchaseEventArgs purchaseEvent)
+        void PurchaseVerified(string id)
         {
             AdStatic.OnChangePreventDisplayAppOpenEvent?.Invoke(false);
-            InternalPurchaseSuccess(purchaseEvent.purchasedProduct.definition.id);
+            InternalPurchaseSuccess(id);
         }
 
         void InternalPurchaseSuccess(string id)
@@ -254,11 +437,10 @@ namespace VirtueSky.Iap
             {
                 Debug.Log("Restore purchase started ...");
 
-                var storeProvider = _extensionProvider.GetExtension<IAppleExtensions>();
-                storeProvider.RestoreTransactions((b, s) =>
+                // Restored purchases are delivered through OnPurchasesFetched
+                _store.RestoreTransactions((success, error) =>
                 {
-                    // no purchase are avaiable to restore
-                    Debug.Log($"Restore purchase continuing: {b}. If no further messages, no purchase available to restore.");
+                    Debug.Log($"Restore purchase continuing: {success}. {error} If no further messages, no purchase available to restore.");
                 });
             }
             else
@@ -303,37 +485,45 @@ namespace VirtueSky.Iap
 
         private bool InternalIsPurchasedProductByIapData(IapDataProduct product)
         {
-            if (_controller == null) return false;
-            return ConvertProductType(product.iapProductType) is ProductType.NonConsumable or ProductType.Subscription &&
-                   _controller.products.WithID(product.Id).hasReceipt;
+            if (_store == null || product == null) return false;
+            return IsOwned(product.Id, ConvertProductType(product.iapProductType));
         }
 
         private bool InternalIsPurchasedProductById(string id)
         {
-            if (_controller == null) return false;
-            return ConvertProductType(GetIapProduct(id).iapProductType) is ProductType.NonConsumable or ProductType.Subscription &&
-                   _controller.products.WithID(id)
-                       .hasReceipt;
+            if (_store == null) return false;
+            var product = GetIapProduct(id);
+            return product != null && IsOwned(id, ConvertProductType(product.iapProductType));
+        }
+
+        private bool IsOwned(string id, ProductType productType)
+        {
+            if (productType is not (ProductType.NonConsumable or ProductType.Subscription)) return false;
+            if (!_ownedProductIds.Contains(id)) return false;
+            if (productType == ProductType.Subscription && _subscriptionInfos.TryGetValue(id, out var info))
+            {
+                return info.IsSubscribed() == Result.True && info.IsExpired() != Result.True;
+            }
+
+            return true;
         }
 
         private Product InternalGetProductByIapData(IapDataProduct product)
         {
-            if (_controller == null) return null;
-            return _controller.products.WithID(product.Id);
+            if (_store == null || product == null) return null;
+            return _store.GetProductById(product.Id);
         }
 
         private Product InternalGetProductById(string id)
         {
-            if (_controller == null) return null;
-            return _controller.products.WithID(id);
+            if (_store == null) return null;
+            return _store.GetProductById(id);
         }
 
         private SubscriptionInfo InternalGetSubscriptionInfo(IapDataProduct product)
         {
-            if (_controller == null || ConvertProductType(product.iapProductType) != ProductType.Subscription ||
-                !_controller.products.WithID(product.Id).hasReceipt) return null;
-            var subscriptionManager = new SubscriptionManager(InternalGetProductByIapData(product), null);
-            return subscriptionManager.getSubscriptionInfo();
+            if (_store == null || product == null || ConvertProductType(product.iapProductType) != ProductType.Subscription) return null;
+            return _subscriptionInfos.TryGetValue(product.Id, out var info) ? info : null;
         }
 
         #endregion

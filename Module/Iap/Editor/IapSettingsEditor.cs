@@ -108,11 +108,10 @@ namespace VirtueSky.Iap
         void ObfuscatorKeyImpl()
         {
             var googleError = "";
-            var appleError = "";
             ObfuscationGenerator.ObfuscateSecrets(includeGoogle: true,
-                appleError: ref googleError,
-                googleError: ref appleError,
+                googleError: ref googleError,
                 googlePlayPublicKey: _iapSettings.GooglePlayStoreKey);
+            if (!string.IsNullOrEmpty(googleError)) Debug.LogWarning(googleError);
             string pathAsmdef =
                 FileExtension.GetPathFileInCurrentEnvironment(
                     $"Module/Utils/Editor/TempAssembly/PurchasingGeneratedAsmdef.txt");
