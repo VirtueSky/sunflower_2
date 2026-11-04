@@ -7,10 +7,9 @@ using VirtueSky.Tracking;
 
 namespace VirtueSky.Ads
 {
-    public class LevelPlayClient : AdClient
+    public class LevelPlayClient : AdClient, IBannerClient, IInterstitialClient, IRewardClient
     {
         private const float InitialLoadDelay = 0.1f;
-
         private BackupAdUnitGroup interstitialGroup;
         private BackupAdUnitGroup rewardGroup;
 
@@ -47,60 +46,29 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
+        public AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
-        public override void LoadInterstitial()
+        public void LoadInterstitial()
         {
             if (!SdkInitializationCompleted) return;
             InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => RewardGroup.Select();
+        public AdUnit RewardAdUnit() => RewardGroup.Select();
 
-        public override void LoadRewarded()
+        public void LoadRewarded()
         {
             if (!SdkInitializationCompleted) return;
             RewardGroup.Load();
         }
 
-        public override AdUnit RewardedInterstitialAdUnit()
-        {
-            return null;
-        }
+        public AdUnit BannerAdUnit() => AdSettings.LevelPlayBannerAdUnit;
 
-        public override void LoadRewardedInterstitial()
-        {
-        }
-
-        public override AdUnit AppOpenAdUnit()
-        {
-            return null;
-        }
-
-        public override void LoadAppOpen()
-        {
-        }
-
-        public override void ShowAppOpen()
-        {
-        }
-
-        public override AdUnit BannerAdUnit() => AdSettings.LevelPlayBannerAdUnit;
-
-        public override void LoadBanner()
+        public void LoadBanner()
         {
             if (!SdkInitializationCompleted) return;
             if (AdSettings.LevelPlayBannerAdUnit == null) return;
             AdSettings.LevelPlayBannerAdUnit.Load();
-        }
-
-        public override AdUnit NativeOverlayAdUnit()
-        {
-            return null;
-        }
-
-        public override void LoadNativeOverlay()
-        {
         }
 
         public override void ShowAdMediationDebugger()

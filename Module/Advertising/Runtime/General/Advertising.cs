@@ -222,48 +222,33 @@ namespace VirtueSky.Ads
 
         #region Method Load Ads
 
-        void AutoLoadInterAds()
+        void AutoLoadInterAds() =>
+            AutoLoad<IInterstitialClient>(ref _lastTimeLoadInterstitialAdTimestamp, c => c.LoadInterstitial());
+
+        void AutoLoadRewardAds() =>
+            AutoLoad<IRewardClient>(ref _lastTimeLoadRewardedTimestamp, c => c.LoadRewarded());
+
+        void AutoLoadRewardInterAds() =>
+            AutoLoad<IRewardedInterstitialClient>(ref _lastTimeLoadRewardedInterstitialTimestamp, c => c.LoadRewardedInterstitial());
+
+        void AutoLoadAppOpenAds() =>
+            AutoLoad<IAppOpenClient>(ref _lastTimeLoadAppOpenTimestamp, c => c.LoadAppOpen());
+
+        /// <summary>
+        /// Calls <paramref name="load"/> on every enabled, SDK-ready client that supports <typeparamref name="TCapability"/>.
+        /// </summary>
+        private void AutoLoad<TCapability>(ref float lastLoadTimestamp, Action<TCapability> load) where TCapability : class
         {
-            if (Time.realtimeSinceStartup - _lastTimeLoadInterstitialAdTimestamp <
-                AdSettings.AdLoadingInterval) return;
-            if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadInterstitial();
-            if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadInterstitial();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
-                levelPlayAdClient.LoadInterstitial();
-            _lastTimeLoadInterstitialAdTimestamp = Time.realtimeSinceStartup;
+            if (Time.realtimeSinceStartup - lastLoadTimestamp < AdSettings.AdLoadingInterval) return;
+            LoadIfReady(AdSettings.IsApplovin(), maxAdClient, load);
+            LoadIfReady(AdSettings.IsAdmob(), admobAdClient, load);
+            LoadIfReady(AdSettings.IsLevelPlay(), levelPlayAdClient, load);
+            lastLoadTimestamp = Time.realtimeSinceStartup;
         }
 
-        void AutoLoadRewardAds()
+        private static void LoadIfReady<TCapability>(bool isEnabled, AdClient client, Action<TCapability> load) where TCapability : class
         {
-            if (Time.realtimeSinceStartup - _lastTimeLoadRewardedTimestamp <
-                AdSettings.AdLoadingInterval) return;
-            if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadRewarded();
-            if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadRewarded();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
-                levelPlayAdClient.LoadRewarded();
-            _lastTimeLoadRewardedTimestamp = Time.realtimeSinceStartup;
-        }
-
-        void AutoLoadRewardInterAds()
-        {
-            if (Time.realtimeSinceStartup - _lastTimeLoadRewardedInterstitialTimestamp <
-                AdSettings.AdLoadingInterval) return;
-            if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadRewardedInterstitial();
-            if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadRewardedInterstitial();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
-                levelPlayAdClient.LoadRewardedInterstitial();
-            _lastTimeLoadRewardedInterstitialTimestamp = Time.realtimeSinceStartup;
-        }
-
-        void AutoLoadAppOpenAds()
-        {
-            if (Time.realtimeSinceStartup - _lastTimeLoadAppOpenTimestamp <
-                AdSettings.AdLoadingInterval) return;
-            if (AdSettings.IsApplovin() && maxAdClient != null && maxAdClient.SdkInitializationCompleted) maxAdClient.LoadAppOpen();
-            if (AdSettings.IsAdmob() && admobAdClient != null && admobAdClient.SdkInitializationCompleted) admobAdClient.LoadAppOpen();
-            if (AdSettings.IsLevelPlay() && levelPlayAdClient != null && levelPlayAdClient.SdkInitializationCompleted)
-                levelPlayAdClient.LoadAppOpen();
-            _lastTimeLoadAppOpenTimestamp = Time.realtimeSinceStartup;
+            if (isEnabled && client is { SdkInitializationCompleted: true } && client is TCapability capability) load(capability);
         }
 
         #endregion
@@ -372,191 +357,50 @@ namespace VirtueSky.Ads
 
         #region Internal API
 
-        private AdUnit GetBannerAdUnit(AdMediation adMediation)
+        private AdClient GetAdClient(AdMediation adMediation)
         {
-            switch (adMediation)
+            return adMediation switch
             {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max banner ad unit.");
-                        return null;
-                    }
-
-                    return maxAdClient.BannerAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob banner ad unit.");
-                        return null;
-                    }
-
-                    return admobAdClient.BannerAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay banner ad unit.");
-                        return null;
-                    }
-
-                    return levelPlayAdClient.BannerAdUnit();
-            }
+                AdMediation.AppLovin => maxAdClient,
+                AdMediation.Admob => admobAdClient,
+                _ => levelPlayAdClient
+            };
         }
 
-        private AdUnit GetInterAdUnit(AdMediation adMediation)
+        private AdClient GetInitializedAdClient(AdMediation adMediation, string featureName)
         {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max interstitial ad unit.");
-                        return null;
-                    }
-
-                    return maxAdClient.InterstitialAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob interstitial ad unit.");
-                        return null;
-                    }
-
-                    return admobAdClient.InterstitialAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay interstitial ad unit.");
-                        return null;
-                    }
-
-                    return levelPlayAdClient.InterstitialAdUnit();
-            }
+            var client = GetAdClient(adMediation);
+            if (client == null) Debug.LogWarning($"{adMediation} AdClient is not initialized, can't use {adMediation} {featureName}.");
+            return client;
         }
 
-        private AdUnit GetRewardAdUnit(AdMediation adMediation)
+        /// <summary>
+        /// Returns the ad unit of the given format, or null if the client is not initialized or the mediation doesn't support that format.
+        /// </summary>
+        private AdUnit GetAdUnit<TCapability>(AdMediation adMediation, Func<TCapability, AdUnit> getAdUnit, string adName)
+            where TCapability : class
         {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max reward ad unit.");
-                        return null;
-                    }
-
-                    return maxAdClient.RewardAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob reward ad unit.");
-                        return null;
-                    }
-
-                    return admobAdClient.RewardAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay reward ad unit.");
-                        return null;
-                    }
-
-                    return levelPlayAdClient.RewardAdUnit();
-            }
+            var client = GetInitializedAdClient(adMediation, $"{adName} ad unit");
+            return client is TCapability capability ? getAdUnit(capability) : null;
         }
 
-        private AdUnit GetRewardInterAdUnit(AdMediation adMediation)
-        {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max rewarded interstitial ad unit.");
-                        return null;
-                    }
+        private AdUnit GetBannerAdUnit(AdMediation adMediation) =>
+            GetAdUnit<IBannerClient>(adMediation, c => c.BannerAdUnit(), "banner");
 
-                    return maxAdClient.RewardedInterstitialAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob rewarded interstitial ad unit.");
-                        return null;
-                    }
+        private AdUnit GetInterAdUnit(AdMediation adMediation) =>
+            GetAdUnit<IInterstitialClient>(adMediation, c => c.InterstitialAdUnit(), "interstitial");
 
-                    return admobAdClient.RewardedInterstitialAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay rewarded interstitial ad unit.");
-                        return null;
-                    }
+        private AdUnit GetRewardAdUnit(AdMediation adMediation) =>
+            GetAdUnit<IRewardClient>(adMediation, c => c.RewardAdUnit(), "reward");
 
-                    return levelPlayAdClient.RewardedInterstitialAdUnit();
-            }
-        }
+        private AdUnit GetRewardInterAdUnit(AdMediation adMediation) =>
+            GetAdUnit<IRewardedInterstitialClient>(adMediation, c => c.RewardedInterstitialAdUnit(), "rewarded interstitial");
 
-        private AdUnit GetAppOpenAdUnit(AdMediation adMediation)
-        {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max app open ad unit.");
-                        return null;
-                    }
+        private AdUnit GetAppOpenAdUnit(AdMediation adMediation) =>
+            GetAdUnit<IAppOpenClient>(adMediation, c => c.AppOpenAdUnit(), "app open");
 
-                    return maxAdClient.AppOpenAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob app open ad unit.");
-                        return null;
-                    }
-
-                    return admobAdClient.AppOpenAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay app open ad unit.");
-                        return null;
-                    }
-
-                    return levelPlayAdClient.AppOpenAdUnit();
-            }
-        }
-
-        private AdUnit GetNativeOverlayAdUnit(AdMediation adMediation)
-        {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't get Max native overlay ad unit.");
-                        return null;
-                    }
-
-                    return maxAdClient.NativeOverlayAdUnit();
-                case AdMediation.Admob:
-                    if (admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't get Admob native overlay ad unit.");
-                        return null;
-                    }
-
-                    return admobAdClient.NativeOverlayAdUnit();
-                default:
-                    if (levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't get LevelPlay native overlay ad unit.");
-                        return null;
-                    }
-
-                    return levelPlayAdClient.NativeOverlayAdUnit();
-            }
-        }
+        private AdUnit GetNativeOverlayAdUnit(AdMediation adMediation) =>
+            GetAdUnit<INativeOverlayClient>(adMediation, c => c.NativeOverlayAdUnit(), "native overlay");
 
         #endregion
 
@@ -564,18 +408,10 @@ namespace VirtueSky.Ads
 
         // API for single mediation
         /// <summary>
-        /// Get ad client for current mediation, return null if the ad client is not supported or not set up in AdSettings. You can call this method to get the ad client for current mediation and then call the method of ad client to load or show ad, for example: Advertising.CurrentAdClient().InterstitialAdUnit().Load(); Note that you should check IsInitAdClient property before calling this method to make sure the ad client is initialized and ready, otherwise it may cause potential error.
+        /// Get ad client for current mediation, return null if the ad client is not supported or not set up in AdSettings. You can call this method to get the ad client for current mediation and then call the method of ad client to load or show ad, for example: if (Advertising.CurrentAdClient() is IInterstitialClient client) client.LoadInterstitial(); Ad formats are exposed through capability interfaces (IBannerClient, IInterstitialClient, IRewardClient, IRewardedInterstitialClient, IAppOpenClient, INativeOverlayClient), so check whether the client implements the one you need. Note that you should check IsInitAdClient property before calling this method to make sure the ad client is initialized and ready, otherwise it may cause potential error.
         /// </summary>
         /// <returns></returns>
-        public static AdClient CurrentAdClient()
-        {
-            return AdSettings.CurrentMediation switch
-            {
-                AdMediation.AppLovin => instance.maxAdClient,
-                AdMediation.Admob => instance.admobAdClient,
-                _ => instance.levelPlayAdClient
-            };
-        }
+        public static AdClient CurrentAdClient() => instance.GetAdClient(AdSettings.CurrentMediation);
 
         /// <summary>
         /// Get banner ad unit for current mediation, return null if the ad unit is not supported or not set up in AdSettings
@@ -617,7 +453,7 @@ namespace VirtueSky.Ads
         /// Show ad mediation debugger for current mediation, do nothing if the mediation is not supported or not set up in AdSettings
         /// </summary>
         /// <returns></returns>
-        public static void ShowAdMediationDebugger() => CurrentAdClient().ShowAdMediationDebugger();
+        public static void ShowAdMediationDebugger() => ShowAdMediationDebugger(AdSettings.CurrentMediation);
 
         // API for mutiple medition
         /// <summary>
@@ -666,39 +502,8 @@ namespace VirtueSky.Ads
         /// Show ad mediation debugger for specific mediation, do nothing if the mediation is not supported or not set up in AdSettings
         /// </summary>
         /// <param name="adMediation"></param>
-        public static void ShowAdMediationDebugger(AdMediation adMediation)
-        {
-            switch (adMediation)
-            {
-                case AdMediation.AppLovin:
-                    if (instance.maxAdClient == null)
-                    {
-                        Debug.LogWarning("MaxAdClient is not initialized, can't show Max ad mediation debugger.");
-                        return;
-                    }
-
-                    instance.maxAdClient.ShowAdMediationDebugger();
-                    break;
-                case AdMediation.Admob:
-                    if (instance.admobAdClient == null)
-                    {
-                        Debug.LogWarning("AdmobAdClient is not initialized, can't show Admob ad mediation debugger.");
-                        return;
-                    }
-
-                    instance.admobAdClient.ShowAdMediationDebugger();
-                    break;
-                case AdMediation.LevelPlay:
-                    if (instance.levelPlayAdClient == null)
-                    {
-                        Debug.LogWarning("LevelPlayAdClient is not initialized, can't show LevelPlay ad mediation debugger.");
-                        return;
-                    }
-
-                    instance.levelPlayAdClient.ShowAdMediationDebugger();
-                    break;
-            }
-        }
+        public static void ShowAdMediationDebugger(AdMediation adMediation) =>
+            instance.GetInitializedAdClient(adMediation, "ad mediation debugger")?.ShowAdMediationDebugger();
 
 
         // General

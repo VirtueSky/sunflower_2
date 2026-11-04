@@ -8,8 +8,10 @@ using VirtueSky.Core;
 
 namespace VirtueSky.Ads
 {
-    public class AdmobClient : AdClient
+    public class AdmobClient : AdClient, IBannerClient, IInterstitialClient, IRewardClient, IRewardedInterstitialClient,
+        IAppOpenClient, INativeOverlayClient
     {
+        private bool statusAppOpenFirstIgnore;
         private BackupAdUnitGroup interstitialGroup;
         private BackupAdUnitGroup rewardGroup;
         private bool isInitializeCompleteHandled;
@@ -48,54 +50,54 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
+        public AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
-        public override void LoadInterstitial()
+        public void LoadInterstitial()
         {
             InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => RewardGroup.Select();
+        public AdUnit RewardAdUnit() => RewardGroup.Select();
 
-        public override void LoadRewarded()
+        public void LoadRewarded()
         {
             RewardGroup.Load();
         }
 
-        public override AdUnit RewardedInterstitialAdUnit() => AdSettings.AdmobRewardedInterstitialAdUnit;
+        public AdUnit RewardedInterstitialAdUnit() => AdSettings.AdmobRewardedInterstitialAdUnit;
 
-        public override void LoadRewardedInterstitial()
+        public void LoadRewardedInterstitial()
         {
             if (AdSettings.AdmobRewardedInterstitialAdUnit == null || AdSettings.AdmobRewardedInterstitialAdUnit.IsShowing) return;
             if (!AdSettings.AdmobRewardedInterstitialAdUnit.IsReady() && !AdSettings.AdmobRewardedInterstitialAdUnit.IsLoading)
                 AdSettings.AdmobRewardedInterstitialAdUnit.Load();
         }
 
-        public override AdUnit AppOpenAdUnit() => AdSettings.AdmobAppOpenAdUnit;
+        public AdUnit AppOpenAdUnit() => AdSettings.AdmobAppOpenAdUnit;
 
-        public override void LoadAppOpen()
+        public void LoadAppOpen()
         {
             if (AdSettings.AdmobAppOpenAdUnit == null) return;
             if (!AdSettings.AdmobAppOpenAdUnit.IsReady() && !AdSettings.AdmobAppOpenAdUnit.IsLoading) AdSettings.AdmobAppOpenAdUnit.Load();
         }
 
-        public override void ShowAppOpen()
+        public void ShowAppOpen()
         {
             if (statusAppOpenFirstIgnore) AdSettings.AdmobAppOpenAdUnit.Show();
             statusAppOpenFirstIgnore = true;
         }
 
-        public override AdUnit BannerAdUnit() => AdSettings.AdmobBannerAdUnit;
+        public AdUnit BannerAdUnit() => AdSettings.AdmobBannerAdUnit;
 
-        public override void LoadBanner()
+        public void LoadBanner()
         {
             if (AdSettings.AdmobBannerAdUnit == null) return;
             AdSettings.AdmobBannerAdUnit.Load();
         }
 
-        public override AdUnit NativeOverlayAdUnit() => AdSettings.AdmobNativeOverlayAdUnit;
+        public AdUnit NativeOverlayAdUnit() => AdSettings.AdmobNativeOverlayAdUnit;
 
-        public override void LoadNativeOverlay()
+        public void LoadNativeOverlay()
         {
             if (AdSettings.AdmobNativeOverlayAdUnit == null) return;
             if (!AdSettings.AdmobNativeOverlayAdUnit.IsReady()) AdSettings.AdmobNativeOverlayAdUnit.Load();

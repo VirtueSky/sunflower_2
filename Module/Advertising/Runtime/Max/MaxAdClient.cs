@@ -3,8 +3,9 @@ using VirtueSky.Core;
 
 namespace VirtueSky.Ads
 {
-    public class MaxAdClient : AdClient
+    public class MaxAdClient : AdClient, IBannerClient, IInterstitialClient, IRewardClient, IAppOpenClient
     {
+        private bool statusAppOpenFirstIgnore;
         private BackupAdUnitGroup interstitialGroup;
         private BackupAdUnitGroup rewardGroup;
 
@@ -31,55 +32,40 @@ namespace VirtueSky.Ads
 #endif
         }
 
-        public override AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
+        public AdUnit InterstitialAdUnit() => InterstitialGroup.Select();
 
-        public override void LoadInterstitial()
+        public void LoadInterstitial()
         {
             InterstitialGroup.Load();
         }
 
-        public override AdUnit RewardAdUnit() => RewardGroup.Select();
+        public AdUnit RewardAdUnit() => RewardGroup.Select();
 
-        public override void LoadRewarded()
+        public void LoadRewarded()
         {
             RewardGroup.Load();
         }
 
-        public override AdUnit RewardedInterstitialAdUnit() => null;
+        public AdUnit AppOpenAdUnit() => AdSettings.MaxAppOpenAdUnit;
 
-        public override void LoadRewardedInterstitial()
-        {
-        }
-
-        public override AdUnit AppOpenAdUnit() => AdSettings.MaxAppOpenAdUnit;
-
-        public override void LoadAppOpen()
+        public void LoadAppOpen()
         {
             if (AdSettings.MaxAppOpenAdUnit == null) return;
             if (!AdSettings.MaxAppOpenAdUnit.IsReady() && !AdSettings.MaxAppOpenAdUnit.IsLoading) AdSettings.MaxAppOpenAdUnit.Load();
         }
 
-        public override void ShowAppOpen()
+        public void ShowAppOpen()
         {
             if (statusAppOpenFirstIgnore) AdSettings.MaxAppOpenAdUnit.Show();
             statusAppOpenFirstIgnore = true;
         }
 
-        public override AdUnit BannerAdUnit() => AdSettings.MaxBannerAdUnit;
+        public AdUnit BannerAdUnit() => AdSettings.MaxBannerAdUnit;
 
-        public override void LoadBanner()
+        public void LoadBanner()
         {
             if (AdSettings.MaxBannerAdUnit == null) return;
             AdSettings.MaxBannerAdUnit.Load();
-        }
-
-        public override AdUnit NativeOverlayAdUnit()
-        {
-            return null;
-        }
-
-        public override void LoadNativeOverlay()
-        {
         }
 
         public override void ShowAdMediationDebugger()
@@ -111,7 +97,6 @@ namespace VirtueSky.Ads
             SdkInitializationCompleted = true;
             LoadInterstitial();
             LoadRewarded();
-            LoadRewardedInterstitial();
             LoadAppOpen();
             //LoadBanner();
         }
