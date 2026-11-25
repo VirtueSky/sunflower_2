@@ -2,7 +2,7 @@
 {
     public class ConstantPackage
     {
-        public const string VersionUnityCommon = "1.9.1";
+        public const string VersionUnityCommon = "1.9.2-preview";
         public const string PackageNameInAppPurchase = "com.unity.purchasing";
         public const string MaxVersionInAppPurchase = "5.0.2";
         public const string PackageNameNewtonsoftJson = "com.unity.nuget.newtonsoft-json";
