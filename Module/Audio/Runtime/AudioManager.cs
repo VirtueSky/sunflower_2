@@ -16,6 +16,7 @@ namespace VirtueSky.Audio
         [Space, SerializeField] private Transform audioHolder;
         [SerializeField] private SoundComponent soundComponentPrefab;
         private SoundComponent music;
+        private int musicSpawnVersion;
 
         [ReadOnly, SerializeField] private List<SoundComponent> listCacheSfx = new List<SoundComponent>();
 
@@ -87,8 +88,16 @@ namespace VirtueSky.Audio
 
         private SoundCache InternalPlaySfx(SoundData soundData, int indexClip = -1)
         {
+            var clip = soundData.GetAudioClip(indexClip);
+            if (clip == null)
+            {
+                // Do not spawn: a component without a clip never completes and would stay active forever.
+                Debug.LogError($"[AudioManager] SoundData '{soundData.name}' has no AudioClip");
+                return null;
+            }
+
             SoundComponent sfxComponent = soundComponentPrefab.Spawn(audioHolder);
-            sfxComponent.PlayAudioClip(soundData.GetAudioClip(indexClip), soundData.loop, soundData.volume * SfxVolume);
+            sfxComponent.PlayAudioClip(clip, soundData.loop, soundData.volume * SfxVolume);
             if (!soundData.loop) sfxComponent.OnCompleted += OnFinishPlayingAudio;
             SoundCache soundCache = GetSoundCache(soundData);
             sfxComponent.Key = key;
@@ -108,14 +117,15 @@ namespace VirtueSky.Audio
         private void InternalPauseSfx(SoundCache soundCache)
         {
             var soundComponent = GetSoundComponent(soundCache);
-            if (soundComponent == null || !soundComponent.IsPlaying) return;
+            // IsPaused, not IsPlaying: IsPlaying is also false under AudioListener.pause (ads).
+            if (soundComponent == null || soundComponent.IsPaused) return;
             soundComponent.Pause();
         }
 
         private void InternalResumeSfx(SoundCache soundCache)
         {
             var soundComponent = GetSoundComponent(soundCache);
-            if (soundComponent == null || soundComponent.IsPlaying) return;
+            if (soundComponent == null || !soundComponent.IsPaused) return;
             soundComponent.Resume();
         }
 
@@ -124,7 +134,7 @@ namespace VirtueSky.Audio
         {
             var soundComponent = GetSoundComponent(soundCache);
             // Finish only makes sense for looping SFX; non-looping ones already have the handler.
-            if (soundComponent == null || !soundComponent.IsPlaying || !soundComponent.IsLooping) return;
+            if (soundComponent == null || !soundComponent.IsLooping) return;
             soundComponent.OnCompleted -= OnFinishPlayingAudio; // avoid double subscription
             soundComponent.OnCompleted += OnFinishPlayingAudio;
             soundComponent.Finish();
@@ -147,14 +157,30 @@ namespace VirtueSky.Audio
 
         #region Music Method
 
+        /// <summary>
+        /// True while <see cref="music"/> still refers to the component we spawned for music.
+        /// Deliberately not based on IsPlaying: that is also false when the music is paused (Pause() or
+        /// AudioListener.pause during ads), and treating paused music as "no music" leaks it.
+        /// The spawn version catches the component having been despawned elsewhere (e.g. Pool.DeSpawnAll).
+        /// </summary>
+        private bool HasMusic => music != null && music.SpawnVersion == musicSpawnVersion;
+
         private void InternalPlayMusic(SoundData soundData, int indexClip = -1)
         {
-            if (music == null || !music.IsPlaying)
+            var clip = soundData.GetAudioClip(indexClip);
+            if (clip == null)
             {
-                music = soundComponentPrefab.Spawn(audioHolder);
+                Debug.LogError($"[AudioManager] SoundData '{soundData.name}' has no AudioClip");
+                return;
             }
 
-            music.FadePlayMusic(soundData.GetAudioClip(indexClip), soundData.loop, soundData.volume * MusicVolume,
+            if (!HasMusic)
+            {
+                music = soundComponentPrefab.Spawn(audioHolder);
+                musicSpawnVersion = music.SpawnVersion;
+            }
+
+            music.FadePlayMusic(clip, soundData.loop, soundData.volume * MusicVolume,
                 soundData.isMusicFadeVolume, soundData.fadeOutDuration, soundData.fadeInDuration);
             music.OnCompleted -= StopAudioMusic; // same component may be reused across PlayMusic calls
             music.OnCompleted += StopAudioMusic;
@@ -163,18 +189,19 @@ namespace VirtueSky.Audio
 
         private void InternalStopMusic()
         {
-            if (music != null && music.IsPlaying)
+            if (HasMusic)
             {
                 music.Stop();
-                music.gameObject.DeSpawn();
-                // Drop the reference: the pooled object may be reused as an SFX afterwards.
-                music = null;
+                music.gameObject.DeSpawn(); // CleanUp() also clears OnCompleted
             }
+
+            // Drop the reference: the pooled object may be reused as an SFX afterwards.
+            music = null;
         }
 
         private void InternalPauseMusic()
         {
-            if (music != null && music.IsPlaying)
+            if (HasMusic && !music.IsPaused)
             {
                 music.Pause();
             }
@@ -182,7 +209,7 @@ namespace VirtueSky.Audio
 
         private void InternalResumeMusic()
         {
-            if (music != null && !music.IsPlaying)
+            if (HasMusic && music.IsPaused)
             {
                 music.Resume();
             }
@@ -194,7 +221,7 @@ namespace VirtueSky.Audio
 
         private void OnMusicVolumeChanged(float volume)
         {
-            if (music != null)
+            if (HasMusic)
             {
                 music.Volume = volume;
             }
